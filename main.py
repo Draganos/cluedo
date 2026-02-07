@@ -1,13 +1,10 @@
 class Character:
+    """Character class"""
     def __init__(self, name):
         self.name = name
         self.room = None
         self.weapon = None
         self.is_murderer = False
-
-    def assign_weapon(self, weapon):
-        """Assign a weapon to a character"""
-        self.weapon = weapon
 
     def move_to_room(self, room):
         """Move a character to a room"""
