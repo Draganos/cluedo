@@ -1,5 +1,4 @@
 class Character:
-    """Character class"""
     def __init__(self, name):
         self.name = name
         self.room = None
