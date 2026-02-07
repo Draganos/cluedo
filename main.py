@@ -5,10 +5,6 @@ class Character:
         self.weapon = None
         self.is_murderer = False
 
-    def assign_weapon(self, weapon):
-        """Assign a weapon to a character"""
-        self.weapon = weapon
-
     def move_to_room(self, room):
         """Move a character to a room"""
         self.room = room
