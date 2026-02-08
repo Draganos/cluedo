@@ -10,7 +10,7 @@ class Character:
         self.room = room
 
     def is_in_room(self, room):
-        """Check if a character is in a room"""
+        """Return true if a character is in a room, false otherwise"""
         return self.room == room
 
     def init_murderer(self, is_murder = True):
@@ -30,4 +30,28 @@ class Character:
         print(f"{self.name}: Room = {room_name}, "
               f"Weapon = {weapon_name}, "
               f"Murderer = {self.is_murderer}")
+
+
+class Room:
+    def __init__(self, name):
+        self.name = name
+        self.characters = []
+        self.weapons = []
+
+class Board:
+    def __init__(self, rooms):
+        self.rooms = rooms
+
+    def list_rooms(self):
+        """List all rooms"""
+
+    def place_weapon(self, weapon, room_name):
+        """Place a weapon in a room"""
+
+    def list_weapons_in_room(self, room_name):
+        """List all weapons in a room"""
+
+    def describe_room_contents(self, room_name):
+        """Describe a room's contents (characters + weapons)"""
+
 
