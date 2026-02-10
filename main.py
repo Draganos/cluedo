@@ -4,7 +4,6 @@ class Character:
         self.room = None #applied in randomizer if murderer
         self.weapon = None #applied in randomizer if murderer
         self.is_murderer = False #applied in randomizer
-        self.is_CPU = False #applied after character is picked
         self.position = None #coordinates or board indexes can be added later with sese coordination
         
     def move_to_room(self, room):
@@ -111,3 +110,8 @@ class Game:
         self.dice = dice
         self.current_turn = 0
         #for initializing the game rounds later. 
+
+class User:
+    def __init__(self, isCPU, character=None):
+        self.isCPU = False #set to none if not user.
+        self.character = character
