@@ -43,17 +43,28 @@ class Board:
     def __init__(self, rooms):
         self.rooms = rooms
 
-    def list_rooms(self):
-        """List all rooms"""
+    def move_character_to_square(self, character, position):
+        """Move a character to a valid square"""
 
-    def place_weapon(self, weapon, room_name):
+    def move_character_into_room(self, character, target):
+        """Move a character into a room"""
+
+    def list_rooms(self):
+        """List all the rooms"""
+
+    def list_characters_in_room(self, room_name):
+        """List characters in a given room"""
+
+    def place_weapon_in_room(self, weapon, room_name):
         """Place a weapon in a room"""
 
     def list_weapons_in_room(self, room_name):
-        """List all weapons in a room"""
+        """List all weapons in a given room"""
 
-    def describe_room_contents(self, room_name):
-        """Describe a room's contents (characters + weapons)"""
+    def get_room(self, room_name):
+        """Return a room object by the given name"""
+
+
 
 class Item:
     def __init__(self, item_name, item_type):
