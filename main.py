@@ -66,9 +66,13 @@ class Board:
 
 
 
-class Item:
+class Asset:
     def __init__(self, item_name, item_type):
         self.item_name = item_name
         self.item_type = item_type
 
+class Envelope:
+    def __init__(self):
+        self.cards = self
+        
 
