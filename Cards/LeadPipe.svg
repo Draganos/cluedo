@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="347.9256"
+   height="399.18832"
+   viewBox="0 0 222.67238 255.48053"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="LeadPipe.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.5150492"
+     inkscape:cx="129.36874"
+     inkscape:cy="176.2319"
+     inkscape:window-width="1470"
+     inkscape:window-height="923"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1" />
+  <path
+     fill="#000000"
+     d="m 160.77231,29.43684 c -0.68365,0.0098 -1.32884,0.102661 -1.90745,0.287939 l -42.68499,22.94587 -35.956129,40.367626 c 0.27897,1.778229 0.473558,3.351872 0.473558,3.351872 l -4.691687,1.383468 -26.655704,29.926055 a 10.493943,6.8611777 26.030483 0 1 8.692843,2.4228 10.493943,6.8611777 26.030483 0 1 5.174718,6.98238 l 62.934141,-70.653966 -0.55765,-7.699548 3.5052,5.776371 40.31576,-21.672146 c 2.11897,-2.303998 2.57158,-4.540043 2.01995,-6.506728 l -4.59152,1.354144 3.02619,-4.148467 c -0.72699,-0.834485 -1.6259,-1.57242 -2.62036,-2.182761 -2.02455,-1.242194 -4.42564,-1.963996 -6.47687,-1.934909 z M 49.391524,131.18133 a 8.4846291,5.5474544 26.030427 0 0 -0.53297,0.005 8.4846291,5.5474544 26.030427 0 0 -4.088117,1.65308 8.4846291,5.5474544 26.030427 0 0 3.290239,8.79313 8.4846291,5.5474544 26.030427 0 0 10.830179,0.32949 8.4846291,5.5474544 26.030427 0 0 -3.291961,-8.79288 8.4846291,5.5474544 26.030427 0 0 -6.20737,-1.98868 z m 0.505705,3.70214 a 4.0678174,2.6596133 26.030646 0 1 0.0012,0 4.0678174,2.6596133 26.030646 0 1 3.231689,0.95084 4.0678174,2.6596133 26.030646 0 1 1.577674,4.21568 4.0678174,2.6596133 26.030646 0 1 -5.191943,-0.15814 4.0678174,2.6596133 26.030646 0 1 -1.57796,-4.21569 4.0678174,2.6596133 26.030646 0 1 1.959392,-0.79294 z"
+     id="path1"
+     style="stroke-width:0.264864" />
+  <text
+     xml:space="preserve"
+     style="font-style:oblique;font-weight:bold;font-size:33.6875px;font-family:Courier;-inkscape-font-specification:'Courier, Bold Oblique';writing-mode:lr-tb;direction:ltr;fill:#000000;stroke-width:0.419889"
+     x="21.563227"
+     y="190.30315"
+     id="text1"
+     transform="scale(0.97401039,1.0266831)"><tspan
+       sodipodi:role="line"
+       id="tspan1"
+       style="stroke-width:0.419889"
+       x="21.563227"
+       y="190.30315">Lead Pipe</tspan></text>
+</svg>
