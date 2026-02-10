@@ -1,3 +1,6 @@
+import pygame
+import random
+
 class Character:
     def __init__(self, name):
         self.name = name
@@ -19,7 +22,7 @@ class Character:
         self.is_murderer = is_murder
 
     def setposition(self, position):
-        return self.position = position
+        self.position = position
         
     def describe_state(self):
         """Describe a character's state"""
@@ -111,7 +114,7 @@ class Game:
         self.current_turn = 0
         #for initializing the game rounds later. 
 
-class User:
-    def __init__(self, isCPU, character=None):
-        self.isCPU = False #set to none if not user.
+class Player:
+    def __init__(self, isCPU=False, character=None):
+        self.isCPU = isCPU #set to none if not user.
         self.character = character
