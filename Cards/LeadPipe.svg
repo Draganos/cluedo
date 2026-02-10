@@ -13,7 +13,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-   <rect x="145.83784" y="95.8125" width="348.80354" height="385.04475" fill="white" />
+   <rect width="100%" height="100%" fill="white"/>
   <defs
      id="defs1" />
   <sodipodi:namedview
