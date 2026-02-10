@@ -1,9 +1,10 @@
 class Character:
     def __init__(self, name):
         self.name = name
-        self.room = None
-        self.weapon = None
-        self.is_murderer = False
+        self.room = None #applied in randomizer if murderer
+        self.weapon = None #applied in randomizer if murderer
+        self.is_murderer = False #applied in randomizer
+        self.is_CPU = False #applied after character is picked
 
     def move_to_room(self, room):
         """Move a character to a room"""
@@ -53,5 +54,10 @@ class Board:
 
     def describe_room_contents(self, room_name):
         """Describe a room's contents (characters + weapons)"""
+
+class Item:
+    def __init__(self, item_name, item_type):
+        self.item_name = item_name
+        self.item_type = item_type
 
 
