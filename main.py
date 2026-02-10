@@ -5,7 +5,8 @@ class Character:
         self.weapon = None #applied in randomizer if murderer
         self.is_murderer = False #applied in randomizer
         self.is_CPU = False #applied after character is picked
-
+        self.position = None #coordinates or board indexes can be added later with sese coordination
+        
     def move_to_room(self, room):
         """Move a character to a room"""
         self.room = room
@@ -18,6 +19,9 @@ class Character:
         """Initialise a character as the murderer"""
         self.is_murderer = is_murder
 
+    def setposition(self, position):
+        return self.position = position
+        
     def describe_state(self):
         """Describe a character's state"""
         if self.room:
@@ -42,6 +46,8 @@ class Room:
 class Board:
     def __init__(self, rooms):
         self.rooms = rooms
+        self.characters = [] #add all characters in this room via list
+        self.weapons = [] #append all weapons in this room via list for referencing later OOP-style
 
     def move_character_to_square(self, character, position):
         """Move a character to a valid square"""
@@ -71,8 +77,37 @@ class Asset:
         self.item_name = item_name
         self.item_type = item_type
 
+class Weapon(Asset):
+    def __init__(self, name):
+        super().__init__(name, "weapon")
+        self.room = None #as weapon must be in one room or not assigned 
+        
 class Envelope:
     def __init__(self):
-        self.cards = self
-        
+        self.character = None
+        self.weapon = None
+        self.room = None
 
+    def setenvelope(self, character, weapon, room):
+        self.character = character
+        self.weapon = weapon
+        self.room = room
+        
+        
+class Dice(Asset):
+    def __init__(self, sides=6):
+        super().__init__("Dice", "dice")
+        self.sides = sides
+
+    def roll(self):
+        return random.randomint(1, self.sides)
+
+class Game:
+    def __init__(self, board, characters, weapons, envelope, dice):
+        self.board = board
+        self.characters = characters
+        self.weapons = weapons
+        self.envelope = envelope
+        self.dice = dice
+        self.current_turn = 0
+        #for initializing the game rounds later. 
