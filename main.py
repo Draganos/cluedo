@@ -119,7 +119,7 @@ class Player:
         self.isCPU = isCPU #set to none if not user.
         self.character = character
 
-#Created the 6 characters and stored them in a list
+#Create 6 character objects and store them in a list
 scarlet = Character("Scarlet")
 plum = Character("Plum")
 mustard = Character("Mustard")
@@ -131,7 +131,7 @@ characters = [scarlet,
               peacock,
               green]
 
-#Created the 9 rooms and stored them in a list
+#Create 9 room objects and store them in a list
 study = Room("Study")
 hall = Room("Hall")
 lounge = Room("Lounge")
