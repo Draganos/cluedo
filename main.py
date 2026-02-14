@@ -172,12 +172,14 @@ weapons = [candlestick,
 #Assign Character to user, set all else characters to CPU, set is_murderer to True
 #Assign Here pls whit
 
+# Let the user choose a character
+print("Choose your character:")
+for i, char in enumerate(characters):
+    print(f"{i + 1}. {char.name}")
 
 #Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
 murderer.init_murderer(True)
-
-#Test
 
 # Assign every character to a random room
 for character in characters:
