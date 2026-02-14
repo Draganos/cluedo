@@ -102,7 +102,7 @@ class Dice(Asset):
         self.sides = sides
 
     def roll(self):
-        return random.randomint(1, self.sides)
+        return random.randint(1, self.sides)
 
 class Game:
     def __init__(self, board, characters, weapons, envelope, dice):
@@ -131,7 +131,7 @@ characters = [scarlet,
               peacock,
               green]
 
-#Create 9 room objects and store them in a list
+#Create 9 room assets and the weapon assets and store them in a list
 study = Room("Study")
 hall = Room("Hall")
 lounge = Room("Lounge")
@@ -150,6 +150,14 @@ rooms = [study,
          conservatory,
          ballroom,
          kitchen]
+candlestick = Weapon("Candlestick")
+knife = Weapon("Knife")
+revolver = Weapon("Revolver")
+rope = Weapon("Rope")
+lead_pipe = Weapon("Lead Pipe")
+wrench = Weapon("Wrench")
+weapons = [candlestick, knife, revolver, rope, lead_pipe, wrench]
+
 
 #Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
