@@ -179,6 +179,27 @@ print("Choose your character:")
 for i, char in enumerate(characters):
     print(f"{i + 1}. {char.name}")
 
+#Take user input and handles checks
+while True:
+    try:
+        choice = int(input("Enter the number of your character: ")) - 1
+        if 0 <= choice < len(characters):
+            user_character = characters[choice]
+            break
+        else:
+            print("Invalid number. Try again!")
+    except ValueError:
+        print("Please enter a valid number.")
+
+#Assign other characters as CPU players
+cpu_players = []
+for character in characters:
+    if character != user_character:
+        cpu_players.append(Player(isCPU=True, character=character))
+
+# Assign user to chosen character
+player = Player(isCPU=False, character=user_character)
+
 #Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
 murderer.init_murderer(True)
