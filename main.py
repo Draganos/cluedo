@@ -118,3 +118,45 @@ class Player:
     def __init__(self, isCPU=False, character=None):
         self.isCPU = isCPU #set to none if not user.
         self.character = character
+
+#Created the 6 characters and stored them in a list
+scarlet = Character("Scarlet")
+plum = Character("Plum")
+mustard = Character("Mustard")
+peacock = Character("Peacock")
+green = Character("Green")
+characters = [scarlet,
+              plum,
+              mustard,
+              peacock,
+              green]
+
+#Created the 9 rooms and stored them in a list
+study = Room("Study")
+hall = Room("Hall")
+lounge = Room("Lounge")
+library = Room("Library")
+billard_room = Room("Billard Room")
+dining_room = Room("Dining Room")
+conservatory = Room("Conservatory")
+ballroom = Room("Ballroom")
+kitchen = Room("Kitchen")
+rooms = [study,
+         hall,
+         lounge,
+         library,
+         billard_room,
+         dining_room,
+         conservatory,
+         ballroom,
+         kitchen]
+
+#Pick a character randomly and initialise them as the murder
+murderer = random.choice(characters)
+murderer.init_murderer(True)
+
+# Each character is assignd to a random room.
+for character in characters:
+    room = random.choice(rooms)
+    character.move_to_room(room)
+    room.characters.append(character)
