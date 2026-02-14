@@ -90,7 +90,7 @@ class Envelope:
         self.weapon = None
         self.room = None
 
-    def setenvelope(self, character, weapon, room):
+    def set_envelope(self, character, weapon, room):
         self.character = character
         self.weapon = weapon
         self.room = room
@@ -160,5 +160,7 @@ for character in characters:
     room = random.choice(rooms)
     character.move_to_room(room)
     room.characters.append(character)
+
+
 
 
