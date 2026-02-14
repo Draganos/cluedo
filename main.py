@@ -151,7 +151,7 @@ rooms = [study,
          ballroom,
          kitchen]
 
-#Pick a character randomly and assign them as the murderer
+#Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
 murderer.init_murderer(True)
 
