@@ -122,8 +122,6 @@ class Player:
         self.character = character
 
 
-
-
 #Initializing the game
 #Create 6 character objects and store them in a list
 scarlet = Character("Scarlet")
@@ -175,13 +173,12 @@ weapons = [candlestick, knife, revolver, rope, lead_pipe, wrench]
 murderer = random.choice(characters)
 murderer.init_murderer(True)
 
+#Testing
 
 # Assign every character to a random room
 for character in characters:
     room = random.choice(rooms)
     character.move_to_room(room)
     room.characters.append(character)
-
-
 
 #Add for later: User to see if his role is murderer or other role.
