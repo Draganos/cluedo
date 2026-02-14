@@ -38,7 +38,6 @@ class Character:
               f"Weapon = {weapon_name}, "
               f"Murderer = {self.is_murderer}")
 
-
 class Room:
     def __init__(self, name):
         self.name = name
@@ -54,14 +53,17 @@ class Board:
     def move_character_to_square(self, character, position):
         """Move a character to a valid square"""
 
-    def move_character_into_room(self, character, target):
-        """Move a character into a room"""
+    def add_character_into_room(self, character):
+        """Add a character into a room"""
 
     def list_rooms(self):
         """List all the rooms"""
 
     def list_characters_in_room(self, room_name):
         """List characters in a given room"""
+
+    def move_weapon_between_room(self,new_room_name):
+        """Move weapon from the current room to the new room"""
 
     def place_weapon_in_room(self, weapon, room_name):
         """Place a weapon in a room"""
@@ -71,8 +73,6 @@ class Board:
 
     def get_room(self, room_name):
         """Return a room object by the given name"""
-
-
 
 class Asset:
     def __init__(self, item_name, item_type):
