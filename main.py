@@ -21,24 +21,18 @@ class Character:
     def init_murderer(self, is_murder = True):
         """Initialise a character as the murderer"""
         self.is_murderer = is_murder
-        
 
     def setposition(self, position):
         self.position = position
-        
+
     def describe_state(self):
         """Describe a character's state"""
-        if self.room:
-            room_name = self.room.name
-        else:
-            room_name = "No room"
-        if self.weapon:
-            weapon_name = self.weapon.name
-        else:
-            weapon_name = "No weapon"
-        print(f"{self.name}: Room = {room_name}, "
-              f"Weapon = {weapon_name}, "
-              f"Murderer = {self.is_murderer}")
+        room_name = self.room.name if self.room else "No room"
+        weapon_name = self.weapon.name if self.weapon else "No weapon"
+        print(f"Character: {self.name:<10} Room: {room_name:<12} "
+              f"Weapon: {weapon_name:<10} "
+              f"Murderer: {self.is_murderer}")
+
 
 class Room:
     def __init__(self, name):
@@ -96,8 +90,7 @@ class Envelope:
         self.character = character
         self.weapon = weapon
         self.room = room
-        
-        
+
 class Dice(Asset):
     def __init__(self, sides=6):
         super().__init__("Dice", "dice")
@@ -181,7 +174,7 @@ print("Choose your character:")
 for i, char in enumerate(characters):
     print(f"{i + 1}. {char.name}")
 
-#Take user input (also handles checks)
+#Take input from user (also handles checks)
 while True:
     try:
         choice = int(input("Enter the number of your character: ")) - 1
@@ -193,11 +186,11 @@ while True:
     except ValueError:
         print("Please enter a valid number!")
 
-# Assign user to their chosen character
+# Assign chosen character to user
 player = Player(isCPU = False, character = user_character)
 print(f"You picked {user_character.name} as your character!")
 
-#Assign the other characters as CPU players
+#Assign the other characters as CPUs
 cpu_players = []
 for character in characters:
     if character != user_character:
@@ -214,5 +207,9 @@ for character in characters:
     room = random.choice(rooms)
     character.move_to_room(room)
     room.characters.append(character)
+
+#Uncomment for debug
+# for character in characters:
+    # character.describe_state()
 
 #Add for later: User to see if his role is murderer or other role.
