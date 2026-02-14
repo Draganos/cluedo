@@ -1,6 +1,7 @@
 import pygame
 import random
 
+#class definition
 class Character:
     def __init__(self, name):
         self.name = name
@@ -20,6 +21,7 @@ class Character:
     def init_murderer(self, is_murder = True):
         """Initialise a character as the murderer"""
         self.is_murderer = is_murder
+        
 
     def setposition(self, position):
         self.position = position
@@ -119,6 +121,10 @@ class Player:
         self.isCPU = isCPU #set to none if not user.
         self.character = character
 
+
+
+
+#Initializing the game
 #Create 6 character objects and store them in a list
 scarlet = Character("Scarlet")
 plum = Character("Plum")
@@ -159,9 +165,16 @@ wrench = Weapon("Wrench")
 weapons = [candlestick, knife, revolver, rope, lead_pipe, wrench]
 
 
+#User must pick character before all below, take the input and then assign below
+#Take input from user
+#Assign Character to user, set all else characters to CPU, set is_murderer to True
+#Assign Here pls whit
+
+
 #Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
 murderer.init_murderer(True)
+
 
 # Assign every character to a random room
 for character in characters:
@@ -171,4 +184,4 @@ for character in characters:
 
 
 
-
+#Add for later: User to see if his role is murderer or other role.
