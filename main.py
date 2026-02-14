@@ -174,12 +174,14 @@ weapons = [candlestick,
 #Assign Character to user, set all else characters to CPU, set is_murderer to True
 #Assign Here pls whit
 
-# Let the user choose a character
+#############################
+
+# Print the character list to the user
 print("Choose your character:")
 for i, char in enumerate(characters):
     print(f"{i + 1}. {char.name}")
 
-#Take user input and handles checks
+#Take user input (also handles checks)
 while True:
     try:
         choice = int(input("Enter the number of your character: ")) - 1
@@ -187,20 +189,21 @@ while True:
             user_character = characters[choice]
             break
         else:
-            print("Invalid number. Try again!")
+            print("Invalid number, try again!")
     except ValueError:
-        print("Please enter a valid number.")
+        print("Please enter a valid number!")
 
-#Assign other characters as CPU players
+# Assign user to their chosen character
+player = Player(isCPU=False, character=user_character)
+print(f"You picked {user_character.name} as your character!")
+
+#Assign the other characters as CPU players
 cpu_players = []
 for character in characters:
     if character != user_character:
         cpu_players.append(Player(isCPU=True, character=character))
 
-# Assign user to chosen character
-player = Player(isCPU=False, character=user_character)
-
-#test
+#############################
 
 #Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
