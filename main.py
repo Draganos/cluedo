@@ -200,6 +200,8 @@ for character in characters:
 # Assign user to chosen character
 player = Player(isCPU=False, character=user_character)
 
+#test
+
 #Pick a random character and assign them as the murderer
 murderer = random.choice(characters)
 murderer.init_murderer(True)
