@@ -129,11 +129,13 @@ plum = Character("Plum")
 mustard = Character("Mustard")
 peacock = Character("Peacock")
 green = Character("Green")
+white = Character("White")
 characters = [scarlet,
               plum,
               mustard,
               peacock,
-              green]
+              green,
+              white]
 
 #Create 9 room assets and the weapon assets and store them in a list
 study = Room("Study")
