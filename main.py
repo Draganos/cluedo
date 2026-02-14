@@ -161,4 +161,4 @@ for character in characters:
     character.move_to_room(room)
     room.characters.append(character)
 
-#Testing pit push
+print("Hello")
