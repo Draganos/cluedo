@@ -160,3 +160,5 @@ for character in characters:
     room = random.choice(rooms)
     character.move_to_room(room)
     room.characters.append(character)
+
+#Testing pit push
