@@ -155,7 +155,7 @@ rooms = [study,
 murderer = random.choice(characters)
 murderer.init_murderer(True)
 
-# Each character is assignd to a random room.
+# Characters assigned to a random room
 for character in characters:
     room = random.choice(rooms)
     character.move_to_room(room)
