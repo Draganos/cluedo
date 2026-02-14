@@ -160,8 +160,12 @@ revolver = Weapon("Revolver")
 rope = Weapon("Rope")
 lead_pipe = Weapon("Lead Pipe")
 wrench = Weapon("Wrench")
-weapons = [candlestick, knife, revolver, rope, lead_pipe, wrench]
-
+weapons = [candlestick,
+           knife,
+           revolver,
+           rope,
+           lead_pipe,
+           wrench]
 
 #User must pick character before all below, take the input and then assign below
 #Take input from user
@@ -173,7 +177,6 @@ weapons = [candlestick, knife, revolver, rope, lead_pipe, wrench]
 murderer = random.choice(characters)
 murderer.init_murderer(True)
 
-#Testing
 
 # Assign every character to a random room
 for character in characters:
