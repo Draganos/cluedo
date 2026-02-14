@@ -177,7 +177,7 @@ weapons = [candlestick,
 murderer = random.choice(characters)
 murderer.init_murderer(True)
 
-#Testing this
+#Testing
 
 # Assign every character to a random room
 for character in characters:
