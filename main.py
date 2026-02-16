@@ -190,6 +190,7 @@ for character in characters:
         cpu_players.append(Player(isCPU = True, character = character))
 
 #########################################
+
 # create an envelope object and randomly generate a character, weapon and room.
 envelope = Envelope()
 envelope.set_envelope(
