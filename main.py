@@ -168,7 +168,7 @@ weapons = [candlestick,
 #Assign Character to user, set all else characters to CPU, set is_murderer to True
 #Assign Here pls whit
 
-# Print the character list to the user
+# Show the character list to the human player
 print("Choose your character:")
 for i, char in enumerate(characters):
     print(f"{i + 1}. {char.name}")
@@ -185,7 +185,7 @@ while True:
     except ValueError:
         print("Please enter a valid number!")
 
-# Assign chosen character to user
+# Assign chosen character to human player
 player = Player(isCPU = False, character = user_character)
 print(f"You've picked {user_character.name} as your character!")
 
@@ -195,14 +195,14 @@ for character in characters:
     if character != user_character:
         cpu_players.append(Player(isCPU = True, character = character))
 
-# create an envelope object and randomly generate a character, weapon and room.
+# create an envelope object and randomly generate a character, weapon and room
 envelope = Envelope()
 envelope.set_envelope(
     random.choice(characters),
     random.choice(weapons),
     random.choice(rooms)
 )
-#Show the contents inside the envelope
+# Show the contents inside the envelope (character, weapon and room)
 envelope.show_contents()
 
 # Assign every character to a random room
