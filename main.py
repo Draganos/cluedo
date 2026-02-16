@@ -7,7 +7,6 @@ class Character:
         self.name = name
         self.room = None #applied in randomizer if murderer
         self.weapon = None #applied in randomizer if murderer
-        self.is_murderer = False #applied in randomizer
         self.position = None #coordinates or board indexes can be added later with sese coordination
         
     def move_to_room(self, room):
@@ -26,8 +25,7 @@ class Character:
         room_name = self.room.name if self.room else "No room"
         weapon_name = self.weapon.name if self.weapon else "No weapon"
         print(f"Character: {self.name:<10} Room: {room_name:<12} "
-              f"Weapon: {weapon_name:<10} "
-              f"Murderer: {self.is_murderer}")
+              f"Weapon: {weapon_name:<10} ")
 
 class Room:
     def __init__(self, name):
@@ -193,9 +191,13 @@ for character in characters:
 
 #########################################
 
-# Pick a random character and assign them as the murderer
-murderer = random.choice(characters)
-murderer.init_murderer(True)
+# create an envelope object and randomly generate a character, weapon and room.
+envelope = Envelope()
+envelope.set_envelope(
+    random.choice(characters),
+    random.choice(weapons),
+    random.choice(rooms)
+)
 
 # Assign every character to a random room
 for character in characters:
