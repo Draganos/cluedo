@@ -173,7 +173,7 @@ print("Choose your character:")
 for i, char in enumerate(characters):
     print(f"{i + 1}. {char.name}")
 
-# Take input from user (also handles checks)
+# Take user input (also handles checks)
 while True:
     try:
         choice = int(input("Enter the number of your character: ")) - 1
