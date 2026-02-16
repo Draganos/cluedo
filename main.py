@@ -18,10 +18,6 @@ class Character:
         """Return true if a character is in a room, false otherwise"""
         return self.room == room
 
-    def init_murderer(self, is_murder = True):
-        """Initialise a character as the murderer"""
-        self.is_murderer = is_murder
-
     def setposition(self, position):
         self.position = position
 
@@ -32,7 +28,6 @@ class Character:
         print(f"Character: {self.name:<10} Room: {room_name:<12} "
               f"Weapon: {weapon_name:<10} "
               f"Murderer: {self.is_murderer}")
-
 
 class Room:
     def __init__(self, name):
@@ -207,9 +202,5 @@ for character in characters:
     room = random.choice(rooms)
     character.move_to_room(room)
     room.characters.append(character)
-
-#Uncomment for debug
-# for character in characters:
-    # character.describe_state()
 
 #Add for later: User to see if his role is murderer or other role.
