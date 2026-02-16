@@ -1,4 +1,3 @@
-import pygame
 import random
 
 class Character:
@@ -41,8 +40,10 @@ class Board:
     def move_character_to_square(self, character, position):
         """Move a character to a valid square"""
 
-    def add_character_into_room(self, character):
+    def add_character_to_room(self, character):
         """Add a character into a room"""
+        if character.room:
+            character.room.characters.append(character)
 
     def list_rooms(self):
         """List all the rooms"""
@@ -205,9 +206,10 @@ envelope.set_envelope(
 envelope.show_contents()
 
 # Assign every character to a random room
+board = Board(rooms)
 for character in characters:
-    room = random.choice(rooms)
-    character.move_to_room(room)
-    room.characters.append(character)
+    random_room = random.choice(rooms)
+    character.move_to_room(random_room)
+    board.add_character_to_room(character)
 
 #Add for later: User to see if his role is murderer or other role.
