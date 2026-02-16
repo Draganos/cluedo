@@ -84,6 +84,15 @@ class Envelope:
         self.weapon = weapon
         self.room = room
 
+    def show_contents(self):
+        """Show the contents of the envelope"""
+        char_name = self.character.name if self.character else "None"
+        weapon_name = self.weapon.item_name if self.weapon else "None"
+        room_name = self.room.name if self.room else "None"
+        print(f"Envelope Contents: Character: {char_name}, "
+              f"Weapon: {weapon_name}, "
+              f"Room: {room_name}")
+
 class Dice(Asset):
     def __init__(self, sides=6):
         super().__init__("Dice", "dice")
@@ -106,7 +115,6 @@ class Player:
     def __init__(self, isCPU=False, character=None):
         self.isCPU = isCPU #set to none if not user.
         self.character = character
-
 
 #Initializing the game
 #Create 6 character objects and store them in a list
@@ -160,8 +168,6 @@ weapons = [candlestick,
 #Assign Character to user, set all else characters to CPU, set is_murderer to True
 #Assign Here pls whit
 
-#########################################
-
 # Print the character list to the user
 print("Choose your character:")
 for i, char in enumerate(characters):
@@ -189,8 +195,6 @@ for character in characters:
     if character != user_character:
         cpu_players.append(Player(isCPU = True, character = character))
 
-#########################################
-
 # create an envelope object and randomly generate a character, weapon and room.
 envelope = Envelope()
 envelope.set_envelope(
@@ -198,6 +202,8 @@ envelope.set_envelope(
     random.choice(weapons),
     random.choice(rooms)
 )
+#Show the contents inside the envelope
+envelope.show_contents()
 
 # Assign every character to a random room
 for character in characters:
