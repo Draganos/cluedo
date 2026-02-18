@@ -212,5 +212,4 @@ for character in characters:
     character.move_to_room(random_room)
     board.add_character_to_room(character)
 
-#Test
 #Add for later: User to see if his role is murderer or other role.
