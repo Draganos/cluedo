@@ -189,6 +189,9 @@ while True:
 player = Player(isCPU = False, character = user_character)
 print(f"You've picked {user_character.name} as your character!")
 
+
+#Test
+
 # Assign the other characters to CPUs
 cpu_players = []
 for character in characters:
