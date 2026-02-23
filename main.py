@@ -206,7 +206,7 @@ envelope.set_envelope(
 envelope.show_contents()
 
 # stores character, weapon, room except the ones selected by envelope
-# (removing the items that the envelope selected)
+# (removing the character, weapon and room which the envelope selected)
 remaining_characters = []
 for char in characters:
     if char != envelope.character:
