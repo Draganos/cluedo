@@ -220,7 +220,7 @@ for room in rooms:
     if room != envelope.room:
         remaining_rooms.append(room)
 
-# Assign every character to a random room
+# Assign all characters to a random room
 board = Board(rooms)
 for character in remaining_characters:
     random_room = random.choice(rooms)
