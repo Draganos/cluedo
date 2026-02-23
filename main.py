@@ -194,7 +194,7 @@ for character in characters:
     if character != user_character:
         cpu_players.append(Player(isCPU = True, character = character))
 
-# create an envelope object and randomly generate a character, weapon and room
+# create an envelope object then randomly generate a character, weapon and room
 envelope = Envelope()
 envelope.set_envelope(
     random.choice(characters),
