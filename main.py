@@ -166,7 +166,6 @@ weapons = [candlestick,
 #User must pick character before all below, take the input and then assign below
 #Take input from user
 #Assign Character to user, set all else characters to CPU, set is_murderer to True
-#Assign Here pls whit
 
 # Show the character list to the human player
 print("Choose your character:")
