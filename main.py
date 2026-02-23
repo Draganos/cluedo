@@ -201,7 +201,7 @@ envelope.set_envelope(
     random.choice(weapons),
     random.choice(rooms)
 )
-# Show the contents inside the envelope (character, weapon and room)
+# Show envelope contents (character, weapon and room)
 envelope.show_contents()
 
 # removes the character, weapon and room which the envelope selected
