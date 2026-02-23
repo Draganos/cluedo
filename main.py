@@ -223,7 +223,7 @@ for room in rooms:
 
 # Assign every character to a random room
 board = Board(rooms)
-for character in characters:
+for character in remaining_characters:
     random_room = random.choice(rooms)
     character.move_to_room(random_room)
     board.add_character_to_room(character)
