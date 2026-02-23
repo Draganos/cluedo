@@ -205,6 +205,22 @@ envelope.set_envelope(
 # Show the contents inside the envelope (character, weapon and room)
 envelope.show_contents()
 
+#stores character, weapon, room except the ones selected by envelope
+remaining_characters = []
+for char in characters:
+    if char != envelope.character:
+        remaining_characters.append(char)
+
+remaining_weapons = []
+for weapons in weapons:
+    if weapons != envelope.weapon:
+        remaining_weapons.append(weapons)
+
+remaining_rooms = []
+for room in rooms:
+    if room != envelope.room:
+        remaining_rooms.append(room)
+
 # Assign every character to a random room
 board = Board(rooms)
 for character in characters:
