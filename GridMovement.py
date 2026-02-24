@@ -9,10 +9,12 @@ OFFSET_Y = 18 * SCALE
 
 
 class Player:
-    def __init__(self, col, row, color):
+    def __init__(self, col, row, color, isCPU=False, character=None):
         self.col = col
         self.row = row
         self.color = color
+        self.isCPU = isCPU #set to none if not user.
+        self.character = character
 
     def move(self, dx, dy):
         #Players Grid Position.
@@ -47,10 +49,10 @@ class Board:
         surface.blit(self.sheet, (self.width, 0))
 
         # Visual Debug: To see the grid lines.
-        for r in range(25):
-            for c in range(24):
-                rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                pygame.draw.rect(surface, (255, 0, 0), rect, 1)
+        #for r in range(25):
+            #for c in range(24):
+                #rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                #pygame.draw.rect(surface, (255, 0, 0), rect, 1)
 
 
 class Game:
@@ -91,3 +93,4 @@ class Game:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
+
