@@ -7,9 +7,8 @@ TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
 OFFSET_Y = 18 * SCALE
 
-
 class Player:
-    def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None)):
+    def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None):
         self.col = col
         self.row = row
         self.color = color
