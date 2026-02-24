@@ -9,7 +9,7 @@ OFFSET_Y = 18 * SCALE
 
 
 class Player:
-    def __init__(self, col, row, color, isCPU=False, character=None):
+    def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None)):
         self.col = col
         self.row = row
         self.color = color
@@ -93,4 +93,5 @@ class Game:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
+
 
