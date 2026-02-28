@@ -224,7 +224,7 @@ for room in rooms:
     if room != envelope.room:
         remaining_rooms.append(room)
 
-# Create the board
+# Create the board object
 board = Board(rooms)
 
 #shuffle the character and weapons list
