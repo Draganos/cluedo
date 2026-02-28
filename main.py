@@ -56,7 +56,7 @@ class Board:
     def move_weapon_between_room(self,new_room_name):
         """Move weapon from the current room to the new room"""
 
-    def place_weapon_in_room(self, weapon, room_name):
+    def add_weapon_in_room(self, weapon, room_name):
         """Place a weapon in a room"""
 
     def list_weapons_in_room(self, room_name):
@@ -205,7 +205,7 @@ envelope.set_envelope(
     random.choice(weapons),
     random.choice(rooms)
 )
-# Show envelope contents (character, weapon and room)
+# DEBUGGING PURPOSES ONLY
 envelope.show_contents()
 
 # removes the character, weapon and room that the envelope chose
@@ -224,20 +224,27 @@ for room in rooms:
     if room != envelope.room:
         remaining_rooms.append(room)
 
-# Assign the remaining characters to random room
+# Create the board
 board = Board(rooms)
-for character in remaining_characters:
-    random_room = random.choice(rooms)
-    board.add_character_to_room(character, random_room)
 
-for weapon in remaining_weapons:
-    random_room = random.choice(rooms)
-    weapon.room = random_room
-    random_room.weapons.append(weapon)
+#shuffle the character and weapons list
+random.shuffle(characters)
+random.shuffle(weapons)
+
+# Assign character pieces to random rooms
+for character in characters:
+    room = random.choice(rooms)
+    board.add_character_to_room(character, room)
+
+# Assign weapon pieces to random rooms
+for weapon in weapons:
+    room = random.choice(rooms)
+    weapon.room = room
+    room.weapons.append(weapon)
 
 # FOR DEBUGGING PURPOSES
-print("\nBoard State After Randomisation")
+print("\nBoard state after randomisation\n")
 for room in rooms:
-    weapon_names = [w.item_name for w in room.weapons]
-    character_names = [c.name for c in room.characters]
-    print(f"{room.name}: Characters: {character_names}, Weapons: {weapon_names}")
+    weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
+    character_names = [c.name for c in room.characters] if room.characters else ["None"]
+    print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
