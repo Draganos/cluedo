@@ -231,7 +231,7 @@ for weapon, room in zip(weapons, weapon_rooms):
     board.add_weapon_to_room(weapon, room)
 
 # Print board state (FOR DEBUGGING PURPOSES ONLY)
-print("\nBoard state after randomisation")
+print("\nBoard state after randomisation:")
 for room in rooms:
     character_names = [c.name for c in room.characters] if room.characters else ["None"]
     weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
