@@ -216,7 +216,7 @@ envelope.show_contents()
 # Create the board object
 board = Board(rooms)
 
-# Shuffle characters and weapons
+# Randomly shuffle characters and weapons
 random.shuffle(characters)
 random.shuffle(weapons)
 
