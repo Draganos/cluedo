@@ -40,10 +40,12 @@ class Board:
     def move_character_to_square(self, character, position):
         """Move a character to a valid square"""
 
-    def add_character_to_room(self, character):
+    def add_character_to_room(self, character, room):
         """Add a character into a room"""
         if character.room:
-            character.room.characters.append(character)
+            character.room.characters.remove(character)
+        character.room = room
+        room.characters.append(character)
 
     def list_rooms(self):
         """List all the rooms"""
@@ -211,8 +213,8 @@ for char in characters:
         remaining_characters.append(char)
 
 remaining_weapons = []
-for weapons in weapons:
-    if weapons != envelope.weapon:
+for weapon in weapons:
+    if weapon != envelope.weapon:
         remaining_weapons.append(weapons)
 
 remaining_rooms = []
@@ -220,10 +222,9 @@ for room in rooms:
     if room != envelope.room:
         remaining_rooms.append(room)
 
-# Assign the remaining characters to a random room
+# Assign the remaining characters to random room
 board = Board(rooms)
 for character in remaining_characters:
     random_room = random.choice(rooms)
-    character.move_to_room(random_room)
-    board.add_character_to_room(character)
+    board.add_character_to_room(character, random_room)
 
