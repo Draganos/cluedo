@@ -133,7 +133,7 @@ characters = [scarlet,
               green,
               white]
 
-#Create 9 room assets and the weapon assets and store them in a list
+#Create 9 room assets and store them in a list
 study = Room("Study")
 hall = Room("Hall")
 lounge = Room("Lounge")
@@ -152,6 +152,8 @@ rooms = [study,
          conservatory,
          ballroom,
          kitchen]
+
+# Create 9 weapon assets and store them in a list
 candlestick = Weapon("Candlestick")
 knife = Weapon("Knife")
 revolver = Weapon("Revolver")
@@ -215,7 +217,7 @@ for char in characters:
 remaining_weapons = []
 for weapon in weapons:
     if weapon != envelope.weapon:
-        remaining_weapons.append(weapons)
+        remaining_weapons.append(weapon)
 
 remaining_rooms = []
 for room in rooms:
@@ -228,3 +230,14 @@ for character in remaining_characters:
     random_room = random.choice(rooms)
     board.add_character_to_room(character, random_room)
 
+for weapon in remaining_weapons:
+    random_room = random.choice(rooms)
+    weapon.room = random_room
+    random_room.weapons.append(weapon)
+
+# FOR DEBUGGING PURPOSES
+print("\nBoard State After Randomisation")
+for room in rooms:
+    weapon_names = [w.item_name for w in room.weapons]
+    character_names = [c.name for c in room.characters]
+    print(f"{room.name}: Characters: {character_names}, Weapons: {weapon_names}")
