@@ -198,17 +198,16 @@ for character in characters:
     if character != user_character:
         cpu_players.append(Player(isCPU = True, character = character))
 
-# create an envelope object then randomly generate a character, weapon and room
+# create an envelope object
 envelope = Envelope()
+
+# envelope randomly picks a character, weapon and room
 envelope.set_envelope(
     random.choice(characters),
     random.choice(weapons),
     random.choice(rooms)
 )
-# DEBUGGING PURPOSES ONLY
-envelope.show_contents()
-
-# removes the character, weapon and room that the envelope chose
+# remove the character, weapon and room that the envelope picked
 remaining_characters = []
 for char in characters:
     if char != envelope.character:
@@ -227,24 +226,24 @@ for room in rooms:
 # Create the board object
 board = Board(rooms)
 
-#shuffle the character and weapons list
+# Shuffle characters and weapons
 random.shuffle(characters)
 random.shuffle(weapons)
 
-# Assign character pieces to random rooms
-for character in characters:
-    room = random.choice(rooms)
-    board.add_character_to_room(character, room)
+# Randomly select 6 rooms for the characters
+character_rooms = random.sample(rooms, len(characters))
+for char, room in zip(characters, character_rooms):
+    board.add_character_to_room(char, room)
 
-# Assign weapon pieces to random rooms
-for weapon in weapons:
-    room = random.choice(rooms)
+# Randomly select 6 rooms for the weapons
+weapon_rooms = random.sample(rooms, len(weapons))
+for weapon, room in zip(weapons, weapon_rooms):
     weapon.room = room
     room.weapons.append(weapon)
 
 # FOR DEBUGGING PURPOSES
 print("\nBoard state after randomisation\n")
 for room in rooms:
-    weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
     character_names = [c.name for c in room.characters] if room.characters else ["None"]
+    weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
     print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
