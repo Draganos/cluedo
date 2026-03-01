@@ -247,7 +247,7 @@ remaining_characters = [c for c in characters if c != envelope.character]
 remaining_weapons = [w for w in weapons if w != envelope.weapon]
 remaining_rooms = [r for r in rooms if r != envelope.room]
 
-#Create the deck of cards
+#Combine all remaining cards into a single deck
 deck = remaining_characters + remaining_weapons + remaining_rooms
 
 # Shuffle the deck
