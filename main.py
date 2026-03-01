@@ -242,10 +242,21 @@ for room in rooms:
     weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
     print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
 
-# Keep track of the remaining cards excluding the ones envelope picked
-remaining_characters = [c for c in characters if c != envelope.character]
-remaining_weapons = [w for w in weapons if w != envelope.weapon]
-remaining_rooms = [r for r in rooms if r != envelope.room]
+# Initialise list, loop through each card and add those not in envelope
+remaining_characters = []
+for c in characters:
+    if c not in envelope.character:
+        remaining_characters.append(c)
+
+remaining_weapons = []
+for w in weapons:
+    if w not in envelope.weapon:
+        remaining_weapons.append(w)
+
+remaining_rooms = []
+for r in rooms:
+    if r not in remaining_rooms:
+        remaining_rooms.append(r)
 
 #Combine all remaining cards into a single deck
 deck = remaining_characters + remaining_weapons + remaining_rooms
@@ -253,7 +264,7 @@ deck = remaining_characters + remaining_weapons + remaining_rooms
 # Shuffle the deck
 random.shuffle(deck)
 
-# Combine player and cpu_players
+# Combine player and CPU players
 all_players = [player] + cpu_players
 
 # For loop to deal cards to human player and CPU players
