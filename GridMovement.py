@@ -6,7 +6,9 @@ SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
 OFFSET_Y = 18 * SCALE
-
+#Button colours
+COLOUR = "#462779"
+COLOUR_HOVER = "#9040BA"
 
 class Player:
     def __init__(self, col, row, color):
@@ -54,16 +56,18 @@ class Board:
 
 
 class Game:
-
-    #Intialisation for the game.
+    #Initialisation for the game.
     def __init__(self):
         pygame.init()
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height))
+        self.menu = Menu()
         #Determines where the player starts and color.
         self.player = Player(11, 11, (255, 0, 0))  # Red player
         self.running = True
+        #Gets mouse position
+        self.mouse = pygame.mouse.get_pos()
 
     def handle_events(self):
         #checks for actions by the user.
@@ -77,15 +81,115 @@ class Game:
                 if event.key == pygame.K_LEFT:  self.player.move(-1, 0)
                 if event.key == pygame.K_RIGHT: self.player.move(1, 0)
 
+            # if the menu screen is not null (or None in python's case) and a mouse click is detected, it will run the buttonAction() func
+            if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
+                self.menu.buttonAction(self.mouse)
+
+
     def run(self):
         while self.running:
             self.handle_events()
+            # Gets mouse position while game running
+            self.mouse = pygame.mouse.get_pos()
             # Renders the game.
             self.screen.fill((0, 0, 0))
-            self.board.draw(self.screen)
-            self.player.draw(self.screen)
+            self.menu.draw(self.screen, self.mouse)
+            # I've commented the two lines below out for the time being just to test the menu; change as you see fit
+            #self.board.draw(self.screen)
+            #self.player.draw(self.screen)
             pygame.display.flip()
         pygame.quit()
+
+class Menu:
+    def __init__(self):
+        # Loads and scales the background image used for the menu to cover the whole screen; overflow ignored
+        self.image = pygame.image.load('Assets/Tudor-Mansion.png')
+        # Couldn't get the win_width to work, so I just found the screen size instead
+        self.disp_surf = pygame.display.get_surface()
+        # Unless I'm being daft, which I probably am
+        x = self.disp_surf.get_width()
+        y = self.disp_surf.get_height()
+        self.image = pygame.transform.smoothscale(self.image, (x, y))
+        self.width = x
+        self.height = y
+        # Using the same principles as Board(), load the Clue logo
+        self.logo = pygame.image.load('Assets/CLUE_logo.png')
+        self.logo_width = int(self.logo.get_width())
+        self.logo_height = int(self.logo.get_height())
+        self.logo = pygame.transform.smoothscale(self.logo, (self.logo_width, self.logo_height))
+        # every object in pygame is associated with a rectangle (get_rect())
+        # thus accordingly, get the rectangle of the logo, and change its centerx position to match that of the screen
+        # make a 'fixed' value for y
+        self.logo_rect = self.logo.get_rect()
+        self.logo_rect.centerx = pygame.display.get_surface().get_rect().centerx
+        self.logo_rect.y = self.height * 0.1
+        # now create the start button - centred horizontally
+        self.start_btn = MenuButton(COLOUR, self.width//2 - 70, self.height//2 - 30, 140, 60, "Start")
+        self.exit_btn = MenuButton(COLOUR, self.width//2 - 70, self.height//2 + 60, 140, 60, "Exit")
+
+    def buttonAction(self, mouse):
+        # since there's only two buttons on the menu, it simply calls the changeGameState() function for both buttons independently
+        self.start_btn.changeGameState(mouse)
+        self.exit_btn.changeGameState(mouse)
+        # there ARE cleaner ways, but this is good enough. If it works, right?
+
+
+    def draw(self, surface, mouse):
+        # Gets mouse pos (taken as parameter)
+        self.mouse = mouse
+        # Draws background from top-left
+        surface.blit(self.image, (0, 0))
+        # Draws logo above sheet, centred horizontally
+        # use the self.logo_rect which contains information pertaining to where the logo should be drawn
+        # Looks nice and pretty, how lovely
+        surface.blit(self.logo, (self.logo_rect))
+        # this logo should probably be replaced later down the line 
+        # draw the button(s)
+        self.start_btn.draw(self.disp_surf)
+        self.start_btn.mouseHover(self.mouse) #realistically, there's a way to merge the mouseHover code into draw(), but I'm not bothered
+        self.exit_btn.draw(self.disp_surf)
+        self.exit_btn.mouseHover(self.mouse)
+
+class MenuButton:
+    def __init__(self, colour, pos_x, pos_y, width, height, text=''):
+        # receives parameters and sets its self values to them
+        self.color = colour
+        self.width = width
+        self.height = height
+        self.text = text
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+    
+    def draw(self, surface):
+        # draw the button as a rectangle
+        pygame.draw.rect(surface, self.color, (self.pos_x, self.pos_y, self.width, self.height), 0)
+
+        # styles the text with a font
+        # obviously, the only font to use in such a situation is papyrus
+        if self.text != '': #checks text isn't empty
+            font = pygame.font.SysFont("papyrus", 30)
+            text = font.render(self.text, 1, "#FFFFFF")
+            surface.blit(text, (self.pos_x + (self.width//2 - text.get_width()//2), self.pos_y + (self.height//2 - text.get_height()//2)))
+
+    def mouseHover(self, position): #changes button colour when mouse is hovering over it
+        if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
+            if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
+                # mouse positions is passed as a paramter into position. position[0] is the mouse's x-coordinate at time of call, position[1] is y-coordinate
+                self.color = COLOUR_HOVER
+                return True # you should be able to safely delete the returns
+        self.color = COLOUR
+        return False # I've only left them in because it may be useful at some later point, or for code refactoring, if such a stage is reached
+    
+    def changeGameState(self, position): # not a very flexible system, but for the limited scope of the game, it'll do
+        if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
+            if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
+                if self.text == "Start":
+                    # This should transition to the character select screen
+                    print("Start game!")
+                else:
+                    # I get some errors, but I doubt they really matter. If you want to look into it, you're more than welcome
+                    # Anyway, importantly, the exit button works (i.e. exits the game)
+                    pygame.quit()
 
 
 if __name__ == "__main__":
