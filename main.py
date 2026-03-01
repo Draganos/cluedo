@@ -40,10 +40,19 @@ class Board:
     def move_character_to_square(self, character, position):
         """Move a character to a valid square"""
 
-    def add_character_to_room(self, character):
+    def add_character_to_room(self, character, room):
         """Add a character into a room"""
         if character.room:
-            character.room.characters.append(character)
+            character.room.characters.remove(character)
+        character.room = room
+        room.characters.append(character)
+
+    def add_weapon_to_room(self, weapon, room):
+        """Add a weapon into a room"""
+        if weapon.room:
+            weapon.room.weapons.remove(weapon)
+        weapon.room = room
+        room.weapons.append(weapon)
 
     def list_rooms(self):
         """List all the rooms"""
@@ -53,9 +62,6 @@ class Board:
 
     def move_weapon_between_room(self,new_room_name):
         """Move weapon from the current room to the new room"""
-
-    def place_weapon_in_room(self, weapon, room_name):
-        """Place a weapon in a room"""
 
     def list_weapons_in_room(self, room_name):
         """List all weapons in a given room"""
@@ -115,8 +121,10 @@ class Player:
     def __init__(self, isCPU=False, character=None):
         self.isCPU = isCPU #set to none if not user.
         self.character = character
+        self.hand = []
 
 #Initializing the game
+
 #Create 6 character objects and store them in a list
 scarlet = Character("Scarlet")
 plum = Character("Plum")
@@ -131,7 +139,7 @@ characters = [scarlet,
               green,
               white]
 
-#Create 9 room assets and the weapon assets and store them in a list
+#Create 9 room assets and store them in a list
 study = Room("Study")
 hall = Room("Hall")
 lounge = Room("Lounge")
@@ -150,6 +158,8 @@ rooms = [study,
          conservatory,
          ballroom,
          kitchen]
+
+# Create 9 weapon assets and store them in a list
 candlestick = Weapon("Candlestick")
 knife = Weapon("Knife")
 revolver = Weapon("Revolver")
@@ -163,17 +173,12 @@ weapons = [candlestick,
            lead_pipe,
            wrench]
 
-#User must pick character before all below, take the input and then assign below
-#Take input from user
-#Assign Character to user, set all else characters to CPU, set is_murderer to True
-#Assign Here pls whit
-
 # Show the character list to the human player
 print("Choose your character:")
 for i, char in enumerate(characters):
     print(f"{i + 1}. {char.name}")
 
-# Take user input (also handles checks)
+# Take user input
 while True:
     try:
         choice = int(input("Enter the number of your character: ")) - 1
@@ -187,29 +192,47 @@ while True:
 
 # Assign chosen character to human player
 player = Player(isCPU = False, character = user_character)
-print(f"You've picked {user_character.name} as your character!")
+print(f"\nYou've picked {user_character.name} as your character!\n")
 
-# Assign the other characters to CPUs
+# Assign the other characters to CPU players
 cpu_players = []
 for character in characters:
     if character != user_character:
         cpu_players.append(Player(isCPU = True, character = character))
 
-# create an envelope object and randomly generate a character, weapon and room
+# Create an envelope object
 envelope = Envelope()
+
+# Envelope randomly picks a character, weapon and room from list
 envelope.set_envelope(
     random.choice(characters),
     random.choice(weapons),
     random.choice(rooms)
 )
-# Show the contents inside the envelope (character, weapon and room)
+
+# Show envelope contents
 envelope.show_contents()
 
-# Assign every character to a random room
+# Create the board object
 board = Board(rooms)
-for character in characters:
-    random_room = random.choice(rooms)
-    character.move_to_room(random_room)
-    board.add_character_to_room(character)
 
-#Add for later: User to see if his role is murderer or other role.
+# Randomly shuffle characters and weapons
+random.shuffle(characters)
+random.shuffle(weapons)
+
+# Randomly select 6 rooms for the characters
+character_rooms = random.sample(rooms, len(characters))
+for char, room in zip(characters, character_rooms):
+    board.add_character_to_room(char, room)
+
+# Randomly select 6 rooms for the weapons
+weapon_rooms = random.sample(rooms, len(weapons))
+for weapon, room in zip(weapons, weapon_rooms):
+    board.add_weapon_to_room(weapon, room)
+
+# Print board state (FOR DEBUGGING PURPOSES ONLY)
+print("\nBoard state after randomisation:")
+for room in rooms:
+    character_names = [c.name for c in room.characters] if room.characters else ["None"]
+    weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
+    print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
