@@ -123,6 +123,11 @@ class Player:
         self.character = character
         self.hand = []
 
+    def show_hand(self):
+        """Show all the character's hand"""
+        return [c.name if isinstance(c, Character) or isinstance(c, Room)
+                else c.item_name for c in self.hand]
+
 #Initializing the game
 
 #Create 6 character objects and store them in a list
@@ -203,14 +208,14 @@ for character in characters:
 # Create an envelope object
 envelope = Envelope()
 
-# Envelope randomly picks a character, weapon and room from list
+# Envelope picks a character, weapon and room from list
 envelope.set_envelope(
     random.choice(characters),
     random.choice(weapons),
     random.choice(rooms)
 )
 
-# Show envelope contents
+# Show the envelope contents
 envelope.show_contents()
 
 # Create the board object
@@ -236,3 +241,33 @@ for room in rooms:
     character_names = [c.name for c in room.characters] if room.characters else ["None"]
     weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
     print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
+
+# Keep track of the remaining cards excluding the ones envelope picked
+remaining_characters = [c for c in characters if c != envelope.character]
+remaining_weapons = [w for w in weapons if w != envelope.weapon]
+remaining_rooms = [r for r in rooms if r != envelope.room]
+
+#Create the deck of cards
+deck = remaining_characters + remaining_weapons + remaining_rooms
+
+# Shuffle the deck
+random.shuffle(deck)
+
+# Combine player and cpu_players
+all_players = [player] + cpu_players
+
+# For loop to deal cards to human player and CPU players
+for i, card in enumerate(deck):
+    all_players[i % len(all_players)].hand.append(card)
+
+# For each player, show their cards (DEBUGGING PURPOSES ONLY)
+print("Dealing cards to players\n")
+for pl in all_players:
+    hand_cards = [c.name if isinstance(c, Character)
+                  else c.item_name if isinstance(c, Weapon)
+                  else c.name for c in pl.hand]
+    player_type = "CPU" if pl.isCPU else "Human"
+    print(f"{player_type} ({pl.character.name}) hand: {hand_cards}")
+
+
+
