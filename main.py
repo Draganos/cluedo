@@ -258,7 +258,7 @@ for r in rooms:
     if r not in remaining_rooms:
         remaining_rooms.append(r)
 
-#Combine all remaining cards into a single deck
+#Combine remaining cards into a single deck
 deck = remaining_characters + remaining_weapons + remaining_rooms
 
 # Shuffle the deck
