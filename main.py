@@ -271,7 +271,7 @@ all_players = [player] + cpu_players
 for i, card in enumerate(deck):
     all_players[i % len(all_players)].hand.append(card)
 
-# For each player, show their cards (DEBUGGING PURPOSES ONLY)
+# Show each player's cards (DEBUGGING PURPOSES ONLY)
 print("Dealing cards to players\n")
 for pl in all_players:
     hand_cards = [c.name if isinstance(c, Character)
