@@ -1,6 +1,8 @@
 import pygame
 
-#
+
+#This file contains both the Board game screen and the title screen.
+
 #Constants, OFFSET X, Y and TILE_SIZE determine the grid layout.
 SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
@@ -83,9 +85,12 @@ class Game:
                 if event.key == pygame.K_LEFT:  self.player.move(-1, 0)
                 if event.key == pygame.K_RIGHT: self.player.move(1, 0)
 
-            # if the menu screen is not null (or None in python's case) and a mouse click is detected, it will run the buttonAction() func
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
-                self.menu.buttonAction(self.mouse)
+                # Catch the action
+                action = self.menu.buttonAction(self.mouse)
+                # If the action is START, get rid of the menu
+                if action == "START":
+                    self.menu = None
 
 
     def run(self):
@@ -95,10 +100,14 @@ class Game:
             self.mouse = pygame.mouse.get_pos()
             # Renders the game.
             self.screen.fill((0, 0, 0))
-            self.menu.draw(self.screen, self.mouse)
-            # I've commented the two lines below out for the time being just to test the menu; change as you see fit
-            #self.board.draw(self.screen)
-            #self.player.draw(self.screen)
+
+
+            if self.menu is not None:
+                self.menu.draw(self.screen, self.mouse)
+            else:
+                self.board.draw(self.screen)
+                self.player.draw(self.screen)
+
             pygame.display.flip()
         pygame.quit()
 
@@ -130,11 +139,12 @@ class Menu:
         self.exit_btn = MenuButton(COLOUR, self.width//2 - 70, self.height//2 + 60, 140, 60, "Exit")
 
     def buttonAction(self, mouse):
-        # since there's only two buttons on the menu, it simply calls the changeGameState() function for both buttons independently
-        self.start_btn.changeGameState(mouse)
-        self.exit_btn.changeGameState(mouse)
-        # there ARE cleaner ways, but this is good enough. If it works, right?
+        start_action = self.start_btn.changeGameState(mouse)
+        exit_action = self.exit_btn.changeGameState(mouse)
+        if start_action == "START":
+            return "START"
 
+        return None
 
     def draw(self, surface, mouse):
         # Gets mouse pos (taken as parameter)
@@ -166,8 +176,7 @@ class MenuButton:
         # draw the button as a rectangle
         pygame.draw.rect(surface, self.color, (self.pos_x, self.pos_y, self.width, self.height), 0)
 
-        # styles the text with a font
-        # obviously, the only font to use in such a situation is papyrus
+    
         if self.text != '': #checks text isn't empty
             font = pygame.font.SysFont("papyrus", 30)
             text = font.render(self.text, 1, "#FFFFFF")
@@ -188,10 +197,14 @@ class MenuButton:
                 if self.text == "Start":
                     # This should transition to the character select screen
                     print("Start game!")
+                    from PickYourCharacter import MainMenu2
+                    char_menu = MainMenu2()
+                    char_menu.run()
+                    return"START"
                 else:
-                    # I get some errors, but I doubt they really matter. If you want to look into it, you're more than welcome
                     # Anyway, importantly, the exit button works (i.e. exits the game)
                     pygame.quit()
+        return None
 
 
 if __name__ == "__main__":
