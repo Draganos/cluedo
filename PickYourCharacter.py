@@ -7,14 +7,11 @@ class MainMenu2:
     def __init__(self):
         #Initialization, Screen set up, variables.
         pygame.init()
-
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
         win_height = self.board.height
-
         self.screen = pygame.display.set_mode((win_width, win_height))
         pygame.display.set_caption("Clue!")
-
         self.title_img = None
         self.title_position = (150, 85)
         self.loaded_characters = []
@@ -23,6 +20,7 @@ class MainMenu2:
             (250, 450), (450, 450), (650, 450)
         ]
 
+        self.character_rects = []
         # Calls load function
         self.load_assets()
 
@@ -44,23 +42,36 @@ class MainMenu2:
             "Rev Green.png"
         ]
 
-        for name in character_names:
-            # Path for loading
+        #Finds cards folder, loads and resizes it, then stores it as self.loaded_characters
+        for i, name in enumerate(character_names):
             img_path = os.path.join(script_dir, "Cards", name)
 
-            #Draws the characters on the screen.
             img = pygame.image.load(img_path).convert_alpha()
             img = pygame.transform.scale(img, (120, 120))
+
             self.loaded_characters.append(img)
+
+            #hitbox for mouseHover
+            rect = img.get_rect(topleft=self.positions[i])
+            self.character_rects.append(rect)
+
 
     def draw(self):
           #Fills the screen with color and the title screen.
         self.screen.fill((35, 45, 60))
         self.screen.blit(self.title_img, self.title_position)
-         #Loads the characters onto the screen at the coordinated positins
+        hovered_rect = self.mouseHover()
+
+         #Loads the characters onto the screen at the coordinated positions
         for i in range(len(self.loaded_characters)):
-            self.screen.blit(self.loaded_characters[i], self.positions[i])
+            self.screen.blit(self.loaded_characters[i], self.character_rects[i])
+
+            if hovered_rect == self.character_rects[i]:
+             pygame.draw.rect(self.screen, (0,0,0), self.character_rects[i], 3)
+
+
         pygame.display.flip()
+
 
     def run(self):
         #Game Loop
@@ -72,8 +83,18 @@ class MainMenu2:
             self.draw()
         pygame.quit()
 
+    #Checks to see if mouse is hovering over character cards.
+    def mouseHover(self):
+        mouse_pos = pygame.mouse.get_pos()
+
+        for rect in self.character_rects:
+            if rect.collidepoint(mouse_pos):
+                return rect
+        return None
+
+
+
 #It prevents your game menu from accidentally launching if you try to import it into another file.
 if __name__ == "__main__":
     menu = MainMenu2()
     menu.run()
-
