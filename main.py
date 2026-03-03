@@ -208,7 +208,7 @@ for character in characters:
 # Create an envelope object
 envelope = Envelope()
 
-# Envelope picks a character, weapon and room from list
+# Envelope randomly picks the solution
 envelope.set_envelope(
     random.choice(characters),
     random.choice(weapons),
