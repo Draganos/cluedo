@@ -245,17 +245,17 @@ for room in rooms:
 # Initialise list, loop through each card and add those not in envelope
 remaining_characters = []
 for c in characters:
-    if c not in envelope.character:
+    if c != envelope.character:
         remaining_characters.append(c)
 
 remaining_weapons = []
 for w in weapons:
-    if w not in envelope.weapon:
+    if w != envelope.weapon:
         remaining_weapons.append(w)
 
 remaining_rooms = []
 for r in rooms:
-    if r not in remaining_rooms:
+    if r != envelope.room:
         remaining_rooms.append(r)
 
 #Combine remaining cards into a single deck
