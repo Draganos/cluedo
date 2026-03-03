@@ -10,7 +10,7 @@ class MainMenu2:
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
         win_height = self.board.height
-        self.screen = pygame.display.set_mode((win_width, win_height))
+        self.screen = pygame.display.get_surface()
         pygame.display.set_caption("Clue!")
         self.title_img = None
         self.title_position = (150, 85)
@@ -80,8 +80,13 @@ class MainMenu2:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                 clicked_rect = self.mouseHover()
+                 if clicked_rect is not None:
+                    print("Character Selected!... Moving to board!")
+                    running = False
             self.draw()
-        pygame.quit()
 
     #Checks to see if mouse is hovering over character cards.
     def mouseHover(self):
@@ -98,3 +103,4 @@ class MainMenu2:
 if __name__ == "__main__":
     menu = MainMenu2()
     menu.run()
+
