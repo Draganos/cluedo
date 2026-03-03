@@ -225,12 +225,12 @@ board = Board(rooms)
 random.shuffle(characters)
 random.shuffle(weapons)
 
-# Randomly select 6 rooms for the characters
+# Randomly places the characters in 6 rooms
 character_rooms = random.sample(rooms, len(characters))
 for char, room in zip(characters, character_rooms):
     board.add_character_to_room(char, room)
 
-# Randomly select 6 rooms for the weapons
+# Randomly places the weapons in 6 rooms
 weapon_rooms = random.sample(rooms, len(weapons))
 for weapon, room in zip(weapons, weapon_rooms):
     board.add_weapon_to_room(weapon, room)
