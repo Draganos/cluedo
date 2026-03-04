@@ -149,7 +149,7 @@ study = Room("Study")
 hall = Room("Hall")
 lounge = Room("Lounge")
 library = Room("Library")
-billard_room = Room("Billard Room")
+billiard_room = Room("Billiard Room")
 dining_room = Room("Dining Room")
 conservatory = Room("Conservatory")
 ballroom = Room("Ballroom")
@@ -158,7 +158,7 @@ rooms = [study,
          hall,
          lounge,
          library,
-         billard_room,
+         billiard_room,
          dining_room,
          conservatory,
          ballroom,
