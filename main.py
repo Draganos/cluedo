@@ -123,6 +123,11 @@ class Player:
         self.character = character
         self.hand = []
 
+    def show_hand(self):
+        """Show all the character's hand"""
+        return [c.name if isinstance(c, Character) or isinstance(c, Room)
+                else c.item_name for c in self.hand]
+
 #Initializing the game
 
 #Create 6 character objects and store them in a list
@@ -203,14 +208,14 @@ for character in characters:
 # Create an envelope object
 envelope = Envelope()
 
-# Envelope randomly picks a character, weapon and room from list
+# Envelope randomly picks the solution
 envelope.set_envelope(
     random.choice(characters),
     random.choice(weapons),
     random.choice(rooms)
 )
 
-# Show envelope contents
+# Show the envelope contents
 envelope.show_contents()
 
 # Create the board object
@@ -220,12 +225,12 @@ board = Board(rooms)
 random.shuffle(characters)
 random.shuffle(weapons)
 
-# Randomly select 6 rooms for the characters
+# Randomly places the characters in 6 rooms
 character_rooms = random.sample(rooms, len(characters))
 for char, room in zip(characters, character_rooms):
     board.add_character_to_room(char, room)
 
-# Randomly select 6 rooms for the weapons
+# Randomly places the weapons in 6 rooms
 weapon_rooms = random.sample(rooms, len(weapons))
 for weapon, room in zip(weapons, weapon_rooms):
     board.add_weapon_to_room(weapon, room)
@@ -236,3 +241,44 @@ for room in rooms:
     character_names = [c.name for c in room.characters] if room.characters else ["None"]
     weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
     print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
+
+# Initialise list, loop through each card and add those not in envelope
+remaining_characters = []
+for c in characters:
+    if c != envelope.character:
+        remaining_characters.append(c)
+
+remaining_weapons = []
+for w in weapons:
+    if w != envelope.weapon:
+        remaining_weapons.append(w)
+
+remaining_rooms = []
+for r in rooms:
+    if r != envelope.room:
+        remaining_rooms.append(r)
+
+#Combine remaining cards into a single deck
+deck = remaining_characters + remaining_weapons + remaining_rooms
+
+# Shuffle the deck
+random.shuffle(deck)
+
+# Combine player and CPU players
+all_players = [player] + cpu_players
+
+# For loop to deal cards to human player and CPU players
+for i, card in enumerate(deck):
+    all_players[i % len(all_players)].hand.append(card)
+
+# Show each player's cards (DEBUGGING PURPOSES ONLY)
+print("Dealing cards to players\n")
+for pl in all_players:
+    hand_cards = [c.name if isinstance(c, Character)
+                  else c.item_name if isinstance(c, Weapon)
+                  else c.name for c in pl.hand]
+    player_type = "CPU" if pl.isCPU else "Human"
+    print(f"{player_type} ({pl.character.name}) hand: {hand_cards}")
+
+
+
