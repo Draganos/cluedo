@@ -128,7 +128,7 @@ class Player:
         return [c.name if isinstance(c, Character) or isinstance(c, Room)
                 else c.item_name for c in self.hand]
 
-#Initializing the game
+# Game initialisation
 
 #Create 6 character objects and store them in a list
 scarlet = Character("Scarlet")
