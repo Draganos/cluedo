@@ -50,6 +50,7 @@ class Board:
         # Draw the sheet to the right of the board
         surface.blit(self.sheet, (self.width, 0))
 
+        # I've also commented out these lines for the sake of menu viewing.
         # Visual Debug: To see the grid lines.
         #for r in range(25):
             #for c in range(24):
