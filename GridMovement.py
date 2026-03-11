@@ -68,6 +68,9 @@ class Game:
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height))
         self.menu = Menu()
+        # creates dice for dice class
+        self.dice = Dice(self.board.width//2 - 60, self.board.height//1.25)
+        self.dice_rect = self.dice.rect
         #Determines where the player starts and color.
         self.player = Player(11, 11, (255, 0, 0))  # Red player
         self.running = True
@@ -92,6 +95,11 @@ class Game:
                 # If the action is START, get rid of the menu
                 if action == "START":
                     self.menu = None
+            
+            if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
+                print("Dice has been rolled with mouse.")
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE: print("Dice has been rolled with spacebar.")
 
 
     def run(self):
@@ -103,14 +111,43 @@ class Game:
             self.screen.fill((0, 0, 0))
 
 
-            if self.menu is not None:
+            if self.menu is not None: #checking if we are on menu screen or board screen
                 self.menu.draw(self.screen, self.mouse)
             else:
                 self.board.draw(self.screen)
                 self.player.draw(self.screen)
-
+                self.dice.draw(self.screen, self.mouse)
             pygame.display.flip()
         pygame.quit()
+
+class Dice:
+    # Should (ideally) have both mouse and keyboard functionality.
+    def __init__(self, x, y):
+        # getting positions for later when drawing
+        self.x = x
+        self.y = y
+        # load dice image
+        self.image = pygame.image.load('Assets/dice.png')
+        # width and height
+        self.width = self.image.get_width()//4
+        self.height = self.image.get_height()//4
+        # scales image
+        self.image = pygame.transform.smoothscale(self.image, (self.width, self.height))
+        self.image_copy = self.image.copy() # a copy that has transparency
+        self.image_copy.set_alpha(150)
+        #create a rect that matches the size of the image
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+    
+    def draw(self, surface, mouse):
+        # gets mouse position 
+        self.mouse = mouse
+        # uses mouse position to change transparency (on hover or no)
+        if self.rect.collidepoint(mouse): # once rounds are introduced, add an extra check to make sure it is the player's turn
+            # in fiddling about with pygame and tutorials, this collidepoint/rect thing seemed much cleaner a solution than nested ifs
+            # with that said, I have no intention of refactoring the other button
+            surface.blit(self.image, (self.x, self.y))
+        else:
+            surface.blit(self.image_copy, (self.x, self.y))
 
 class Menu:
     def __init__(self):
