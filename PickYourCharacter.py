@@ -43,7 +43,7 @@ class MainMenu2:
         ]
 
         #Finds cards folder, loads and resizes it, then stores it as self.loaded_characters
-        for i, name in enumerate(character_names):
+        for i, name in enumerate(self.character_names):
             img_path = os.path.join(script_dir, "Cards", name)
 
             img = pygame.image.load(img_path).convert_alpha()
