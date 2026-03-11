@@ -33,7 +33,7 @@ class MainMenu2:
         self.title_img = pygame.image.load(title_path).convert_alpha()
 
         # Load Characters
-        character_names = [
+        self.character_names = [
             "Col Mustard.png",
             "MissScarlett.svg",
             "MrsWhite.svg",
@@ -75,6 +75,7 @@ class MainMenu2:
 
     def run(self):
         #Game Loop
+        self.selected_character = None
         running = True
         while running:
             for event in pygame.event.get():
@@ -84,9 +85,17 @@ class MainMenu2:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                  clicked_rect = self.mouseHover()
                  if clicked_rect is not None:
+                    # Get the index of the clicked rect, self.selected_character is the selected character chosen on main screen.
+                    index = self.character_rects.index(clicked_rect)
+                     
+                    self.selected_character = self.character_names[index]
+                     
                     print("Character Selected!... Moving to board!")
+                     
                     running = False
+                     
             self.draw()
+        return self.selected_character #other code can use selected character
 
     #Checks to see if mouse is hovering over character cards.
     def mouseHover(self):
