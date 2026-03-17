@@ -130,155 +130,104 @@ class Player:
 
 # Game initialisation
 
-#Create 6 character objects and store them in a list
-scarlet = Character("Scarlet")
-plum = Character("Plum")
-mustard = Character("Mustard")
-peacock = Character("Peacock")
-green = Character("Green")
-white = Character("White")
-characters = [scarlet,
-              plum,
-              mustard,
-              peacock,
-              green,
-              white]
+def setup_game(selected_character_name):
+    # Create 6 character objects
+    scarlet = Character("Scarlet")
+    plum = Character("Plum")
+    mustard = Character("Mustard")
+    peacock = Character("Peacock")
+    green = Character("Green")
+    white = Character("White")
+    characters = [scarlet, plum, mustard, peacock, green, white]
 
-#Create 9 room assets and store them in a list
-study = Room("Study")
-hall = Room("Hall")
-lounge = Room("Lounge")
-library = Room("Library")
-billiard_room = Room("Billiard Room")
-dining_room = Room("Dining Room")
-conservatory = Room("Conservatory")
-ballroom = Room("Ballroom")
-kitchen = Room("Kitchen")
-rooms = [study,
-         hall,
-         lounge,
-         library,
-         billiard_room,
-         dining_room,
-         conservatory,
-         ballroom,
-         kitchen]
+    # Create rooms
+    study = Room("Study")
+    hall = Room("Hall")
+    lounge = Room("Lounge")
+    library = Room("Library")
+    billiard_room = Room("Billiard Room")
+    dining_room = Room("Dining Room")
+    conservatory = Room("Conservatory")
+    ballroom = Room("Ballroom")
+    kitchen = Room("Kitchen")
+    rooms = [study, hall, lounge, library, billiard_room, dining_room,
+             conservatory, ballroom, kitchen]
 
-# Create 9 weapon assets and store them in a list
-candlestick = Weapon("Candlestick")
-knife = Weapon("Knife")
-revolver = Weapon("Revolver")
-rope = Weapon("Rope")
-lead_pipe = Weapon("Lead Pipe")
-wrench = Weapon("Wrench")
-weapons = [candlestick,
-           knife,
-           revolver,
-           rope,
-           lead_pipe,
-           wrench]
+    # Create weapons
+    candlestick = Weapon("Candlestick")
+    knife = Weapon("Knife")
+    revolver = Weapon("Revolver")
+    rope = Weapon("Rope")
+    lead_pipe = Weapon("Lead Pipe")
+    wrench = Weapon("Wrench")
+    weapons = [candlestick, knife, revolver, rope, lead_pipe, wrench]
 
-# Show the character list to the human player
-print("Choose your character:")
-for i, char in enumerate(characters):
-    print(f"{i + 1}. {char.name}")
+    # Assign selected character to human player
+    user_character = next(c for c in characters if c.name == selected_character_name)
+    player = Player(isCPU=False, character=user_character)
 
-# Take user input
-while True:
-    try:
-        choice = int(input("Enter the number of your character: ")) - 1
-        if 0 <= choice < len(characters):
-            user_character = characters[choice]
-            break
-        else:
-            print("Invalid number, try again!")
-    except ValueError:
-        print("Please enter a valid number!")
+    # Assign CPU players
+    cpu_players = [Player(isCPU=True, character=c) for c in characters if c != user_character]
+    # Create an envelope object
+    envelope = Envelope()
 
-# Assign chosen character to human player
-player = Player(isCPU = False, character = user_character)
-print(f"\nYou've picked {user_character.name} as your character!\n")
+    # Envelope randomly picks the solution
+    envelope.set_envelope(
+        random.choice(characters),
+        random.choice(weapons),
+        random.choice(rooms)
+    )
 
-# Assign the other characters to CPU players
-cpu_players = []
-for character in characters:
-    if character != user_character:
-        cpu_players.append(Player(isCPU = True, character = character))
+    # Show the envelope contents
+    envelope.show_contents()
 
-# Create an envelope object
-envelope = Envelope()
+    # Create the board object
+    board = Board(rooms)
 
-# Envelope randomly picks the solution
-envelope.set_envelope(
-    random.choice(characters),
-    random.choice(weapons),
-    random.choice(rooms)
-)
+    # Randomly shuffle characters and weapons
+    random.shuffle(characters)
+    random.shuffle(weapons)
 
-# Show the envelope contents
-envelope.show_contents()
+    # Randomly places the characters in 6 rooms
+    character_rooms = random.sample(rooms, len(characters))
+    for char, room in zip(characters, character_rooms):
+        board.add_character_to_room(char, room)
 
-# Create the board object
-board = Board(rooms)
+    # Randomly places the weapons in 6 rooms
+    weapon_rooms = random.sample(rooms, len(weapons))
+    for weapon, room in zip(weapons, weapon_rooms):
+        board.add_weapon_to_room(weapon, room)
 
-# Randomly shuffle characters and weapons
-random.shuffle(characters)
-random.shuffle(weapons)
+    # Initialise list, loop through each card and add those not in envelope
+    remaining_characters = []
+    for c in characters:
+        if c != envelope.character:
+            remaining_characters.append(c)
 
-# Randomly places the characters in 6 rooms
-character_rooms = random.sample(rooms, len(characters))
-for char, room in zip(characters, character_rooms):
-    board.add_character_to_room(char, room)
+    remaining_weapons = []
+    for w in weapons:
+        if w != envelope.weapon:
+            remaining_weapons.append(w)
 
-# Randomly places the weapons in 6 rooms
-weapon_rooms = random.sample(rooms, len(weapons))
-for weapon, room in zip(weapons, weapon_rooms):
-    board.add_weapon_to_room(weapon, room)
+    remaining_rooms = []
+    for r in rooms:
+        if r != envelope.room:
+            remaining_rooms.append(r)
 
-# Print board state (FOR DEBUGGING PURPOSES ONLY)
-print("\nBoard state after randomisation:")
-for room in rooms:
-    character_names = [c.name for c in room.characters] if room.characters else ["None"]
-    weapon_names = [w.item_name for w in room.weapons] if room.weapons else ["None"]
-    print(f"{room.name:<15} | Characters: {character_names} | Weapons: {weapon_names}")
+    #Combine remaining cards into a single deck
+    deck = remaining_characters + remaining_weapons + remaining_rooms
 
-# Initialise list, loop through each card and add those not in envelope
-remaining_characters = []
-for c in characters:
-    if c != envelope.character:
-        remaining_characters.append(c)
+    # Shuffle the deck
+    random.shuffle(deck)
 
-remaining_weapons = []
-for w in weapons:
-    if w != envelope.weapon:
-        remaining_weapons.append(w)
+    # Combine player and CPU players
+    all_players = [player] + cpu_players
 
-remaining_rooms = []
-for r in rooms:
-    if r != envelope.room:
-        remaining_rooms.append(r)
+    # For loop to deal cards to human player and CPU players
+    for i, card in enumerate(deck):
+        all_players[i % len(all_players)].hand.append(card)
 
-#Combine remaining cards into a single deck
-deck = remaining_characters + remaining_weapons + remaining_rooms
-
-# Shuffle the deck
-random.shuffle(deck)
-
-# Combine player and CPU players
-all_players = [player] + cpu_players
-
-# For loop to deal cards to human player and CPU players
-for i, card in enumerate(deck):
-    all_players[i % len(all_players)].hand.append(card)
-
-# Show each player's cards (DEBUGGING PURPOSES ONLY)
-print("Dealing cards to players\n")
-for pl in all_players:
-    hand_cards = [c.name if isinstance(c, Character)
-                  else c.item_name if isinstance(c, Weapon)
-                  else c.name for c in pl.hand]
-    player_type = "CPU" if pl.isCPU else "Human"
-    print(f"{player_type} ({pl.character.name}) hand: {hand_cards}")
+        return player, cpu_players, board, envelope, characters, weapons, rooms
 
 
 
