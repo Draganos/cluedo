@@ -115,7 +115,7 @@ class Game:
         self.envelope = envelope
         self.dice = dice
         self.current_turn = 0
-        #for initializing the game rounds later. 
+        #for initializing the game rounds later.
 
 class Player:
     def __init__(self, isCPU=False, character=None):
