@@ -105,10 +105,10 @@ class Game:
     def run(self):
         while self.running:
             self.handle_events()
-            # Gets mouse position while game running
-            self.mouse = pygame.mouse.get_pos()
             # Renders the game.
             self.screen.fill((0, 0, 0))
+            # Gets mouse position while game running
+            self.mouse = pygame.mouse.get_pos()
 
 
             if self.menu is not None: #checking if we are on menu screen or board screen
