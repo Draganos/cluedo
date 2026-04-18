@@ -20,11 +20,22 @@ class Player:
         self.isCPU = isCPU #set to none if not user.
         self.character = character
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, forbidden_zones):
         #Players Grid Position.
         # Add boundary checks here later
-        self.col += dx
-        self.row += dy
+        new_col = self.col + dx
+        new_row = self.row + dy
+
+        # Forbidden tile Check:
+        if (new_col, new_row) in forbidden_zones:
+            print("Cannot move in there!")
+            return
+
+            # Boundary check (so they don't walk off the screen)
+        if 0 <= new_col < 24 and 0 <= new_row < 25:
+            self.col = new_col
+            self.row = new_row
+
 
     def draw(self, surface):
         #Convert grid position to pixels and draws the player on the grid.
@@ -54,10 +65,10 @@ class Board:
 
         # I've also commented out these lines for the sake of menu viewing.
         # Visual Debug: To see the grid lines.
-        #for r in range(25):
-            #for c in range(24):
-                #rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                #pygame.draw.rect(surface, (255, 0, 0), rect, 1)
+        for r in range(25):
+            for c in range(24):
+                rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                pygame.draw.rect(surface, (255, 0, 0), rect, 1)
 
 
 class Game:
@@ -76,6 +87,79 @@ class Game:
         self.running = True
         #Gets mouse position
         self.mouse = pygame.mouse.get_pos()
+        self.forbidden_tiles = [
+            #These are all the forbidden zones.
+            #Grid is 24x25 ColumnsxRows. starts at 0x0.
+
+            #Study room
+            (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0),
+            (0, 1), (1, 1), (2, 1), (3, 1), (4, 1), (5, 1),
+            (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2),
+            (0, 3), (1, 3), (2, 3), (3, 3), (4, 3), (5, 3),
+            (6, 0), (6, 1), (6, 2), (6, 3),
+
+            #Specific tiles:
+            (0,4), (0,11), (0,17), (6,24), (7,24), (6,23),(16, 24), (17,24 ), (17,23), (23,6),(23,8),
+            (6,7),(6,8),(6,9), (10, 24),(11,24),(12,24),(13,24),(10, 23),(11,23),(12,23),(13,23),
+
+            #STAIRS:
+            (9,8),(9,9),(9,10),(9,11),(10,8),(10,9),(10,10),(10,11),
+            (13, 8), (13, 9), (13, 10), (13, 11),(12,8),(12,9),(12,10),(12,11),
+
+            # LOUNGE
+            (17, 0), (18, 0), (19, 0), (20, 0), (21, 0), (22, 0), (23, 0),
+            (17, 1), (18, 1), (19, 1), (20, 1), (21, 1), (22, 1), (23, 1),
+            (17, 2), (18, 2), (19, 2), (20, 2), (21, 2), (22, 2), (23, 2),
+            (17, 3), (18, 3), (19, 3), (20, 3), (21, 3), (22, 3), (23, 3),
+            (17, 4), (18, 4), (19, 4), (20, 4), (21, 4), (22, 4), (23, 4),
+            (17, 5),(18, 5),(19, 5),(20, 5),(21, 5),(22, 5), (23, 5),
+            (15,0),  (8,0),
+
+            #Specific Dining Room Coordinates
+            (19, 15), (20,15 ), (21,15 ), (22,15 ), (23,15 ), (24,15 ),(24,16), (23,16),
+        ]
+
+        #MIDDLE =
+        for r in range(12,15):
+            for c in range(9,14):
+                self.forbidden_tiles.append((c,r))
+
+        # HALL =
+        for r in range(0, 7):
+            for c in range(9, 15):
+                self.forbidden_tiles.append((c, r))
+
+        # LIBRARY =
+        for r in range(6, 11):
+            for c in range(0, 6):
+                self.forbidden_tiles.append((c, r))
+
+        # CONSERVATORY =
+        for r in range(19, 25):
+            for c in range(0, 6):
+                self.forbidden_tiles.append((c, r))
+
+        #BALLROOM =
+        for r in range(17, 23):
+            for c in range(8, 16):
+                self.forbidden_tiles.append((c, r))
+
+        #KITCHEN =
+        for r in range(18, 25):
+            for c in range(18, 24):
+                self.forbidden_tiles.append((c, r))
+
+        #DINING ROOM =
+        for r in range(9, 15):
+            for c in range(16, 24):
+                self.forbidden_tiles.append((c, r))
+
+
+        #Billiard Room =
+        for r in range(12,17):
+            for c in range(0,6):
+                self.forbidden_tiles.append((c, r))
+
 
     def handle_events(self):
         #checks for actions by the user.
@@ -84,10 +168,10 @@ class Game:
                 self.running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:    self.player.move(0, -1)
-                if event.key == pygame.K_DOWN:  self.player.move(0, 1)
-                if event.key == pygame.K_LEFT:  self.player.move(-1, 0)
-                if event.key == pygame.K_RIGHT: self.player.move(1, 0)
+                if event.key == pygame.K_UP:    self.player.move(0, -1, self.forbidden_tiles)
+                if event.key == pygame.K_DOWN:  self.player.move(0, 1,self.forbidden_tiles)
+                if event.key == pygame.K_LEFT:  self.player.move(-1, 0,self.forbidden_tiles)
+                if event.key == pygame.K_RIGHT: self.player.move(1, 0,self.forbidden_tiles)
 
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
                 # Catch the action
@@ -248,5 +332,7 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
+
+
 
 
