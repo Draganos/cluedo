@@ -26,36 +26,6 @@ class Room:
         self.characters = []
         self.weapons = []
 
-class Board:
-    def __init__(self, rooms):
-        self.rooms = rooms
-        self.characters = []
-        self.weapons = []
-
-    def move_character_to_square(self, character, position):
-        """Move a character to a valid square"""
-
-    def add_character_to_room(self, character, room):
-        """Add a character into a room"""
-
-    def add_weapon_to_room(self, weapon, room):
-        """Add a weapon into a room"""
-
-    def list_rooms(self):
-        """List all the rooms"""
-
-    def list_characters_in_room(self, room_name):
-        """List characters in a given room"""
-
-    def move_weapon_between_room(self, new_room_name):
-        """Move weapon from the current room to the new room"""
-
-    def list_weapons_in_room(self, room_name):
-        """List all weapons in a given room"""
-
-    def get_room(self, room_name):
-        """Return a room object by the given name"""
-
 class Asset:
     def __init__(self, item_name, item_type):
         self.item_name = item_name
@@ -162,3 +132,43 @@ def setup_game(selected_character_name):
 
     print("Game initialised...")
     return player, cpu_players, rooms, weapons, characters, envelope
+
+def suggestion(player, room, characters, weapons, all_players):
+    print(f"\nYou are in {room.name}")
+
+    suspect = random.choice(characters)
+    weapon = random.choice(weapons)
+
+    print(f"Suggestion: {suspect.name} in {room.name} with {weapon.item_name}")
+
+    # Move the suggested suspect into the room
+    suspect.room = room
+    start_index = all_players.index(player)
+
+    for i in range(1, len(all_players)):
+        other = all_players[(start_index + i) % len(all_players)]
+
+        # Find matching cards
+        matches = []
+        for card in other.hand:
+            if isinstance(card, Character) and card.name == suspect.name:
+                matches.append(card)
+            elif isinstance(card, Weapon) and card.item_name == weapon.item_name:
+                matches.append(card)
+            elif isinstance(card, Room) and card.name == room.name:
+                matches.append(card)
+        if matches:
+            shown = random.choice(matches)
+            print(f"{other.character.name} shows you a card.")
+
+            return shown
+    print("No player could show you a card.")
+    return None
+
+if __name__ == "__main__":
+    selected_character = "Scarlet"
+    player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_character)
+    all_players = [player] + cpu_players
+    test_room = rooms[0]
+    suggestion(player, test_room, characters, weapons, all_players)
+
