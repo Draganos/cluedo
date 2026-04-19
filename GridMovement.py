@@ -19,6 +19,7 @@ class Player:
         self.color = color
         self.isCPU = isCPU #set to none if not user.
         self.character = character
+        self.hand = []
 
     def move(self, dx, dy, forbidden_zones):
         #Players Grid Position.
