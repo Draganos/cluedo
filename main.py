@@ -1,5 +1,4 @@
 import random
-from GridMovement import Player as BoardPlayer
 
 class Character:
     def __init__(self, name):
@@ -7,18 +6,6 @@ class Character:
         self.room = None  # applied in randomizer if murderer
         self.weapon = None  # applied in randomizer if murderer
         self.position = None  # coordinates or board indexes can be added later with sese coordination
-
-    def move_to_room(self, room):
-        """Move a character to a room"""
-
-    def is_in_room(self, room):
-        """Return true if a character is in a room, false otherwise"""
-
-    def setposition(self, position):
-        self.position = position
-
-    def describe_state(self):
-        """Describe a character's state"""
 
 class Room:
     def __init__(self, name):
@@ -63,7 +50,6 @@ class Game:
         self.envelope = envelope
         self.dice = dice
         self.current_turn = 0
-        # for initializing the game rounds later.
 
 class Player:
     def __init__(self, isCPU=False, character=None):
@@ -106,7 +92,7 @@ def setup_game(selected_character_name):
 
     # Assign human player and CPU players
     user_character = next(c for c in characters if c.name == selected_character_name)
-    player = BoardPlayer(isCPU=False, character=user_character)
+    player = Player(isCPU=False, character=user_character)
     cpu_players = [Player(isCPU=True, character=c) for c in characters if c != user_character]
 
     # Create the envelope
@@ -164,11 +150,4 @@ def suggestion(player, room, characters, weapons, all_players):
             return shown
     print("No player could show you a card.")
     return None
-
-if __name__ == "__main__":
-    selected_character = "Scarlet"
-    player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_character)
-    all_players = [player] + cpu_players
-    test_room = rooms[0]
-    suggestion(player, test_room, characters, weapons, all_players)
 
