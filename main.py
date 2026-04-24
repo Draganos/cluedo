@@ -93,7 +93,6 @@ def setup_game(selected_character_name):
     # Assign human player and CPU players
     user_character = next(c for c in characters if c.name == selected_character_name)
     player = Player(isCPU=False, character=user_character)
-    player = Player(isCPU=False, character=user_character)
     cpu_players = [Player(isCPU=True, character=c) for c in characters if c != user_character]
 
     # Create the envelope
@@ -121,19 +120,21 @@ def setup_game(selected_character_name):
     return player, cpu_players, rooms, weapons, characters, envelope
 
 def suggestion(player, room, characters, weapons, all_players):
-    print(f"\nYou are in {room.name}")
+    print(f"\nYou are {player.character.name} in {room.name}")
 
-    suspect = random.choice(characters)
+    suspect = random.choice(list(set(characters)-set(eliminated)))
     weapon = random.choice(weapons)
 
     print(f"Suggestion: {suspect.name} in {room.name} with {weapon.item_name}")
 
+    active_players = list(set(all_players)-set(eliminated))
+
     # Move the suggested suspect into the room
     suspect.room = room
-    start_index = all_players.index(player)
+    start_index = active_players.index(player)
 
-    for i in range(1, len(all_players)):
-        other = all_players[(start_index + i) % len(all_players)]
+    for i in range(1, len(all_players)-len(eliminated)):
+        other = active_players[(start_index + i) % len(active_players)]
 
         # Find matching cards
         matches = []
@@ -152,26 +153,59 @@ def suggestion(player, room, characters, weapons, all_players):
     print("No player could show you a card.")
     return None
 
-def round(player, room, characters, weapons, all_players):
-    # TODO - round initialisation, ideally functions in the game loop but main itself does not loop
-    # Should be called with each new round (a round is considered complete once all players have taken a turn)
-    # could also potentially be a class (with turn as a function/subroutine) but that's long
-    # for i in queue { call turn(i) }
-    # when receiving some special note, queue is updated
-    return None
+""" Should be called with each new round (a round is considered complete once all players have taken a turn)
+    - returns boolean (False means game ends) and queue (turn order of all non-eliminated players)"""
+def round(queue, room, characters, weapons, all_players):
 
+    print("Round start")
+    # this function makes the assumption that it is called repeatedely in the game loop, which is effectively a while True loop
+    if len(all_players) > (len(eliminated)-3):
+        player_turn = queue[0]
+        queue = turn(queue[0], room, characters, weapons, all_players)
+        if player_turn in queue:
+            popped = queue.pop(0)
+            queue.append(popped)
+    else:
+        print("Winner is", list(set(all_players)-set(eliminated))[0].character.name)
+        return False, queue
+    return True, queue
+
+"""This is a player's turn (NOT A ROUND)
+    - variable 'player' should receive whatever correct player is needed for their turn
+    - player turn consists of 1) dice roll, 2) suggestion (already done), 3) end turn OR accusation
+    - if turn ends with accusation and accusation FALSE, removes the player from the queue
+    - returns array of Player objects, all_players """
 def turn(player, room, characters, weapons, all_players):
-    # TODO
-    # This is a player's turn (NOT A ROUND)
-    # variable 'player' should receive whatever correct player is needed for their turn
-    # player turn consists of 1) dice roll, 2) suggestion (already done), 3) end turn OR accusation
-    # if turn ends with accusation and accusation FALSE, return some special note that removes the player from the queue
-    return None
+    if player not in eliminated:
+        # roll_dice(player)
+        suggestion(player, room, characters, weapons, all_players)
+        
+        # end/accusation
+        print("\nDebug notes: Accusation is not yet implemented, selecting accusation will end turn, but remove player from queue.\n")
+        receive = input("End turn or make accusation? (Type 'End' to end turn, 'Accuse' to make accusation, case-insensitive).")
+        if receive.lower() == "end":
+            print("Ended turn.")
+        else:
+            print("Made an accusation.")
+            # accusation(player, all_players)
+            # currently, the code makes the default assumption that all accusations are incorrect
+            eliminated.append(player)
+            #debug_elim = []
+            #for i in eliminated:
+            #    debug_elim.append(i.character.name)
+            #print(debug_elim)
+            all_players.remove(player)
+
+    return all_players
 
 if __name__ == "__main__":
     selected_character = "Scarlet"
     player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_character)
     all_players = [player] + cpu_players
+    queue = all_players 
+    eliminated = [] # keeps track of eliminated player objects
     test_room = rooms[0]
-    suggestion(player, test_room, characters, weapons, all_players)
-
+    #suggestion(player, test_room, characters, weapons, all_players)
+    game = True
+    while (game): # simulate game loop
+        game, queue = round(queue, test_room, characters, weapons, all_players)
