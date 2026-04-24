@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from main import setup_game #for linking gridcontroller
 
@@ -220,9 +222,16 @@ class Game:
                     print("the game is fully initialised.")
             
             if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
-                print("Dice has been rolled with mouse.")
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE: print("Dice has been rolled with spacebar.")
+                print("Dice has been rolled with mouse.") #debugging
+                if self.activegame:
+                    self.moves_left = random.randint(1, 6)
+                    print(f"Rolled: {self.moves_left}")
+            if event.type == pygame.KEYDOWN: 
+                if event.key == pygame.K_SPACE:
+                    print("Dice has been rolled with spacebar.")
+                    if self.activegame:
+                        self.moves_left = random.randint(1, 6)
+                        print(f"Rolled: {self.moves_left}")
 
 
     def run(self):
