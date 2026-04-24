@@ -93,6 +93,7 @@ def setup_game(selected_character_name):
     # Assign human player and CPU players
     user_character = next(c for c in characters if c.name == selected_character_name)
     player = Player(isCPU=False, character=user_character)
+    player = Player(isCPU=False, character=user_character)
     cpu_players = [Player(isCPU=True, character=c) for c in characters if c != user_character]
 
     # Create the envelope
@@ -150,4 +151,27 @@ def suggestion(player, room, characters, weapons, all_players):
             return shown
     print("No player could show you a card.")
     return None
+
+def round(player, room, characters, weapons, all_players):
+    # TODO - round initialisation, ideally functions in the game loop but main itself does not loop
+    # Should be called with each new round (a round is considered complete once all players have taken a turn)
+    # could also potentially be a class (with turn as a function/subroutine) but that's long
+    # for i in queue { call turn(i) }
+    # when receiving some special note, queue is updated
+    return None
+
+def turn(player, room, characters, weapons, all_players):
+    # TODO
+    # This is a player's turn (NOT A ROUND)
+    # variable 'player' should receive whatever correct player is needed for their turn
+    # player turn consists of 1) dice roll, 2) suggestion (already done), 3) end turn OR accusation
+    # if turn ends with accusation and accusation FALSE, return some special note that removes the player from the queue
+    return None
+
+if __name__ == "__main__":
+    selected_character = "Scarlet"
+    player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_character)
+    all_players = [player] + cpu_players
+    test_room = rooms[0]
+    suggestion(player, test_room, characters, weapons, all_players)
 
