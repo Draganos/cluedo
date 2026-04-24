@@ -1,5 +1,5 @@
 import pygame
-
+from main import setup_game #for linking gridcontroller
 
 #This file contains both the Board game screen and the title screen.
 
@@ -88,6 +88,17 @@ class Game:
         self.running = True
         #Gets mouse position
         self.mouse = pygame.mouse.get_pos()
+
+        ###storing game state variables for gamecontroller
+        self.activegame = False
+        self.currentplayer = None
+        self.otherplayers = []
+        self.rooms = []
+        self.weapons = []
+        self.characters = []
+        self.envelope = None
+        self.moves_left = 0
+
         self.forbidden_tiles = [
             #These are all the forbidden zones.
             #Grid is 24x25 ColumnsxRows. starts at 0x0.
