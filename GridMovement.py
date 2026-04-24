@@ -101,6 +101,11 @@ class Game:
         self.envelope = None
         self.moves_left = 0
 
+        ###TURN TRACKING VARIABLES
+        self.turn_index = 0
+        self.all_players = []
+        self.turn_phase = "ROLL"  # ROLL → MOVE → END
+
         self.forbidden_tiles = [
             #These are all the forbidden zones.
             #Grid is 24x25 ColumnsxRows. starts at 0x0.
@@ -212,6 +217,8 @@ class Game:
                     player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_name)
                     self.currentplayer = player
                     self.otherplayers = cpu_players
+                    self.all_players = [self.currentplayer] + self.otherplayers ###for turn system
+                    self.turn_index = 0 ###turn index
                     self.rooms = rooms
                     self.weapons = weapons
                     self.characters = characters
@@ -226,7 +233,7 @@ class Game:
                 if self.activegame:
                     self.moves_left = random.randint(1, 6)
                     print(f"Rolled: {self.moves_left}")
-            if event.type == pygame.KEYDOWN: 
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     print("Dice has been rolled with spacebar.")
                     if self.activegame:
@@ -234,6 +241,9 @@ class Game:
                         print(f"Rolled: {self.moves_left}")
 
 
+    def get_active_player(self): ###for turn system
+        return self.all_players[self.turn_index]
+    #PAUSED AT STEP FOUR.
     def run(self):
         while self.running:
             self.handle_events()
