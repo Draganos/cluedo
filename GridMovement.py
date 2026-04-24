@@ -188,9 +188,36 @@ class Game:
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
                 # Catch the action
                 action = self.menu.buttonAction(self.mouse)
+                print("menu action = ", action) #for debugging in console
                 # If the action is START, get rid of the menu
-                if action == "START":
+                if action is not None:
+                    selected_name = action
+                    # Extract proper character name
+                    if "Mustard" in selected_name:
+                        selected_name = "Mustard"
+                    elif "Scarlet" in selected_name:
+                        selected_name = "Scarlet"
+                    elif "White" in selected_name:
+                        selected_name = "White"
+                    elif "Peacock" in selected_name:
+                        selected_name = "Peacock"
+                    elif "Plum" in selected_name:
+                        selected_name = "Plum"
+                    elif "Green" in selected_name:
+                        selected_name = "Green"
+
+                    #initializing game logic ABDULLAHMODIFIED
+                    player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_name)
+                    self.currentplayer = player
+                    self.otherplayers = cpu_players
+                    self.rooms = rooms
+                    self.weapons = weapons
+                    self.characters = characters
+                    self.envelope = envelope
+                    self.player.character = self.currentplayer.character                     #this links visual player to logic of the character
+                    self.activegame = True
                     self.menu = None
+                    print("the game is fully initialised.")
             
             if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
                 print("Dice has been rolled with mouse.")
@@ -275,8 +302,8 @@ class Menu:
     def buttonAction(self, mouse):
         start_action = self.start_btn.changeGameState(mouse)
         exit_action = self.exit_btn.changeGameState(mouse)
-        if start_action == "START":
-            return "START"
+        if start_action is not None: #start button returns character selected
+            return start_action
 
         return None
 
@@ -333,8 +360,8 @@ class MenuButton:
                     print("Start game!")
                     from PickYourCharacter import MainMenu2
                     char_menu = MainMenu2()
-                    char_menu.run()
-                    return"START"
+                    selectedchar = char_menu.run()
+                    return selectedchar
                 else:
                     # Anyway, importantly, the exit button works (i.e. exits the game)
                     pygame.quit()
