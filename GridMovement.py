@@ -386,7 +386,7 @@ class Game:
 
                 print("Dice has been rolled with mouse.")  # debugging
                 if self.activegame:
-                    self.moves_left = random.randint(1, 6)
+                    self.moves_left = random.randint(2, 12)
                     print(f"Rolled: {self.moves_left}")
 
         #Accuse button logic
@@ -401,11 +401,11 @@ class Game:
                 if event.key == pygame.K_SPACE:
                     if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                         print(
-                            "Dice cannot be rolled with mouse as not players turn")  # added 24/04/2026 for locking movement to current turn
+                            "Dice cannot be rolled with spacebar as not players turn")  # added 24/04/2026 for locking movement to current turn
                         return  # added 24/04/2026 for locking movement to current turn
                     print("Dice has been rolled with spacebar.")
                     if self.activegame:
-                        self.moves_left = random.randint(1, 6)
+                        self.moves_left = random.randint(2, 12)
                         print(f"Rolled: {self.moves_left}")
 
     def get_active_player(self):  ###for turn system
@@ -487,11 +487,11 @@ class Dice:
 
         # uses mouse position to change transparency (on hover or no)
         if self.rect.collidepoint(mouse):
-            # draw the transparent copy
-            surface.blit(self.image_copy, (self.x, self.y))
-        else:
             # draw the solid original
             surface.blit(self.image, (self.x, self.y))
+        else:
+            # draw the transparent copy
+            surface.blit(self.image_copy, (self.x, self.y))
 
 
 class AccuseButton:
@@ -508,11 +508,11 @@ class AccuseButton:
     def draw(self, surface, mouse_pos):
         # Check if the mouse is currently inside the button's picture frame
         if self.rect.collidepoint(mouse_pos):
-            # If hovering, draw the slightly transparent version
-            surface.blit(self.image_hover, self.rect.topleft)
-        else:
-            # If not hovering, draw the normal, solid version
+            # If hovering, draw the normal, solid version
             surface.blit(self.image, self.rect.topleft)
+        else:
+            # If not hovering, draw the slightly transparent version
+            surface.blit(self.image_hover, self.rect.topleft)
 
 
 

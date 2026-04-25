@@ -153,12 +153,10 @@ def suggestion(player, room, characters, weapons, all_players):
     print("No player could show you a card.")
     return None
 
-""" Should be called with each new round (a round is considered complete once all players have taken a turn)
-    - returns boolean (False means game ends) and queue (turn order of all non-eliminated players)"""
+""" - returns boolean (False means game ends) and queue (turn order of all non-eliminated players)"""
 def round(queue, room, characters, weapons, all_players):
-
-    print("Round start")
-    # this function makes the assumption that it is called repeatedely in the game loop, which is effectively a while True loop
+    # this function makes the assumption that it is called repeatedly in the game loop, which is effectively a while True loop
+    # this while True loop is simulated in main.py. I cannot stress this enough, that is solely for testing purposes and NOT TO BE IMPLEMENTED IN THE FINAL GAME
     if len(all_players) > (len(eliminated)-3):
         player_turn = queue[0]
         queue = turn(queue[0], room, characters, weapons, all_players)
@@ -177,26 +175,60 @@ def round(queue, room, characters, weapons, all_players):
     - returns array of Player objects, all_players """
 def turn(player, room, characters, weapons, all_players):
     if player not in eliminated:
-        # roll_dice(player)
+        print("You can move up to", roll_dice(player), "spaces.")
         suggestion(player, room, characters, weapons, all_players)
         
         # end/accusation
-        print("\nDebug notes: Accusation is not yet implemented, selecting accusation will end turn, but remove player from queue.\n")
+        print("\nDebug notes: Accusation has been partially implemented, but always makes the assumption the accusation was incorrect. This is because no envelope with the correct cards have been determined afaik in main.py.\n")
         receive = input("End turn or make accusation? (Type 'End' to end turn, 'Accuse' to make accusation, case-insensitive).")
         if receive.lower() == "end":
             print("Ended turn.")
         else:
             print("Made an accusation.")
-            # accusation(player, all_players)
+            accusation(player, all_players)
             # currently, the code makes the default assumption that all accusations are incorrect
             eliminated.append(player)
             #debug_elim = []
             #for i in eliminated:
-            #    debug_elim.append(i.character.name)
+            #debug_elim.append(i.character.name)
             #print(debug_elim)
             all_players.remove(player)
 
     return all_players
+
+
+def roll_dice(player):
+    input("Press enter to roll dice: ")
+    dice_roll = random.randint(2, 12) # randomly generate number between 2-12
+    return dice_roll
+
+def accusation(player, all_players):
+    accusations = {"character": None, "weapon": None, "room": None}
+
+    char_list = ["scarlet", "plum", "mustard", "white", "peacock", "green"]
+    weap_list = ["candlestick", "knife", "revolver", "rope", "lead pipe", "wrench"]
+    room_list = ["study", "hall", "lounge", "library", "billiard room", 
+                 "dining room", "conservatory", "ballroom", "kitchen"]
+    
+    accused = input("Who do you accuse?: ").lower()
+    while accused not in char_list:
+        print("Suspect must be one of: Scarlet, Plum, Mustard, White, Peacock, Green.")
+        accused = input("Who do you accuse?: ").lower()
+    accusations["character"] = accused.capitalize()
+
+    weapon = input("What did they use to carry out the murder?: ").lower()
+    while weapon not in weap_list:
+        print("Weapon must be one of: Candlestick, Knife, Revolver, Rope, Lead Pipe, Wrench.")
+        weapon = input("What did they use to carry out the murder?: ").lower()
+    accusations["weapon"] = weapon.capitalize()
+
+    location = input("Where was the murder committed?: ").lower()
+    while location not in room_list:
+        print("Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
+        location = input("Where was the murder committed?: ").lower()
+    accusations["room"] = location.capitalize()
+
+    print(f"{player.character.name} has accused {accusations["character"]} of using the {accusations["weapon"]} to murder Black in the {accusations["room"]}.")
 
 if __name__ == "__main__":
     selected_character = "Scarlet"
@@ -207,5 +239,5 @@ if __name__ == "__main__":
     test_room = rooms[0]
     #suggestion(player, test_room, characters, weapons, all_players)
     game = True
-    while (game): # simulate game loop
+    while (game): # simulate game loop (REMOVE ONCE MAIN AND GRIDMOVEMENT ARE FULLY LINKED)
         game, queue = round(queue, test_room, characters, weapons, all_players)
