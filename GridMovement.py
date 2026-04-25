@@ -46,6 +46,7 @@ class Player:
         pixel_y = OFFSET_Y + (self.row * TILE_SIZE) + (TILE_SIZE / 2)
         pygame.draw.circle(surface, self.color, (int(pixel_x), int(pixel_y)), int(TILE_SIZE / 3))
 
+
 class Board:
     def __init__(self):
         # Load and scale the board
@@ -58,7 +59,7 @@ class Board:
         self.sheet = pygame.image.load("Assets/cluedo-sheet.png")
         self.sheet_width = int(self.sheet.get_width() * 0.5 * SCALE)
         self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.height))
-    
+
     def draw(self, surface):
         # Draw the board at the top-left, this is neccessary so the player can be drawn on top of the board.
         surface.blit(self.image, (0, 0))
@@ -72,28 +73,30 @@ class Board:
                 rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                 pygame.draw.rect(surface, (255, 0, 0), rect, 1)
 
+##SPRITE WORK FROM VICTOR ####
 class Spritesheet():
     def __init__(self, image):
         self.sheet = image
-    
+
     def get_frame(self, frame_x, frame_y, width, height, scale=1):
         frame = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
-        frame.blit(self.sheet, (0, 0), (frame_x*width, frame_y*height, width, height))
+        frame.blit(self.sheet, (0, 0), (frame_x * width, frame_y * height, width, height))
         frame = pygame.transform.smoothscale_by(frame, scale)
 
         return frame
 
+
 class Sprite_Chars():
     def __init__(self, width, height):
         self.sprite_sheet_image = pygame.image.load("Assets/143445.png")
-        self.sprite_sheet_image = pygame.transform.smoothscale(self.sprite_sheet_image, ((width)*2, (height)*7))
+        self.sprite_sheet_image = pygame.transform.smoothscale(self.sprite_sheet_image, ((width) * 2, (height) * 7))
 
         self.sprite_sheet = Spritesheet(self.sprite_sheet_image)
 
         self.animation_list = []
         animation_steps = 14
         self.last_update = pygame.time.get_ticks()
-        self.animation_cooldown = 60 # milliseconds
+        self.animation_cooldown = 60  # milliseconds
         self.frame = 0
 
         self.select_sfx = pygame.mixer.Sound("Assets/dice_roll.mp3")
@@ -107,7 +110,7 @@ class Sprite_Chars():
             if y == 6:
                 y = 0
                 x += 1
-    
+
     def draw(self, surface):
         # update animation
         done = False
@@ -118,16 +121,16 @@ class Sprite_Chars():
             if self.frame >= len(self.animation_list):
                 self.frame = 0
                 done = True
-        
+
         self.select_sfx.set_volume(0.05)
         self.select_sfx.play()
-        surface.blit(self.animation_list[self.frame], (0,0))
+        surface.blit(self.animation_list[self.frame], (0, 0))
 
         if done:
             return True
         return False
 
-
+###END SPRITE WORK FROM VICTOR
 class Game:
     #Initialisation for the game.
     def __init__(self):
@@ -144,8 +147,7 @@ class Game:
         self.running = True
         #Gets mouse position
         self.mouse = pygame.mouse.get_pos()
-
-        self.sprite = Sprite_Chars(win_width, self.board.height)
+        self.sprite = Sprite_Chars(win_width, self.board.height) ###for spritework from victor, not relevant to game state
 
         ###storing game state variables for gamecontroller
         self.activegame = False
@@ -235,11 +237,6 @@ class Game:
             for c in range(0,6):
                 self.forbidden_tiles.append((c, r))
 
-        self.chance = 10000
-        self.last_surprise = pygame.time.get_ticks()
-        self.playing = False
-        self.play_finished = False
-        self.cooldown = 840 # milliseconds
 
     def handle_events(self):
         #checks for actions by the user.
@@ -248,6 +245,8 @@ class Game:
                 self.running = False
 
             if event.type == pygame.KEYDOWN:
+                if not self.activegame or self.get_active_player() != self.currentplayer:   #added 24/04/2026 for locking movement to current turn
+                    return                                                                  #added 24/04/2026 for locking movement to current turn
                 if event.key == pygame.K_UP:    self.player.move(0, -1, self.forbidden_tiles)
                 if event.key == pygame.K_DOWN:  self.player.move(0, 1,self.forbidden_tiles)
                 if event.key == pygame.K_LEFT:  self.player.move(-1, 0,self.forbidden_tiles)
@@ -290,12 +289,19 @@ class Game:
                     print("the game is fully initialised.")
             
             if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
+                if not self.activegame or self.get_active_player() != self.currentplayer:   #added 24/04/2026 for locking movement to current turn
+                    print("Dice cannot be rolled with mouse as not players turn")           #added 24/04/2026 for locking movement to current turn
+                    return                                                                  #added 24/04/2026 for locking movement to current turn
+
                 print("Dice has been rolled with mouse.") #debugging
                 if self.activegame:
                     self.moves_left = random.randint(1, 6)
                     print(f"Rolled: {self.moves_left}")
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    if not self.activegame or self.get_active_player() != self.currentplayer:   # added 24/04/2026 for locking movement to current turn
+                        print("Dice cannot be rolled with mouse as not players turn")           # added 24/04/2026 for locking movement to current turn
+                        return                                                                  # added 24/04/2026 for locking movement to current turn
                     print("Dice has been rolled with spacebar.")
                     if self.activegame:
                         self.moves_left = random.randint(1, 6)
@@ -304,8 +310,6 @@ class Game:
 
     def get_active_player(self): ###for turn system
         return self.all_players[self.turn_index]
-
-
     #PAUSED AT STEP FOUR.
     def run(self):
         while self.running:
@@ -315,15 +319,6 @@ class Game:
             # Gets mouse position while game running
             self.mouse = pygame.mouse.get_pos()
 
-            current_time = pygame.time.get_ticks()
-
-            if current_time - self.last_surprise >= self.cooldown and not self.playing:
-                j_roll = random.randint(1, self.chance)
-
-                if j_roll == self.chance:
-                    self.playing = True
-                    self.play_finished = False
-                    self.last_surprise = current_time
 
             if self.menu is not None: #checking if we are on menu screen or board screen
                 self.menu.draw(self.screen, self.mouse)
@@ -331,11 +326,6 @@ class Game:
                 self.board.draw(self.screen)
                 self.player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
-                if self.playing:
-                    finished = self.sprite.draw(self.screen)
-
-                    if finished:
-                        self.playing = False
             pygame.display.flip()
         pygame.quit()
 
