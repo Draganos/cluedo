@@ -78,12 +78,11 @@ class Board:
         # Draw the sheet to the right of the board
         surface.blit(self.sheet, (self.width, 0))
 
-        # I've also commented out these lines for the sake of menu viewing.
         # Visual Debug: To see the grid lines.
-        for r in range(25):
-            for c in range(24):
-                rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                pygame.draw.rect(surface, (255, 0, 0), rect, 1)
+        #for r in range(25):
+            #for c in range(24):
+                #rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+               # pygame.draw.rect(surface, (255, 0, 0), rect, 1)
 
 
 ##SPRITE WORK FROM VICTOR ####
