@@ -19,15 +19,15 @@ class TestPlayer(unittest.TestCase):
             ((6, 8), "Library", (2, 7)),
             ((8, 19), "Ballroom", (10, 19)),
         ]
-        for door_position, room_name, expected_pos in test_cases:
+        for door_position, room_name, expected_position in test_cases:
             player = Player(5, 5)
             doors = {door_position: room_name}
-            room_seats = {room_name: [expected_pos]}
+            room_seats = {room_name: [expected_position]}
             dx = door_position[0] - 5
             dy = door_position[1] - 5
             result = player.move(dx, dy, [], doors, room_seats)
             self.assertEqual(result, "ENTERED_ROOM")
-            self.assertEqual((player.col, player.row), expected_pos)
+            self.assertEqual((player.col, player.row), expected_position)
             self.assertEqual(player.in_room, room_name)
 
 if __name__ == '__main__':
