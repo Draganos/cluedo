@@ -30,5 +30,12 @@ class TestPlayer(unittest.TestCase):
             self.assertEqual((player.col, player.row), expected_position)
             self.assertEqual(player.in_room, room_name)
 
+    def test_player_out_of_bounds(self):
+        player = Player(0, 0)
+        result = player.move(-1, 0, [], {}, {})
+        assert player.col == 0
+        assert player.row == 0
+        assert result is None
+
 if __name__ == '__main__':
     unittest.main()
