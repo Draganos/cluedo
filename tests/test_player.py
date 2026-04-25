@@ -10,7 +10,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.col, 6)
         self.assertEqual(player.row, 5)
 
-    def test_player_move_through_door(self):
+    def test_player_move_into_room(self):
         player = Player(5, 5)
         doors = {(6, 5): "Kitchen"}
         room_seats = {"Kitchen": [(10, 10), (11, 11)]}
