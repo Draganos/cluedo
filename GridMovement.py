@@ -8,7 +8,10 @@ from main import setup_game  # for linking gridcontroller
 SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
-OFFSET_Y = 18 * SCALE
+HEADER_HEIGHT = 80
+#Header height is added here to make sure that player starts at top left of board.
+OFFSET_Y = (18 * SCALE) + HEADER_HEIGHT
+
 # Button colours
 COLOUR = "#462779"
 COLOUR_HOVER = "#9040BA"
@@ -70,13 +73,24 @@ class Board:
         # Load and scale the sheet
         self.sheet = pygame.image.load("Assets/cluedo-sheet.png")
         self.sheet_width = int(self.sheet.get_width() * 0.5 * SCALE)
-        self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.height))
+        self.sheet_height = self.height - 200
+        self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.sheet_height))
 
     def draw(self, surface):
-        # Draw the board at the top-left, this is neccessary so the player can be drawn on top of the board.
-        surface.blit(self.image, (0, 0))
-        # Draw the sheet to the right of the board
-        surface.blit(self.sheet, (self.width, 0))
+        
+        # Draw the board and sheet shifted down by HEADER_HEIGHT
+        surface.blit(self.image, (0, HEADER_HEIGHT))
+        surface.blit(self.sheet, (self.width, HEADER_HEIGHT))
+
+
+
+        # Fill the empty space under the sheet with green.
+        pygame.draw.rect(
+            surface,
+            (140, 185, 130),
+            (self.width, self.sheet_height + HEADER_HEIGHT, self.sheet_width, self.height - self.sheet_height)
+        )
+
 
         # Visual Debug: To see the grid lines.
         #for r in range(25):
@@ -149,13 +163,30 @@ class Game:
     # Initialisation for the game.
     def __init__(self):
         pygame.init()
+        
+        #Board init
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
-        self.screen = pygame.display.set_mode((win_width, self.board.height))
+        self.screen = pygame.display.set_mode((win_width, self.board.height + HEADER_HEIGHT))
         self.menu = Menu()
-        # creates dice for dice class
-        self.dice = Dice(self.board.width // 2 - 60, self.board.height // 1.25)
+
+        #Header, Dice and Accuse button
+        self.turn_image = pygame.image.load('Assets/Your turn.png')
+        self.turn_image = pygame.transform.smoothscale(self.turn_image, (400, 60))
+        item_y = self.board.sheet_height + 50 + HEADER_HEIGHT
+        dice_x = self.board.width + 40
+        accuse_x = self.board.width + 220
+        self.dice = Dice(dice_x, item_y)
         self.dice_rect = self.dice.rect
+        self.accuse_btn = AccuseButton(accuse_x, item_y)
+
+        # Determines where the player starts and color.
+        self.player = Player(11, 11, (255, 0, 0))  # Red player
+
+
+
+
+
         # Determines where the player starts and color.
         self.player = Player(11, 11, (255, 0, 0))  # Red player
         self.running = True
@@ -163,6 +194,8 @@ class Game:
         self.mouse = pygame.mouse.get_pos()
 
         self.sprite = Sprite_Chars(win_width, self.board.height)
+
+
 
         ###storing game state variables for gamecontroller
         self.activegame = False
@@ -355,6 +388,15 @@ class Game:
                 if self.activegame:
                     self.moves_left = random.randint(1, 6)
                     print(f"Rolled: {self.moves_left}")
+
+        #Accuse button logic
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if hasattr(self, 'accuse_btn') and self.accuse_btn.rect.collidepoint(self.mouse):
+                    # Check if the game has started and if it's the active player's turn
+                    if self.activegame and self.get_active_player() == self.currentplayer:
+                        print("Accuse button clicked!")
+
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
@@ -390,16 +432,32 @@ class Game:
 
             if self.menu is not None:  # checking if we are on menu screen or board screen
                 self.menu.draw(self.screen, self.mouse)
+                
+            #This draws everything basically.
             else:
+                pygame.draw.rect(self.screen, (140, 185, 130),(0, 0, self.board.width + self.board.sheet_width, HEADER_HEIGHT))
+
+                if hasattr(self, 'turn_image'):
+                    img_x = (self.board.width + self.board.sheet_width) // 2 - (self.turn_image.get_width() // 2)
+                    img_y = HEADER_HEIGHT // 2 - (self.turn_image.get_height() // 2)
+                    self.screen.blit(self.turn_image, (img_x, img_y))
+
                 self.board.draw(self.screen)
                 self.player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
+
+
+                if hasattr(self, 'accuse_btn'):
+                    self.accuse_btn.draw(self.screen, self.mouse)
+
 
                 if self.playing:
                     finished = self.sprite.draw(self.screen)
 
                     if finished:
                         self.playing = False
+
+
 
             pygame.display.flip()
         pygame.quit()
@@ -426,12 +484,37 @@ class Dice:
     def draw(self, surface, mouse):
         # gets mouse position
         self.mouse = mouse
+
         # uses mouse position to change transparency (on hover or no)
-        if self.rect.collidepoint(
-                mouse):  # once rounds are introduced, add an extra check to make sure it is the player's turn
-            surface.blit(self.image, (self.x, self.y))
-        else:
+        if self.rect.collidepoint(mouse):
+            # draw the transparent copy
             surface.blit(self.image_copy, (self.x, self.y))
+        else:
+            # draw the solid original
+            surface.blit(self.image, (self.x, self.y))
+
+
+class AccuseButton:
+    def __init__(self, x, y):
+        self.image = pygame.image.load('Assets/Accuse.png')
+        self.image = pygame.transform.smoothscale(self.image, (150, 120))
+        #Transparent effect
+        self.image_hover = self.image.copy()
+        self.image_hover.set_alpha(150)
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x,y)
+
+    def draw(self, surface, mouse_pos):
+        # Check if the mouse is currently inside the button's picture frame
+        if self.rect.collidepoint(mouse_pos):
+            # If hovering, draw the slightly transparent version
+            surface.blit(self.image_hover, self.rect.topleft)
+        else:
+            # If not hovering, draw the normal, solid version
+            surface.blit(self.image, self.rect.topleft)
+
+
 
 
 class Menu:
@@ -522,5 +605,4 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
-
 
