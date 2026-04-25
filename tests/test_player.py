@@ -3,7 +3,7 @@ from GridMovement import Player
 
 class TestPlayer(unittest.TestCase):
 
-    def test_player_move(self):
+    def test_player_movement(self):
         player = Player(5, 5)
         result = player.move(1, 0, [], {}, {})
         self.assertEqual(result, "MOVED")
