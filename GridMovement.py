@@ -182,13 +182,6 @@ class Game:
 
         # Determines where the player starts and color.
         self.player = Player(11, 11, (255, 0, 0))  # Red player
-
-
-
-
-
-        # Determines where the player starts and color.
-        self.player = Player(11, 11, (255, 0, 0))  # Red player
         self.running = True
         # Gets mouse position
         self.mouse = pygame.mouse.get_pos()
@@ -385,9 +378,10 @@ class Game:
                     return  # added 24/04/2026 for locking movement to current turn
 
                 print("Dice has been rolled with mouse.")  # debugging
-                if self.activegame:
+                if self.activegame and self.turn_phase == "ROLL":
                     self.moves_left = random.randint(2, 12)
                     print(f"Rolled: {self.moves_left}")
+                    self.turn_phase = "MOVE"
 
         #Accuse button logic
             if event.type == pygame.MOUSEBUTTONDOWN:
