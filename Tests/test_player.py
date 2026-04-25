@@ -10,6 +10,21 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.col, 6)
         self.assertEqual(player.row, 5)
 
+    def test_player_out_of_bounds(self):
+        player = Player(0, 0)
+        result = player.move(-1, 0, [], {}, {})
+        self.assertEqual(player.col, 0)
+        self.assertEqual(player.row, 0)
+        self.assertIsNone(result)
+
+    def test_player_forbidden_zone(self):
+        player = Player(5, 5)
+        forbidden = [(6, 5)]
+        result = player.move(1, 0, forbidden, {}, {})
+        self.assertEqual(result, None)
+        self.assertEqual(player.col, 5)
+        self.assertEqual(player.row, 5)
+
     def test_player_enter_rooms(self):
         rooms = [
             ((6, 5), "Kitchen", (20, 20)),
@@ -33,21 +48,6 @@ class TestPlayer(unittest.TestCase):
             self.assertEqual(result, "ENTERED_ROOM")
             self.assertEqual((player.col, player.row), expected_position)
             self.assertEqual(player.in_room, room_name)
-
-    def test_player_forbidden_zone(self):
-        player = Player(5, 5)
-        forbidden = [(6, 5)]
-        result = player.move(1, 0, forbidden, {}, {})
-        self.assertEqual(result, None)
-        self.assertEqual(player.col, 5)
-        self.assertEqual(player.row, 5)
-
-    def test_player_out_of_bounds(self):
-        player = Player(0, 0)
-        result = player.move(-1, 0, [], {}, {})
-        self.assertEqual(player.col, 0)
-        self.assertEqual(player.row, 0)
-        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()
