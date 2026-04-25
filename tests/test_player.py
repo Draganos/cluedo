@@ -33,9 +33,9 @@ class TestPlayer(unittest.TestCase):
     def test_player_out_of_bounds(self):
         player = Player(0, 0)
         result = player.move(-1, 0, [], {}, {})
-        assert player.col == 0
-        assert player.row == 0
-        assert result is None
+        self.assertEqual(player.col, 0)
+        self.assertEqual(player.row, 0)
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()
