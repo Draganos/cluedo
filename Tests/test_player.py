@@ -18,7 +18,11 @@ class TestPlayer(unittest.TestCase):
             ((17, 5), "Lounge", (19, 2)),
             ((6, 8), "Library", (2, 7)),
             ((8, 19), "Ballroom", (10, 19)),
+            ((1, 12), "Billiard Room", (2, 13)),
+            ((16, 12), "Dining Room", (19, 10)),
+            ((4, 19), "Conservatory", (2, 20)),
         ]
+
         for door_position, room_name, expected_position in rooms:
             player = Player(5, 5)
             doors = {door_position: room_name}
