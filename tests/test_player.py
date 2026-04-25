@@ -10,15 +10,25 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.col, 6)
         self.assertEqual(player.row, 5)
 
-    def test_player_move_into_room(self):
-        player = Player(5, 5)
-        doors = {(6, 5): "Kitchen"}
-        room_seats = {"Kitchen": [(10, 10), (11, 11)]}
-        result = player.move(1, 0, [], doors, room_seats)
-        self.assertEqual(result, "ENTERED_ROOM")
-        self.assertEqual(player.col, 10)
-        self.assertEqual(player.row, 10)
-        self.assertEqual(player.in_room, "Kitchen")
+    def test_player_enter_rooms(self):
+        test_cases = [
+            ((6, 5), "Kitchen", (20, 20)),
+            ((6, 3), "Study", (2, 1)),
+            ((9, 4), "Hall", (11, 2)),
+            ((17, 5), "Lounge", (19, 2)),
+            ((6, 8), "Library", (2, 7)),
+            ((8, 19), "Ballroom", (10, 19)),
+        ]
+        for door_position, room_name, expected_pos in test_cases:
+            player = Player(5, 5)
+            doors = {door_position: room_name}
+            room_seats = {room_name: [expected_pos]}
+            dx = door_position[0] - 5
+            dy = door_position[1] - 5
+            result = player.move(dx, dy, [], doors, room_seats)
+            self.assertEqual(result, "ENTERED_ROOM")
+            self.assertEqual((player.col, player.row), expected_pos)
+            self.assertEqual(player.in_room, room_name)
 
 if __name__ == '__main__':
     unittest.main()
