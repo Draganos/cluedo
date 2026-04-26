@@ -189,6 +189,7 @@ class Game:
         self.check_sheet = CheckSheetFunction(self.board.width + 67)
 
         # Determines where the player starts and color.
+        self.visual_players = []
         self.player = Player(11, 11, (255, 0, 0))  # Red player
         self.running = True
         # Gets mouse position
@@ -445,6 +446,28 @@ class Game:
                     self.menu = None
                     print("the game is fully initialised.")
 
+                    ###CPU GRAPHICS
+                    cpu_start_positions = [
+                        (0, 6),
+                        (7, 0),
+                        (16, 0),
+                        (23, 7),
+                        (14, 24)
+                    ]
+                    cpu_colours = [
+                        (128, 0, 128),  # Plum
+                        (255, 255, 0),  # Mustard
+                        (0, 128, 0),  # Green
+                        (0, 0, 255),  # Peacock
+                        (255, 255, 255)  # White
+                    ]
+                    self.visual_players = [self.player]
+                    for i, cpu in enumerate(self.otherplayers):
+                        col, row = cpu_start_positions[i]
+                        colour = cpu_colours[i]
+                        visual_cpu = Player(col, row, colour, isCPU=True, character=cpu.character)
+                        self.visual_players.append(visual_cpu)
+
             if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     print(
@@ -489,6 +512,14 @@ class Game:
         next_index = (self.turn_index + 1) % len(self.all_players)
         return self.all_players[next_index]
 
+
+##CPU DEF FUNCTIONS
+    def getvisualplayer(self, logic_player):
+        for visual_player in self.visual_players:
+            if visual_player.character == logic_player.character:
+                return visual_player
+        return None
+
     def run(self):
         while self.running:
             self.handle_events()
@@ -514,6 +545,7 @@ class Game:
                 if self.cpu_timer > 120:  # 2 second delay (number is delay in fps)
 
                     cpu = self.get_active_player()
+                    visualcpu = self.getvisualplayer(cpu)
                     print(f"{cpu.character.name} (CPU) turn")
                     roll = random.randint(1, 6)
                     print(f"{cpu.character.name} rolled {roll}")
@@ -590,7 +622,9 @@ class Game:
                     self.screen.blit(line1, (box_rect.x + 10, box_rect.y + 5))
                     self.screen.blit(line2, (box_rect.x + 10, box_rect.y + 5 + line1.get_height()))
 
-                self.player.draw(self.screen)
+               # self.player.draw(self.screen) ###HASHING FOR NOW TO FOR LOOP THE CPU WITH PLAYERS
+                for visual_player in self.visual_players:
+                    visual_player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
 
                 if hasattr(self, 'accuse_btn'):
