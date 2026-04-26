@@ -1,5 +1,4 @@
 import random
-
 import pygame
 
 from main import setup_game  # for linking gridcontroller
@@ -242,6 +241,11 @@ class Game:
             (14, 17): "Ballroom",
             (19, 18): "Kitchen",
         }
+        self.room_doors = {}
+        for tile, room_name in self.doors.items():
+            if room_name not in self.room_doors:
+                self.room_doors[room_name] = []
+            self.room_doors[room_name].append(tile)
 
         self.room_seats = {
             "Study": [(2, 1), (3, 1), (2, 2), (3, 2), (1, 1), (4, 1)],
@@ -544,15 +548,32 @@ class Game:
         return None
 
     def get_cpudirection(self, visual_player, target_tile):
-        dx = target_tile[0] - visual_player.col
-        dy = target_tile[1] - visual_player.row
-        #if target_room == None:
-            #target_room = random.choice(list(self.room_seats.keys()))
-        if abs(dx) > abs(dy):
-            return (1 if dx > 0 else -1, 0)
-        elif dy != 0:
-            return (0, 1 if dy > 0 else -1)
-        return (0, 0)
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        valid_directions = []
+        for dx, dy in directions: #checkvalid directions
+            new_col = visual_player.col + dx
+            new_row = visual_player.row + dy
+            if (new_col, new_row) in self.doors:
+                valid_directions.append((dx, dy))
+            elif (
+                    0 <= new_col < 24
+                    and 0 <= new_row < 25
+                    and (new_col, new_row) not in self.forbidden_tiles):
+                valid_directions.append((dx, dy))
+        if not valid_directions:
+            return (0, 0)
+        #set target to move towards
+        dx_to_target = target_tile[0] - visual_player.col
+        dy_to_target = target_tile[1] - visual_player.row
+        if abs(dx_to_target) > abs(dy_to_target):
+            preferred = (1 if dx_to_target > 0 else -1, 0)
+        elif dy_to_target != 0:
+            preferred = (0, 1 if dy_to_target > 0 else -1)
+        else:
+            preferred = (0, 0)
+        if preferred in valid_directions: #bias set in direction
+            return preferred
+        return random.choice(valid_directions)         #else do another direction which is valid
 
     def run(self):
         while self.running:
@@ -588,8 +609,8 @@ class Game:
                         self.cpu_roomtarget[cpu] = random.choice(list(self.room_exits.keys()))
 
                     target_room = self.cpu_roomtarget[cpu]
-                    target_tile = self.room_exits[target_room]
-
+                    target_tile = random.choice(self.room_doors[target_room])
+                    
                     #CPU MOVES W DELAY
                     if self.cpu_timer > 50 and self.cpu_moves_left > 0:
                         dx, dy = self.get_cpudirection(visualcpu, target_tile)
@@ -601,16 +622,16 @@ class Game:
                             self.room_seats,
                             self.room_exits
                         )
-                        if result is None: #If CPU goes into the wall or something
-                            dx, dy = random.choice([(0, -1), (0, 1), (-1, 0), (1, 0)])
-                            result = visualcpu.move(
-                                dx,
-                                dy,
-                                self.forbidden_tiles,
-                                self.doors,
-                                self.room_seats,
-                                self.room_exits
-                            )
+                        #if result is None: #If CPU goes into the wall or something
+                        #    dx, dy = random.choice([(0, -1), (0, 1), (-1, 0), (1, 0)])
+                        #    result = visualcpu.move(
+                        #        dx,
+                        #        dy,
+                        #        self.forbidden_tiles,
+                        #        self.doors,
+                        #        self.room_seats,
+                        #        self.room_exits
+                        #    )
                         if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                             self.cpu_moves_left -= 1
                         #behavior for when the cpu reaches that room
@@ -977,4 +998,3 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
-
