@@ -1,6 +1,7 @@
 import random
 import pygame
 
+
 from main import setup_game  # for linking gridcontroller
 
 # Constants, OFFSET X, Y and TILE_SIZE determine the grid layout. Sheet is for the squares inside the sheet.
@@ -163,7 +164,7 @@ class Sprite_Chars():
 ###END SPRITE WORK FROM VICTOR
 
 class Game:
-    # Initialisation for the game.
+    #Initialisation for the game.
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
@@ -189,9 +190,11 @@ class Game:
         cards_y = HEADER_HEIGHT - 80
         self.cards_btn = CardsButton(cards_x, cards_y)
 
-        #Dropdown menu for cards init
+        #Cards and Dropdown menu for cards init
         self.show_cards_dropdown = False
         self.dropdown_font = pygame.font.SysFont(None, 24)
+        self.card_images = {}
+        self.load_card_images()
 
         # Determines where the player starts and color.
         self.visual_players = []
@@ -366,6 +369,46 @@ class Game:
         pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
 
+    def load_card_images(self):
+        self.card_images = {
+            #characters
+            "Mustard": pygame.transform.smoothscale(pygame.image.load("Cards/Col Mustard.png").convert_alpha(),
+                                                    (140, 200)),
+            "Scarlet": pygame.transform.smoothscale(pygame.image.load("Cards/MissScarlett.png").convert_alpha(),
+                                                    (140, 200)),
+            "White": pygame.transform.smoothscale(pygame.image.load("Cards/MrsWhite.png").convert_alpha(), (140, 200)),
+            "Peacock": pygame.transform.smoothscale(pygame.image.load("Cards/Mrs. Peacock.png").convert_alpha(),
+                                                    (140, 200)),
+            "Plum": pygame.transform.smoothscale(pygame.image.load("Cards/ProfessorPlum.png").convert_alpha(),
+                                                 (140, 200)),
+            "Green": pygame.transform.smoothscale(pygame.image.load("Cards/Rev Green.png").convert_alpha(), (140, 200)),
+
+            #weapons
+            "Candlestick": pygame.transform.smoothscale(pygame.image.load("Cards/Candlestick.png").convert_alpha(),
+                                                        (140, 200)),
+            "Dagger": pygame.transform.smoothscale(pygame.image.load("Cards/dagger.png").convert_alpha(), (140, 200)),
+            "Pistol": pygame.transform.smoothscale(pygame.image.load("Cards/Pistol.png").convert_alpha(),
+                                                     (140, 200)),
+            "Rope": pygame.transform.smoothscale(pygame.image.load("Cards/Rope.svg").convert_alpha(), (140, 200)),
+            "Lead Pipe": pygame.transform.smoothscale(pygame.image.load("Cards/LeadPipe.png").convert_alpha(),
+                                                      (140, 200)),
+            "Wrench": pygame.transform.smoothscale(pygame.image.load("Cards/spanner.png").convert_alpha(), (140, 200)),
+
+            #rooms
+            "Study": pygame.transform.smoothscale(pygame.image.load("Cards/Study.png").convert_alpha(), (140, 200)),
+            "Hall": pygame.transform.smoothscale(pygame.image.load("Cards/Hall.png").convert_alpha(), (140, 200)),
+            "Lounge": pygame.transform.smoothscale(pygame.image.load("Cards/Lounge.png").convert_alpha(), (140, 200)),
+            "Library": pygame.transform.smoothscale(pygame.image.load("Cards/Library.png").convert_alpha(), (140, 200)),
+            "Billiard Room": pygame.transform.smoothscale(pygame.image.load("Cards/Billiards Room.png").convert_alpha(),
+                                                          (140, 200)),
+            "Dining Room": pygame.transform.smoothscale(pygame.image.load("Cards/Dining Room.png").convert_alpha(),
+                                                        (140, 200)),
+            "Conservatory": pygame.transform.smoothscale(pygame.image.load("Cards/Conservatory.png").convert_alpha(),
+                                                         (140, 200)),
+            "Ballroom": pygame.transform.smoothscale(pygame.image.load("Cards/Ballroom.png").convert_alpha(),
+                                                     (140, 200)),
+            "Kitchen": pygame.transform.smoothscale(pygame.image.load("Cards/Kitchen.png").convert_alpha(), (140, 200)),
+        }
     def handle_events(self):
         # checks for actions by the user.
         for event in pygame.event.get():
@@ -610,7 +653,7 @@ class Game:
 
                     target_room = self.cpu_roomtarget[cpu]
                     target_tile = random.choice(self.room_doors[target_room])
-                    
+
                     #CPU MOVES W DELAY
                     if self.cpu_timer > 50 and self.cpu_moves_left > 0:
                         dx, dy = self.get_cpudirection(visualcpu, target_tile)
@@ -724,23 +767,35 @@ class Game:
 
                 #CardButton Dropdown Menu running
                 if self.show_cards_dropdown and self.currentplayer:
-                    cards_in_hand = self.currentplayer.show_hand()
-
+                    cards_in_hand = self.currentplayer.hand
                     if cards_in_hand:
-                        # Set up the dropdown dimensions
-                        drop_x = self.cards_btn.rect.x
+                        card_w = 140
+                        card_h = 200
+                        padding = 15
                         drop_y = self.cards_btn.rect.bottom
-                        drop_w = 150
-                        drop_h = len(cards_in_hand) * 30 + 10
+                        max_width = self.screen.get_width() - 40
+                        drop_w = min((card_w + padding) * len(cards_in_hand) + padding, max_width)
+                        drop_h = card_h + 20
+                        drop_x = self.cards_btn.rect.centerx - (drop_w // 2)
 
-                        # Draw the drop down menu
                         pygame.draw.rect(self.screen, (50, 50, 50), (drop_x, drop_y, drop_w, drop_h))
                         pygame.draw.rect(self.screen, (255, 255, 255), (drop_x, drop_y, drop_w, drop_h), 2)
+                        for i, card in enumerate(cards_in_hand):
+                            if hasattr(card, "item_name"):
+                                card_name = card.item_name
+                            else:
+                                card_name = card.name
 
-                        #  Each card name
-                        for i, card_name in enumerate(cards_in_hand):
-                            text_dropdown = self.dropdown_font.render(card_name, True, (255, 255, 255))
-                            self.screen.blit(text_dropdown, (drop_x + 10, drop_y + 10 + (i * 30)))
+                            x = drop_x + padding + i * (card_w + padding)
+                            if x + card_w > drop_x + drop_w:
+                                break  #stop drawing if cards arent in the box anymore
+                            y = drop_y + padding
+
+                            if card_name in self.card_images:
+                                self.screen.blit(self.card_images[card_name], (x, y))
+                            else:
+                                text_dropdown = self.dropdown_font.render(card_name, True, (255, 255, 255))
+                                self.screen.blit(text_dropdown, (x, y))
 
 
                 if hasattr(self, 'accuse_btn'):
