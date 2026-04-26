@@ -545,12 +545,14 @@ class Game:
                 ##TURN DISPLAY
                 if self.activegame and self.all_players:
                     font = pygame.font.SysFont(None, 42)
-
-                    active = self.get_active_player().character.name
-                    text = font.render(f"{active}'s Turn", True, (255, 255, 255))
-
+                    active_player = self.get_active_player()
+                    active = active_player.character.name
+                    room_text = ""
+                    if active_player == self.currentplayer and self.player.in_room is not None:
+                        room_text = f" - In {self.player.in_room}"
+                    text = font.render(f"{active}'s Turn{room_text}", True, (255, 255, 255))
                     text_rect = text.get_rect(
-                        center=((self.board.width + self.board.sheet_width) // 2, HEADER_HEIGHT // 2)
+                        midleft=(20, HEADER_HEIGHT // 2)
                     )
                     bg_rect = text_rect.inflate(20, 12)
 
