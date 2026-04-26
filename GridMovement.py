@@ -21,13 +21,22 @@ COLOUR_HOVER = "#9040BA"
 class Player:
     def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None):
         self.col = col
+        self.in_room = None
         self.row = row
         self.color = color
         self.isCPU = isCPU  # set to none if not user.
         self.character = character
         self.hand = []
 
-    def move(self, dx, dy, forbidden_zones, doors, room_seats):
+    def move(self, dx, dy, forbidden_zones, doors, room_seats, room_exits):
+        #if player is inside room, first move them to the rooms exit
+        if self.in_room is not None:
+            exit_tile = room_exits[self.in_room]
+            self.col = exit_tile[0]
+            self.row = exit_tile[1]
+            print(f"Player left the {self.in_room}")
+            self.in_room = None
+            return "LEFT_ROOM"
         # Calculate new position
         new_col = self.col + dx
         new_row = self.row + dy
@@ -237,7 +246,23 @@ class Game:
             "Ballroom": [(10, 19), (11, 19), (12, 19), (10, 20), (11, 20), (12, 20)],
             "Kitchen": [(20, 20), (21, 20), (20, 21), (21, 21), (20, 22), (21, 22)]
         }
-
+        self.room_exits = {
+            "Study": (6, 4),
+            "Hall": (11, 7),
+            "Lounge": (17, 6),
+            "Library": (6, 10),
+            "Billiard Room": (5, 17),
+            "Dining Room": (16, 15),
+            "Conservatory": (4, 18),
+            "Ballroom": (8, 16),
+            "Kitchen": (19, 17)
+        }
+        self.secret_passages = {
+            "Study": "Kitchen",
+            "Kitchen": "Study",
+            "Lounge": "Conservatory",
+            "Conservatory": "Lounge"
+        }
         self.forbidden_tiles = [
             # These are all the forbidden zones.
             # Grid is 24x25 ColumnsxRows. starts at 0x0 top left corner.
@@ -327,29 +352,55 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     return  # added 24/04/2026 for locking movement to current turn
+                ###SECRET PASSAGES
+                elif event.key == pygame.K_s and self.player.in_room in self.secret_passages:
+                    target_room = self.secret_passages[self.player.in_room]
+                    seat = self.room_seats[target_room][0]
+                    self.player.col = seat[0]
+                    self.player.row = seat[1]
+                    self.player.in_room = target_room
+                    print(f"Secret passage used: moved to {target_room}")
+                    self.moves_left = 0
+                    self.turn_phase = "END"
+                    if self.player.character:
+                        self.player.character.position = (self.player.col, self.player.row)
+                        self.player.character.room = self.player.in_room
+                    ##MOVEMENT FUNCTIONALITY BELOW
                 elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats);
-                    self.moves_left -= 1
-
+                    result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
+                        self.moves_left -= 1
+                    if result == "ENTERED_ROOM":
+                        self.moves_left = 0
+                        self.turn_phase = "END"
                     if self.moves_left == 0:
                         self.turn_phase = "END"
                 elif event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats);
-                    self.moves_left -= 1
-
+                    result = self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
+                        self.moves_left -= 1
+                    if result == "ENTERED_ROOM":
+                        self.moves_left = 0
+                        self.turn_phase = "END"
                     if self.moves_left == 0:
                         self.turn_phase = "END"
 
                 elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats);
-                    self.moves_left -= 1
-
+                    result = self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
+                        self.moves_left -= 1
+                    if result == "ENTERED_ROOM":
+                        self.moves_left = 0
+                        self.turn_phase = "END"
                     if self.moves_left == 0:
                         self.turn_phase = "END"
                 elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats);
-                    self.moves_left -= 1
-
+                    result = self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
+                        self.moves_left -= 1
+                    if result == "ENTERED_ROOM":
+                        self.moves_left = 0
+                        self.turn_phase = "END"
                     if self.moves_left == 0:
                         self.turn_phase = "END"
 
@@ -515,7 +566,7 @@ class Game:
                     elif self.turn_phase == "MOVE":
                         status = f"Moves left: {self.moves_left}"
                     elif self.turn_phase == "END":
-                        status = "Press ENTER to end"
+                        status = "Make Accusation or ENTER to end"
                     else:
                         status = self.turn_phase
 
