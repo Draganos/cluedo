@@ -187,6 +187,10 @@ class Game:
         self.accuse_btn = AccuseButton(accuse_x, item_y)
 
         self.check_sheet = CheckSheetFunction(self.board.width + 67)
+        
+        cards_x = (self.board.width * 0.80) - (150 // 2)
+        cards_y = HEADER_HEIGHT - 80
+        self.cards_btn = CardsButton(cards_x, cards_y)
 
         # Determines where the player starts and color.
         self.visual_players = []
@@ -695,6 +699,8 @@ class Game:
                     visual_player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
 
+                self.cards_btn.draw(self.screen, self.mouse)
+
                 if hasattr(self, 'accuse_btn'):
                     self.accuse_btn.draw(self.screen, self.mouse)
 
@@ -749,6 +755,22 @@ class Dice:
             # draw the transparent copy
             surface.blit(self.image_copy, (self.x, self.y))
 
+class CardsButton:
+    def __init__(self, x, y):
+        self.image = pygame.image.load('Assets/HandCards.png')
+        self.image = pygame.transform.smoothscale(self.image, (150, 80))
+        #Transparent Effect
+        self.image_hover = self.image.copy()
+        self.image_hover.set_alpha(150)
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+    def draw(self, surface, mouse_pos):
+        if self.rect.collidepoint(mouse_pos):
+            surface.blit(self.image, self.rect.topleft)
+        else:
+            surface.blit(self.image_hover, self.rect.topleft)
 
 class AccuseButton:
     def __init__(self, x, y):
