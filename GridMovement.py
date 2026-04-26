@@ -570,7 +570,7 @@ class Game:
                     target_tile = self.room_exits[target_room]
 
                     #CPU MOVES W DELAY
-                    if self.cpu_timer > 70 and self.cpu_moves_left > 0:
+                    if self.cpu_timer > 50 and self.cpu_moves_left > 0:
                         dx, dy = self.get_cpudirection(visualcpu, target_tile)
                         result = visualcpu.move(
                             dx,
