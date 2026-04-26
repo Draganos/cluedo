@@ -168,8 +168,8 @@ class Game:
         self.menu = Menu()
 
         # Header, Dice and Accuse button
-        self.turn_image = pygame.image.load('Assets/Your turn.png')
-        self.turn_image = pygame.transform.smoothscale(self.turn_image, (400, 60))
+        #self.turn_image = pygame.image.load('Assets/Your turn.png')   ####MADE REDUNDANT BY NEW YOUR TURN IMAGE
+        #self.turn_image = pygame.transform.smoothscale(self.turn_image, (400, 60))   ###MADE REDUNDANT BY NEW YOUR TURN GRAPHIC
         item_y = self.board.sheet_height + 50 + HEADER_HEIGHT
         dice_x = self.board.width + 40
         accuse_x = self.board.width + 220
@@ -342,14 +342,12 @@ class Game:
 
                 elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
                     self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats);
-                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats);
                     self.moves_left -= 1
 
                     if self.moves_left == 0:
                         self.turn_phase = "END"
                 elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
                     self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats);
-                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats);
                     self.moves_left -= 1
 
                     if self.moves_left == 0:
@@ -427,12 +425,18 @@ class Game:
                             "Dice cannot be rolled with spacebar as not players turn")  # added 24/04/2026 for locking movement to current turn
                         return  # added 24/04/2026 for locking movement to current turn
                     print("Dice has been rolled with spacebar.")
-                    if self.activegame:
+                    if self.activegame and self.turn_phase == "ROLL": #26/04/2026 changes made such that roll cannot be done while moving
                         self.moves_left = random.randint(2, 12)
                         print(f"Rolled: {self.moves_left}")
+                        self.turn_phase = "MOVE"
 
-    def get_active_player(self):  ###for turn system
+    ###for turn system below VVV
+    def get_active_player(self):
         return self.all_players[self.turn_index]
+
+    def get_next_player(self):
+        next_index = (self.turn_index + 1) % len(self.all_players)
+        return self.all_players[next_index]
 
     def run(self):
         while self.running:
@@ -480,26 +484,58 @@ class Game:
                 #ticks and debug grid drawn on top of the sheet.
                 self.check_sheet.draw(self.screen)
 
-                # Draw the turn image at the top
-                if hasattr(self, 'turn_image'):
-                    img_x = (self.board.width + self.board.sheet_width) // 2 - (self.turn_image.get_width() // 2)
-                    img_y = HEADER_HEIGHT // 2 - (self.turn_image.get_height() // 2)
-                    self.screen.blit(self.turn_image, (img_x, img_y))
+                # Draw the turn image at the top ###REDUNDANT NOW AS NEW TURN GRAPHIC IS DONE DYNAMICALLY
+                #######if hasattr(self, 'turn_image'):
+                #######    img_x = (self.board.width + self.board.sheet_width) // 2 - (self.turn_image.get_width() // 2)
+                #######    img_y = HEADER_HEIGHT // 2 - (self.turn_image.get_height() // 2)
+                #######    self.screen.blit(self.turn_image, (img_x, img_y))
 
                 #Draw UI and Players
-                if self.activegame and self.all_players:  ###turn display
-                    font = pygame.font.SysFont(None, 36)
+                ##TURN DISPLAY
+                if self.activegame and self.all_players:
+                    font = pygame.font.SysFont(None, 42)
 
                     active = self.get_active_player().character.name
-                    phase = self.turn_phase
+                    text = font.render(f"{active}'s Turn", True, (255, 255, 255))
 
-                    text = font.render(f"{active}'s Turn - {phase}", True, (255, 255, 255))
-
-                    text_rect = text.get_rect(topright=(self.screen.get_width() - 20, 20))
-                    bg_rect = text_rect.inflate(10, 10)
+                    text_rect = text.get_rect(
+                        center=((self.board.width + self.board.sheet_width) // 2, HEADER_HEIGHT // 2)
+                    )
+                    bg_rect = text_rect.inflate(20, 12)
 
                     pygame.draw.rect(self.screen, (0, 0, 0), bg_rect)
                     self.screen.blit(text, text_rect)
+                if self.activegame and self.all_players:
+                    small_font = pygame.font.SysFont(None, 28)
+
+                    next_player = self.get_next_player().character.name
+
+                    if self.turn_phase == "ROLL":
+                        status = "ROLL"
+                    elif self.turn_phase == "MOVE":
+                        status = f"Moves left: {self.moves_left}"
+                    elif self.turn_phase == "END":
+                        status = "Press ENTER to end"
+                    else:
+                        status = self.turn_phase
+
+                    line1 = small_font.render(status, True, (255, 255, 255))
+                    line2 = small_font.render(f"Next: {next_player}", True, (255, 255, 255))
+
+                    box_width = max(line1.get_width(), line2.get_width()) + 20
+                    box_height = line1.get_height() + line2.get_height() + 15
+
+                    box_rect = pygame.Rect(
+                        self.screen.get_width() - box_width - 20,
+                        15,
+                        box_width,
+                        box_height
+                    )
+
+                    pygame.draw.rect(self.screen, (0, 0, 0), box_rect)
+
+                    self.screen.blit(line1, (box_rect.x + 10, box_rect.y + 5))
+                    self.screen.blit(line2, (box_rect.x + 10, box_rect.y + 5 + line1.get_height()))
 
                 self.player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
@@ -743,4 +779,3 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
-
