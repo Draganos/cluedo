@@ -1,14 +1,16 @@
 import random
 
 import pygame
+from pygame import surface
+from pygame.examples.music_drop_fade import starting_pos
+
 from main import setup_game  # for linking gridcontroller
 
-# Constants, OFFSET X, Y and TILE_SIZE determine the grid layout.
+# Constants, OFFSET X, Y and TILE_SIZE determine the grid layout. Sheet is for the squares inside the sheet.
 SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
 HEADER_HEIGHT = 80
-# Header height is added here to make sure that player starts at top left of board.
 OFFSET_Y = (18 * SCALE) + HEADER_HEIGHT
 
 # Button colours
@@ -30,7 +32,7 @@ class Player:
         new_col = self.col + dx
         new_row = self.row + dy
 
-        # 1. Door Check
+        # Door Check
         if (new_col, new_row) in doors:
             entered_room = doors[(new_col, new_row)]
             print(f"Player entered the {entered_room}!")
@@ -43,12 +45,12 @@ class Player:
 
             return "ENTERED_ROOM"
 
-        # 2. Forbidden tile Check
+        # Forbidden tile Check
         if (new_col, new_row) in forbidden_zones:
             print("Cannot move in there!")
             return None
 
-        # 3. Boundary check (so they don't walk off the screen)
+        # Boundary check (so they don't walk off the screen)
         if 0 <= new_col < 24 and 0 <= new_row < 25:
             self.col = new_col
             self.row = new_row
@@ -174,6 +176,8 @@ class Game:
         self.dice = Dice(dice_x, item_y)
         self.dice_rect = self.dice.rect
         self.accuse_btn = AccuseButton(accuse_x, item_y)
+
+        self.check_sheet = CheckSheetFunction(self.board.width + 67)
 
         # Determines where the player starts and color.
         self.player = Player(11, 11, (255, 0, 0))  # Red player
@@ -400,9 +404,14 @@ class Game:
 
                 print("Dice has been rolled with mouse.")  # debugging
                 if self.activegame and self.turn_phase == "ROLL":
-                    self.moves_left = random.randint(2, 12)
-                    print(f"Rolled: {self.moves_left}")
-                    self.turn_phase = "MOVE"
+                 self.moves_left = random.randint(2, 12)
+                 print(f"Rolled: {self.moves_left}")
+
+                 self.turn_phase = "MOVE"
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                 self.check_sheet.handle_click(self.mouse)
+
 
             # Accuse button logic
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -444,7 +453,7 @@ class Game:
                     self.play_finished = False
                     self.last_surprise = current_time
 
-            # // CPU HANDLING FOR NON-USER TURN
+            # CPU HANDLING FOR NON-USER TURN
             if self.activegame and self.get_active_player() != self.currentplayer:
                 self.cpu_timer += 1
                 if self.cpu_timer > 120:  # 2 second delay (number is delay in fps)
@@ -465,13 +474,20 @@ class Game:
                 pygame.draw.rect(self.screen, (140, 185, 130),
                                  (0, 0, self.board.width + self.board.sheet_width, HEADER_HEIGHT))
 
+                #Board and sheet get drawn first
+                self.board.draw(self.screen)
+
+                #ticks and debug grid drawn on top of the sheet.
+                self.check_sheet.draw(self.screen)
+
+                # Draw the turn image at the top
                 if hasattr(self, 'turn_image'):
                     img_x = (self.board.width + self.board.sheet_width) // 2 - (self.turn_image.get_width() // 2)
                     img_y = HEADER_HEIGHT // 2 - (self.turn_image.get_height() // 2)
                     self.screen.blit(self.turn_image, (img_x, img_y))
 
-                self.board.draw(self.screen)
-                if self.activegame and self.all_players: ###turn display
+                #Draw UI and Players
+                if self.activegame and self.all_players:  ###turn display
                     font = pygame.font.SysFont(None, 36)
 
                     active = self.get_active_player().character.name
@@ -496,6 +512,8 @@ class Game:
 
                     if finished:
                         self.playing = False
+
+
 
             pygame.display.flip()
         pygame.quit()
@@ -604,6 +622,81 @@ class Menu:
         self.exit_btn.mouseHover(self.mouse)
 
 
+class CheckSheetFunction:
+    def __init__(self,start_x):
+        self.start_x = start_x
+        # Width and height of each cell within the sheet
+        self.cell_w = 49
+        self.cell_h = 16.5
+
+        #Starting positions on Y axis for each of the grids.
+        self.y_suspects = 174.5
+        self.y_weapons = 310
+        self.y_rooms = 440
+
+        #Font
+        pygame.font.init()
+        self.font = pygame.font.SysFont(None, 25)
+
+        #X render
+        self.x_image = self.font.render("X", True, (0, 0, 0))
+
+        #Centers the X right in the middle of a cell.
+        self.center_offset_x = self.cell_w // 2
+        self.center_offset_y = self.cell_h // 2
+
+        # Dictionary to check rows/col per grid.
+        self.sections = {
+            "Suspects": {"y": self.y_suspects, "rows": 6, "cols": 6},
+            "Weapons": {"y": self.y_weapons, "rows": 6, "cols": 6},
+            "Rooms": {"y": self.y_rooms, "rows": 9, "cols": 6}
+        }
+
+        #Keeps track of boxes that have been ticked.
+        self.ticks = set()
+
+    def handle_click(self, mouse_pos):
+        mouse_x, mouse_y = mouse_pos
+
+        for section, data in self.sections.items():
+            start_y = data["y"]
+
+            # Loop through every possible cell in this section
+            for row in range(data["rows"]):
+                for col in range(data["cols"]):
+                    # Calculate the top-left corner of this specific cell
+                    cell_x = self.start_x + (col * self.cell_w)
+                    cell_y = start_y + (row * self.cell_h)
+
+                    # Creates a hitbox for the cell
+                    cell_rect = pygame.Rect(cell_x, cell_y, self.cell_w, self.cell_h)
+
+                    # Check if the mouse click happened inside this cell's rectangle
+                    if cell_rect.collidepoint(mouse_x, mouse_y):
+                        cell_id = (section, row, col)
+
+                        # Toggle Logic with ticks
+                        if cell_id in self.ticks:
+                            self.ticks.remove(cell_id)  # Remove tick if already clicked
+                        else:
+                            self.ticks.add(cell_id)  # Add tick if empty
+
+                        return
+
+    def draw(self, surface):
+        for (section, row, col) in self.ticks:
+            #Find the center
+            start_y = self.sections[section]["y"]
+            center_x = self.start_x + (col * self.cell_w) + self.center_offset_x
+            center_y = start_y + (row * self.cell_h) + self.center_offset_y
+
+            #Creates hitbox
+            x_rect = self.x_image.get_rect(center=(center_x, center_y))
+            surface.blit(self.x_image, x_rect)
+
+
+
+
 class MenuButton:
     def __init__(self, colour, pos_x, pos_y, width, height, text=''):
         self.color = colour
@@ -650,3 +743,4 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
+
