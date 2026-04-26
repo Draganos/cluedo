@@ -324,40 +324,34 @@ class Game:
                 self.running = False
 
 ####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
-            if event.type == pygame.KEYDOWN:
-                if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
-                    return  # added 24/04/2026 for locking movement to current turn
+             if event.type == pygame.KEYDOWN:
+                if not self.activegame or self.get_active_player() != self.currentplayer:
+                    return  # Lock movement to current turn
+
                 if event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(0, -1, self.forbidden_tiles, self.doors,self.room_seats)
-                    self.moves_left -= 1
+                    if self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats):
+                        self.moves_left -= 1
+                        if self.moves_left == 0:
+                            self.turn_phase = "END"
 
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
-                if event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats)
-                    self.moves_left -= 1
+                elif event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    if self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats):
+                        self.moves_left -= 1
+                        if self.moves_left == 0:
+                            self.turn_phase = "END"
 
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
+                elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    if self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats):
+                        self.moves_left -= 1
+                        if self.moves_left == 0:
+                            self.turn_phase = "END"
 
-                if event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats)
-                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats)
-                    self.moves_left -= 1
+                elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    if self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats):
+                        self.moves_left -= 1
+                        if self.moves_left == 0:
+                            self.turn_phase = "END"
 
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
-                if event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats)
-                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats)
-                    self.moves_left -= 1
-
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
-
-                elif event.key == pygame.K_RETURN and self.turn_phase == "END":
-                    print("TURN ENDED")
-                    self.end_turn()
 
 ###        MENU SELECTION BELOW
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
