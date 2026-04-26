@@ -3,13 +3,12 @@ import random
 import pygame
 from main import setup_game  # for linking gridcontroller
 
-
 # Constants, OFFSET X, Y and TILE_SIZE determine the grid layout.
 SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
 HEADER_HEIGHT = 80
-#Header height is added here to make sure that player starts at top left of board.
+# Header height is added here to make sure that player starts at top left of board.
 OFFSET_Y = (18 * SCALE) + HEADER_HEIGHT
 
 # Button colours
@@ -77,12 +76,9 @@ class Board:
         self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.sheet_height))
 
     def draw(self, surface):
-
         # Draw the board and sheet shifted down by HEADER_HEIGHT
         surface.blit(self.image, (0, HEADER_HEIGHT))
         surface.blit(self.sheet, (self.width, HEADER_HEIGHT))
-
-
 
         # Fill the empty space under the sheet with green.
         pygame.draw.rect(
@@ -91,12 +87,11 @@ class Board:
             (self.width, self.sheet_height + HEADER_HEIGHT, self.sheet_width, self.height - self.sheet_height)
         )
 
-
         # Visual Debug: To see the grid lines.
-        #for r in range(25):
-            #for c in range(24):
-                #rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-               # pygame.draw.rect(surface, (255, 0, 0), rect, 1)
+        # for r in range(25):
+        # for c in range(24):
+        # rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        # pygame.draw.rect(surface, (255, 0, 0), rect, 1)
 
 
 ##SPRITE WORK FROM VICTOR ####
@@ -164,13 +159,13 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        #Board init
+        # Board init
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height + HEADER_HEIGHT))
         self.menu = Menu()
 
-        #Header, Dice and Accuse button
+        # Header, Dice and Accuse button
         self.turn_image = pygame.image.load('Assets/Your turn.png')
         self.turn_image = pygame.transform.smoothscale(self.turn_image, (400, 60))
         item_y = self.board.sheet_height + 50 + HEADER_HEIGHT
@@ -188,7 +183,8 @@ class Game:
 
         self.sprite = Sprite_Chars(win_width, self.board.height)
 
-
+        ###cpu-related
+        self.cpu_timer = 0
 
         ###storing game state variables for gamecontroller
         self.activegame = False
@@ -323,37 +319,43 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
-####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
-             if event.type == pygame.KEYDOWN:
-                if not self.activegame or self.get_active_player() != self.currentplayer:
-                    return  # Lock movement to current turn
+            ####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
+            if event.type == pygame.KEYDOWN:
+                if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
+                    return  # added 24/04/2026 for locking movement to current turn
+                elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats);
+                    self.moves_left -= 1
 
-                if event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    if self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats):
-                        self.moves_left -= 1
-                        if self.moves_left == 0:
-                            self.turn_phase = "END"
-
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
                 elif event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    if self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats):
-                        self.moves_left -= 1
-                        if self.moves_left == 0:
-                            self.turn_phase = "END"
+                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats);
+                    self.moves_left -= 1
+
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
 
                 elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    if self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats):
-                        self.moves_left -= 1
-                        if self.moves_left == 0:
-                            self.turn_phase = "END"
+                    self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats);
+                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats);
+                    self.moves_left -= 1
 
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
                 elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    if self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats):
-                        self.moves_left -= 1
-                        if self.moves_left == 0:
-                            self.turn_phase = "END"
+                    self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats);
+                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats);
+                    self.moves_left -= 1
 
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
 
-###        MENU SELECTION BELOW
+                elif event.key == pygame.K_RETURN and self.turn_phase == "END":
+                    print("TURN ENDED")
+                    self.end_turn()
+
+            ###        MENU SELECTION BELOW
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
                 # Catch the action
                 action = self.menu.buttonAction(self.mouse)
@@ -402,13 +404,12 @@ class Game:
                     print(f"Rolled: {self.moves_left}")
                     self.turn_phase = "MOVE"
 
-        #Accuse button logic
+            # Accuse button logic
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if hasattr(self, 'accuse_btn') and self.accuse_btn.rect.collidepoint(self.mouse):
                     # Check if the game has started and if it's the active player's turn
                     if self.activegame and self.get_active_player() == self.currentplayer:
                         print("Accuse button clicked!")
-
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -443,12 +444,26 @@ class Game:
                     self.play_finished = False
                     self.last_surprise = current_time
 
+            # // CPU HANDLING FOR NON-USER TURN
+            if self.activegame and self.get_active_player() != self.currentplayer:
+                self.cpu_timer += 1
+                if self.cpu_timer > 120:  # 2 second delay (number is delay in fps)
+
+                    cpu = self.get_active_player()
+                    print(f"{cpu.character.name} (CPU) turn")
+                    roll = random.randint(1, 6)
+                    print(f"{cpu.character.name} rolled {roll}")
+                    self.end_turn()
+                    self.cpu_timer = 0
+
+            ######### drawing menus
             if self.menu is not None:  # checking if we are on menu screen or board screen
                 self.menu.draw(self.screen, self.mouse)
 
-            #This draws everything basically.
+            # This draws everything basically.
             else:
-                pygame.draw.rect(self.screen, (140, 185, 130),(0, 0, self.board.width + self.board.sheet_width, HEADER_HEIGHT))
+                pygame.draw.rect(self.screen, (140, 185, 130),
+                                 (0, 0, self.board.width + self.board.sheet_width, HEADER_HEIGHT))
 
                 if hasattr(self, 'turn_image'):
                     img_x = (self.board.width + self.board.sheet_width) // 2 - (self.turn_image.get_width() // 2)
@@ -456,21 +471,31 @@ class Game:
                     self.screen.blit(self.turn_image, (img_x, img_y))
 
                 self.board.draw(self.screen)
+                if self.activegame and self.all_players: ###turn display
+                    font = pygame.font.SysFont(None, 36)
+
+                    active = self.get_active_player().character.name
+                    phase = self.turn_phase
+
+                    text = font.render(f"{active}'s Turn - {phase}", True, (255, 255, 255))
+
+                    text_rect = text.get_rect(topright=(self.screen.get_width() - 20, 20))
+                    bg_rect = text_rect.inflate(10, 10)
+
+                    pygame.draw.rect(self.screen, (0, 0, 0), bg_rect)
+                    self.screen.blit(text, text_rect)
+
                 self.player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
 
-
                 if hasattr(self, 'accuse_btn'):
                     self.accuse_btn.draw(self.screen, self.mouse)
-
 
                 if self.playing:
                     finished = self.sprite.draw(self.screen)
 
                     if finished:
                         self.playing = False
-
-
 
             pygame.display.flip()
         pygame.quit()
@@ -483,6 +508,7 @@ class Game:
         self.turn_phase = "ROLL"
 
         print(f"Next player: {self.get_active_player().character.name}")
+
 
 class Dice:
     # Should (ideally) have both mouse and keyboard functionality.
@@ -519,12 +545,12 @@ class AccuseButton:
     def __init__(self, x, y):
         self.image = pygame.image.load('Assets/Accuse.png')
         self.image = pygame.transform.smoothscale(self.image, (150, 120))
-        #Transparent effect
+        # Transparent effect
         self.image_hover = self.image.copy()
         self.image_hover.set_alpha(150)
 
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x,y)
+        self.rect.topleft = (x, y)
 
     def draw(self, surface, mouse_pos):
         # Check if the mouse is currently inside the button's picture frame
@@ -534,8 +560,6 @@ class AccuseButton:
         else:
             # If not hovering, draw the slightly transparent version
             surface.blit(self.image_hover, self.rect.topleft)
-
-
 
 
 class Menu:
@@ -626,4 +650,3 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
-
