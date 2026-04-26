@@ -77,7 +77,7 @@ class Board:
         self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.sheet_height))
 
     def draw(self, surface):
-        
+
         # Draw the board and sheet shifted down by HEADER_HEIGHT
         surface.blit(self.image, (0, HEADER_HEIGHT))
         surface.blit(self.sheet, (self.width, HEADER_HEIGHT))
@@ -163,7 +163,7 @@ class Game:
     # Initialisation for the game.
     def __init__(self):
         pygame.init()
-        
+
         #Board init
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
@@ -323,18 +323,43 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
+####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
             if event.type == pygame.KEYDOWN:
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     return  # added 24/04/2026 for locking movement to current turn
-                if event.key == pygame.K_UP:    self.player.move(0, -1, self.forbidden_tiles, self.doors,
-                                                                 self.room_seats)
-                if event.key == pygame.K_DOWN:  self.player.move(0, 1, self.forbidden_tiles, self.doors,
-                                                                 self.room_seats)
-                if event.key == pygame.K_LEFT:  self.player.move(-1, 0, self.forbidden_tiles, self.doors,
-                                                                 self.room_seats)
-                if event.key == pygame.K_RIGHT: self.player.move(1, 0, self.forbidden_tiles, self.doors,
-                                                                 self.room_seats)
+                if event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    self.player.move(0, -1, self.forbidden_tiles, self.doors,self.room_seats)
+                    self.moves_left -= 1
 
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
+                if event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats)
+                    self.moves_left -= 1
+
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
+
+                if event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats)
+                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats)
+                    self.moves_left -= 1
+
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
+                if event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats)
+                    self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats)
+                    self.moves_left -= 1
+
+                    if self.moves_left == 0:
+                        self.turn_phase = "END"
+
+                elif event.key == pygame.K_RETURN and self.turn_phase == "END":
+                    print("TURN ENDED")
+                    self.end_turn()
+
+###        MENU SELECTION BELOW
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
                 # Catch the action
                 action = self.menu.buttonAction(self.mouse)
@@ -426,7 +451,7 @@ class Game:
 
             if self.menu is not None:  # checking if we are on menu screen or board screen
                 self.menu.draw(self.screen, self.mouse)
-                
+
             #This draws everything basically.
             else:
                 pygame.draw.rect(self.screen, (140, 185, 130),(0, 0, self.board.width + self.board.sheet_width, HEADER_HEIGHT))
@@ -456,6 +481,14 @@ class Game:
             pygame.display.flip()
         pygame.quit()
 
+    def end_turn(self):
+        print(f"Ending turn: {self.get_active_player().character.name}")
+
+        self.turn_index = (self.turn_index + 1) % len(self.all_players)
+        self.moves_left = 0
+        self.turn_phase = "ROLL"
+
+        print(f"Next player: {self.get_active_player().character.name}")
 
 class Dice:
     # Should (ideally) have both mouse and keyboard functionality.
