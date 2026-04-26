@@ -1,8 +1,6 @@
 import random
 
 import pygame
-from pygame import surface
-from pygame.examples.music_drop_fade import starting_pos
 
 from main import setup_game  # for linking gridcontroller
 
@@ -201,7 +199,9 @@ class Game:
 
         ###cpu-related
         self.cpu_timer = 0
-
+        self.cpu_moves_left = 0
+        self.cpu_rolled = False
+        self.cpu_roomtarget = {}
         ###storing game state variables for gamecontroller
         self.activegame = False
         self.currentplayer = None
@@ -470,11 +470,11 @@ class Game:
                         (14, 24)
                     ]
                     cpu_colours = [
-                        (128, 0, 128),  # Plum
-                        (255, 255, 0),  # Mustard
-                        (0, 128, 0),  # Green
-                        (0, 0, 255),  # Peacock
-                        (255, 255, 255)  # White
+                        (128, 0, 128),  #Plum
+                        (255, 255, 0),  #Mustard
+                        (0, 128, 0),  #Green
+                        (0, 0, 255),  #Peacock
+                        (255, 255, 255)  #White
                     ]
                     self.visual_players = [self.player]
                     for i, cpu in enumerate(self.otherplayers):
@@ -535,6 +535,17 @@ class Game:
                 return visual_player
         return None
 
+    def get_cpudirection(self, visual_player, target_tile):
+        dx = target_tile[0] - visual_player.col
+        dy = target_tile[1] - visual_player.row
+        #if target_room == None:
+            #target_room = random.choice(list(self.room_seats.keys()))
+        if abs(dx) > abs(dy):
+            return (1 if dx > 0 else -1, 0)
+        elif dy != 0:
+            return (0, 1 if dy > 0 else -1)
+        return (0, 0)
+
     def run(self):
         while self.running:
             self.handle_events()
@@ -554,18 +565,60 @@ class Game:
                     self.play_finished = False
                     self.last_surprise = current_time
 
-            # CPU HANDLING FOR NON-USER TURN
+            # CPU HANDLING FOR NON-USER TURN (CPU's Turn)
             if self.activegame and self.get_active_player() != self.currentplayer:
                 self.cpu_timer += 1
-                if self.cpu_timer > 120:  # 2 second delay (number is delay in fps)
+                cpu = self.get_active_player()
+                visualcpu = self.getvisualplayer(cpu)
+#CPU step by step actions in CPU Turn
+                if visualcpu is not None: #rolls dice here for each cpu at their turn
+                    if not self.cpu_rolled:
+                        self.cpu_moves_left = random.randint(2, 12)
+                        self.cpu_rolled = True
+                        print(f"{cpu.character.name} (CPU) rolled {self.cpu_moves_left}")
 
-                    cpu = self.get_active_player()
-                    visualcpu = self.getvisualplayer(cpu)
-                    print(f"{cpu.character.name} (CPU) turn")
-                    roll = random.randint(1, 6)
-                    print(f"{cpu.character.name} rolled {roll}")
-                    self.end_turn()
-                    self.cpu_timer = 0
+                    #Assigning a room for CPU to target
+                    if cpu not in self.cpu_roomtarget or self.cpu_roomtarget[cpu] is None:
+                        self.cpu_roomtarget[cpu] = random.choice(list(self.room_exits.keys()))
+
+                    target_room = self.cpu_roomtarget[cpu]
+                    target_tile = self.room_exits[target_room]
+
+                    #CPU MOVES W DELAY
+                    if self.cpu_timer > 50 and self.cpu_moves_left > 0:
+                        dx, dy = self.get_cpudirection(visualcpu, target_tile)
+                        result = visualcpu.move(
+                            dx,
+                            dy,
+                            self.forbidden_tiles,
+                            self.doors,
+                            self.room_seats,
+                            self.room_exits
+                        )
+                        if result is None: #If CPU goes into the wall or something
+                            dx, dy = random.choice([(0, -1), (0, 1), (-1, 0), (1, 0)])
+                            result = visualcpu.move(
+                                dx,
+                                dy,
+                                self.forbidden_tiles,
+                                self.doors,
+                                self.room_seats,
+                                self.room_exits
+                            )
+                        if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
+                            self.cpu_moves_left -= 1
+                        #behavior for when the cpu reaches that room
+                        if result == "ENTERED_ROOM":
+                            self.cpu_roomtarget[cpu] = None
+                            self.cpu_moves_left = 0
+                            ###CPU WILL NEED TO MAKE ACCUSATION IF RELEVANT MAYBE??? CHECK
+
+                        self.cpu_timer = 0
+
+                    #CPUENDTURN
+                    if self.cpu_rolled and self.cpu_moves_left == 0:
+                        self.cpu_rolled = False
+                        self.end_turn()
 
             ######### drawing menus
             if self.menu is not None:  # checking if we are on menu screen or board screen
