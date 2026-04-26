@@ -167,14 +167,16 @@ class Game:
     # Initialisation for the game.
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
 
         # Board init
         self.board = Board()
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height + HEADER_HEIGHT))
         self.menu = Menu()
+        self.play_menu_music()
 
-        # Header, Dice and Accuse button
+        # Header, Dice, Accuse and CardButton
         #self.turn_image = pygame.image.load('Assets/Your turn.png')   ####MADE REDUNDANT BY NEW YOUR TURN IMAGE
         #self.turn_image = pygame.transform.smoothscale(self.turn_image, (400, 60))   ###MADE REDUNDANT BY NEW YOUR TURN GRAPHIC
         item_y = self.board.sheet_height + 50 + HEADER_HEIGHT
@@ -183,12 +185,14 @@ class Game:
         self.dice = Dice(dice_x, item_y)
         self.dice_rect = self.dice.rect
         self.accuse_btn = AccuseButton(accuse_x, item_y)
-
         self.check_sheet = CheckSheetFunction(self.board.width + 67)
-        
         cards_x = (self.board.width * 0.80) - (150 // 2)
         cards_y = HEADER_HEIGHT - 80
         self.cards_btn = CardsButton(cards_x, cards_y)
+
+        #Dropdown menu for cards init
+        self.show_cards_dropdown = False
+        self.dropdown_font = pygame.font.SysFont(None, 24)
 
         # Determines where the player starts and color.
         self.visual_players = []
@@ -196,7 +200,6 @@ class Game:
         self.running = True
         # Gets mouse position
         self.mouse = pygame.mouse.get_pos()
-
         self.sprite = Sprite_Chars(win_width, self.board.height)
 
         ###cpu-related
@@ -347,6 +350,18 @@ class Game:
         self.play_finished = False
         self.cooldown = 840  # milliseconds
 
+    def play_menu_music(self):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load("Sounds/menumusic.mp3")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+
+    def play_game_music(self):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load("Sounds/gamemusic.mp3")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+
     def handle_events(self):
         # checks for actions by the user.
         for event in pygame.event.get():
@@ -448,6 +463,7 @@ class Game:
                     self.player.character = self.currentplayer.character  # this links visual player to logic of the character
                     self.activegame = True
                     self.menu = None
+                    self.play_game_music()
                     print("the game is fully initialised.")
 
                     ###CPU GRAPHICS
@@ -496,6 +512,9 @@ class Game:
                     if self.activegame and self.get_active_player() == self.currentplayer:
                         print("Accuse button clicked!")
 
+                if hasattr(self, 'cards_btn') and self.cards_btn.rect.collidepoint(self.mouse):
+                    self.show_cards_dropdown = not self.show_cards_dropdown
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
@@ -542,9 +561,7 @@ class Game:
             self.screen.fill((0, 0, 0))
             # Gets mouse position while game running
             self.mouse = pygame.mouse.get_pos()
-
             current_time = pygame.time.get_ticks()
-
             # Random sprite trigger logic
             if current_time - self.last_surprise >= self.cooldown and not self.playing:
                 j_roll = random.randint(1, self.chance)
@@ -649,7 +666,6 @@ class Game:
                     self.screen.blit(text, text_rect)
                 if self.activegame and self.all_players:
                     small_font = pygame.font.SysFont(None, 28)
-
                     next_player = self.get_next_player().character.name
 
                     if self.turn_phase == "ROLL":
@@ -683,8 +699,28 @@ class Game:
                 for visual_player in self.visual_players:
                     visual_player.draw(self.screen)
                 self.dice.draw(self.screen, self.mouse)
-
                 self.cards_btn.draw(self.screen, self.mouse)
+
+                #CardButton Dropdown Menu running
+                if self.show_cards_dropdown and self.currentplayer:
+                    cards_in_hand = self.currentplayer.show_hand()
+
+                    if cards_in_hand:
+                        # Set up the dropdown dimensions
+                        drop_x = self.cards_btn.rect.x
+                        drop_y = self.cards_btn.rect.bottom
+                        drop_w = 150
+                        drop_h = len(cards_in_hand) * 30 + 10
+
+                        # Draw the drop down menu
+                        pygame.draw.rect(self.screen, (50, 50, 50), (drop_x, drop_y, drop_w, drop_h))
+                        pygame.draw.rect(self.screen, (255, 255, 255), (drop_x, drop_y, drop_w, drop_h), 2)
+
+                        #  Each card name
+                        for i, card_name in enumerate(cards_in_hand):
+                            text_dropdown = self.dropdown_font.render(card_name, True, (255, 255, 255))
+                            self.screen.blit(text_dropdown, (drop_x + 10, drop_y + 10 + (i * 30)))
+
 
                 if hasattr(self, 'accuse_btn'):
                     self.accuse_btn.draw(self.screen, self.mouse)
@@ -941,3 +977,4 @@ class MenuButton:
 if __name__ == "__main__":
     clue_game = Game()
     clue_game.run()
+
