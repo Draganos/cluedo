@@ -54,7 +54,6 @@ class Player:
 
         # Forbidden tile Check
         if (new_col, new_row) in forbidden_zones:
-            print("Cannot move in there!")
             return None
 
         # Boundary check (so they don't walk off the screen)
@@ -228,6 +227,10 @@ class Game:
         self.turn_index = 0
         self.all_players = []
         self.turn_phase = "ROLL"  # ROLL/MOVE/ACTION/END
+
+        self.message = ""
+        self.message_timer = 0
+        self.font = pygame.font.SysFont(None, 32)
 
         # Door tiles
         self.doors = {
@@ -456,6 +459,9 @@ class Game:
                     ##MOVEMENT FUNCTIONALITY BELOW
                 elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+                    if result is None:
+                        self.message = "Cannot move in there!"
+                        self.message_timer = pygame.time.get_ticks()
 
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
@@ -471,6 +477,9 @@ class Game:
 
                 elif event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+                    if result is None:
+                        self.message = "Cannot move in there!"
+                        self.message_timer = pygame.time.get_ticks()
 
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
@@ -486,6 +495,9 @@ class Game:
 
                 elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+                    if result is None:
+                        self.message = "Cannot move in there!"
+                        self.message_timer = pygame.time.get_ticks()
 
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
@@ -501,6 +513,9 @@ class Game:
 
                 elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+                    if result is None:
+                        self.message = "Cannot move in there!"
+                        self.message_timer = pygame.time.get_ticks()
 
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
@@ -860,8 +875,22 @@ class Game:
 
                     if finished:
                         self.playing = False
-
-
+            if self.message:
+                elapsed = pygame.time.get_ticks() - self.message_timer
+                if elapsed < 2000:
+                    text_surface = self.font.render(self.message, True, (255, 255, 255))
+                    text_rect = text_surface.get_rect()
+                    # Positions bottom in the centre
+                    text_rect.center = (self.screen.get_width() // 2, self.screen.get_height() - 40)
+                    # Background box
+                    padding = 10
+                    bg_rect = text_rect.inflate(padding * 2, padding * 2)
+                    # Draws box
+                    pygame.draw.rect(self.screen, (30, 30, 30), bg_rect, border_radius=8)
+                    pygame.draw.rect(self.screen, (200, 50, 50), bg_rect, 2, border_radius=8)
+                    self.screen.blit(text_surface, text_rect)
+                else:
+                    self.message = ""
 
             pygame.display.flip()
         pygame.quit()
