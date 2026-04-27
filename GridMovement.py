@@ -743,14 +743,14 @@ class Game:
                         "Dice cannot be rolled with mouse as not players turn")  # added 24/04/2026 for locking movement to current turn
                     return  # added 24/04/2026 for locking movement to current turn
 
-                print("Dice has been rolled with mouse.")  # debugging
+                # print("Dice has been rolled with mouse.")
                 if self.activegame and self.turn_phase == "ROLL":
 
                  self.moves_left = random.randint(2, 12)
                  self.last_roll = self.moves_left
                  self.roll_display_time = pygame.time.get_ticks()
                  self.turn_phase = "MOVE"
-                 print(f"Rolled: {self.moves_left}")
+                 #print(f"Rolled: {self.moves_left}")
 
                  self.turn_phase = "MOVE"
                  self.dice_sound.play()
@@ -976,7 +976,7 @@ class Game:
                         self.cpu_rolled = True
                         self.last_roll = self.cpu_moves_left
                         self.roll_display_time = pygame.time.get_ticks()
-                        print(f"{cpu.character.name} (CPU) rolled {self.cpu_moves_left}")
+                       #print(f"{cpu.character.name} (CPU) rolled {self.cpu_moves_left}")
 
                     #Assigning a room for CPU to target
                     if cpu not in self.cpu_roomtarget or self.cpu_roomtarget[cpu] is None:
@@ -1109,8 +1109,9 @@ class Game:
                  # UI for dice roll
                 if self.last_roll is not None:
                     font = pygame.font.SysFont(None, 23)
+
                     if self.roll_source:
-                        display_text = f"Rolled: {self.last_roll}"
+                        display_text = f"Rolled: {self.last_roll} ({self.roll_source})"
                     else:
                         display_text = f"Rolled: {self.last_roll}"
                     text = font.render(display_text, True, (255, 255, 255))
@@ -1230,7 +1231,7 @@ class Game:
         pygame.quit()
 
     def end_turn(self):
-        print(f"Ending turn: {self.get_active_player().character.name}")
+        #print(f"Ending turn: {self.get_active_player().character.name}")
 
         self.turn_index = (self.turn_index + 1) % len(self.all_players)
         self.moves_left = 0
@@ -1245,7 +1246,7 @@ class Game:
         self.selection_card_list = []
 
 
-        print(f"Next player: {self.get_active_player().character.name}")
+        #print(f"Next player: {self.get_active_player().character.name}")
 
 
 class Dice:
