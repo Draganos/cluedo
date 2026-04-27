@@ -85,7 +85,7 @@ def setup_game(selected_character_name):
     weapons = [Weapon(n) for n
                in ["Candlestick",
                    "Dagger",
-                   "Revolver",
+                   "Pistol",
                    "Rope",
                    "Lead Pipe",
                    "Wrench"]]
