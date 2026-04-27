@@ -2,7 +2,7 @@ import random
 import pygame
 
 
-from main import setup_game  # for linking gridcontroller
+from main import setup_game, make_suggestion  # for linking gridcontroller
 
 # Constants, OFFSET X, Y and TILE_SIZE determine the grid layout. Sheet is for the squares inside the sheet.
 SCALE = 0.6
@@ -219,10 +219,13 @@ class Game:
         self.envelope = None
         self.moves_left = 0
 
+        #suggestion tracking variables
+        self.suggestion_result = None
+        self.readytosuggest = False
         ###TURN TRACKING VARIABLES
         self.turn_index = 0
         self.all_players = []
-        self.turn_phase = "ROLL"  # ROLL → MOVE → END
+        self.turn_phase = "ROLL"  # ROLL/MOVE/ACTION/END
 
         # Door tiles
         self.doors = {
@@ -432,48 +435,87 @@ class Game:
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
+                elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest:
+                    current_room = self.player.in_room
+                    suspect = random.choice(self.characters)
+                    weapon = random.choice(self.weapons)
+                    shown_card = make_suggestion(
+                        self.currentplayer,
+                        current_room,
+                        suspect,
+                        weapon,
+                        self.all_players
+                    )
+                    self.suggestion_result = shown_card
+                    self.readytosuggest = False
+                    self.turn_phase = "END"
+
                     ##MOVEMENT FUNCTIONALITY BELOW
                 elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
+
                     if result == "ENTERED_ROOM":
                         self.moves_left = 0
+                        self.turn_phase = "ACTION"
+                        self.readytosuggest = True
+
+                    elif self.moves_left == 0:
                         self.turn_phase = "END"
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
+
+
                 elif event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    result = self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    result = self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
+
                     if result == "ENTERED_ROOM":
                         self.moves_left = 0
+                        self.turn_phase = "ACTION"
+                        self.readytosuggest = True
+
+                    elif self.moves_left == 0:
                         self.turn_phase = "END"
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
+
 
                 elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    result = self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
+                    result = self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+
                     if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                         self.moves_left -= 1
+
                     if result == "ENTERED_ROOM":
                         self.moves_left = 0
-                        self.turn_phase = "END"
-                    if self.moves_left == 0:
-                        self.turn_phase = "END"
-                elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
-                    result = self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits);
-                    if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
-                        self.moves_left -= 1
-                    if result == "ENTERED_ROOM":
-                        self.moves_left = 0
-                        self.turn_phase = "END"
-                    if self.moves_left == 0:
+                        self.turn_phase = "ACTION"
+                        self.readytosuggest = True
+
+                    elif self.moves_left == 0:
                         self.turn_phase = "END"
 
-                elif event.key == pygame.K_RETURN and self.turn_phase == "END":
+
+                elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                    result = self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
+
+                    if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
+                        self.moves_left -= 1
+
+                    if result == "ENTERED_ROOM":
+                        self.moves_left = 0
+                        self.turn_phase = "ACTION"
+                        self.readytosuggest = True
+
+                    elif self.moves_left == 0:
+                        self.turn_phase = "END"
+
+                elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER] and self.turn_phase in ["END", "ACTION"]:
                     print("TURN ENDED")
+                    self.readytosuggest = False
+                    self.suggestion_result = None
                     self.end_turn()
+
 
             ###        MENU SELECTION BELOW
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
@@ -736,8 +778,10 @@ class Game:
                         status = "ROLL"
                     elif self.turn_phase == "MOVE":
                         status = f"Moves left: {self.moves_left}"
+                    elif self.turn_phase == "ACTION":
+                        status = "Suggest / Accuse or click ENTER"
                     elif self.turn_phase == "END":
-                        status = "Make Accusation or ENTER to end"
+                        status = "Accuse or ENTER to end"
                     else:
                         status = self.turn_phase
 
