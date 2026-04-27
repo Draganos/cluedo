@@ -712,7 +712,10 @@ class Game:
                     if not self.cpu_rolled:
                         self.cpu_moves_left = random.randint(2, 12)
                         self.cpu_rolled = True
-                        print(f"{cpu.character.name} (CPU) rolled {self.cpu_moves_left}")
+                        self.last_roll = self.cpu_moves_left
+                        self.roll_source = f"{cpu.character.name} (CPU)"
+                        self.roll_display_time = pygame.time.get_ticks()
+                        #print(f"{cpu.character.name} (CPU) rolled {self.cpu_moves_left}")
 
                     #Assigning a room for CPU to target
                     if cpu not in self.cpu_roomtarget or self.cpu_roomtarget[cpu] is None:
@@ -843,13 +846,13 @@ class Game:
 
                 # UI for dice roll
                 if self.last_roll is not None:
-                    font = pygame.font.SysFont(None, 25)
+                    font = pygame.font.SysFont(None, 23)
                     if self.roll_source:
                         display_text = f"Rolled: {self.last_roll} ({self.roll_source})"
                     else:
                         display_text = f"Rolled: {self.last_roll}"
                     text = font.render(display_text, True, (255, 255, 255))
-                    rect = text.get_rect(topleft=(320, HEADER_HEIGHT - 55))
+                    rect = text.get_rect(topright=(self.screen.get_width() - 290, HEADER_HEIGHT - 20))
                     bg = rect.inflate(20, 15)
                     pygame.draw.rect(self.screen, (0, 0, 0), bg, border_radius=8)
                     pygame.draw.rect(self.screen, (255, 255, 255), bg, 2, border_radius=8)
@@ -901,12 +904,9 @@ class Game:
                 if elapsed < 2000:
                     text_surface = self.font.render(self.message, True, (255, 255, 255))
                     text_rect = text_surface.get_rect()
-                    # Positions bottom in the centre
                     text_rect.center = (self.screen.get_width() // 2, self.screen.get_height() - 40)
-                    # Background box
                     padding = 10
                     bg_rect = text_rect.inflate(padding * 2, padding * 2)
-                    # Draws box
                     pygame.draw.rect(self.screen, (30, 30, 30), bg_rect, border_radius=8)
                     pygame.draw.rect(self.screen, (200, 50, 50), bg_rect, 2, border_radius=8)
                     self.screen.blit(text_surface, text_rect)
