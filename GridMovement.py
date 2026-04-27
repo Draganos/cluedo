@@ -804,7 +804,7 @@ class Game:
 
 
                #Handles clicks on check sheet
-                elif self.activegame:
+                elif self.activegame and event.type == pygame.MOUSEBUTTONDOWN and not self.selecting and not self.accuse_menu.active:
                    if self.check_sheet.handle_click(self.mouse):
                       self.click_sound.play()
 
@@ -1503,7 +1503,7 @@ class CheckSheetFunction:
                             self.ticks.add(cell_id)  # Add tick if empty
 
                         return True
-                    return False
+          return False
 
     def draw(self, surface):
         for (section, row, col) in self.ticks:
