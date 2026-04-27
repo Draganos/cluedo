@@ -228,9 +228,14 @@ class Game:
         self.all_players = []
         self.turn_phase = "ROLL"  # ROLL/MOVE/ACTION/END
 
+        # for the invalid movement UI
         self.message = ""
         self.message_timer = 0
         self.font = pygame.font.SysFont(None, 40)
+
+        self.last_roll = None
+        self.roll_source = None
+        self.roll_display_time = 0
 
         # Door tiles
         self.doors = {
@@ -601,12 +606,12 @@ class Game:
                         "Dice cannot be rolled with mouse as not players turn")  # added 24/04/2026 for locking movement to current turn
                     return  # added 24/04/2026 for locking movement to current turn
 
-                print("Dice has been rolled with mouse.")  # debugging
                 if self.activegame and self.turn_phase == "ROLL":
-                 self.moves_left = random.randint(2, 12)
-                 print(f"Rolled: {self.moves_left}")
-
-                 self.turn_phase = "MOVE"
+                    self.moves_left = random.randint(2, 12)
+                    self.last_roll = self.moves_left
+                    self.roll_display_time = pygame.time.get_ticks()
+                    self.turn_phase = "MOVE"
+                    self.roll_source = "mouse"
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                  self.check_sheet.handle_click(self.mouse)
@@ -628,11 +633,13 @@ class Game:
                         print(
                             "Dice cannot be rolled with spacebar as not players turn")  # added 24/04/2026 for locking movement to current turn
                         return  # added 24/04/2026 for locking movement to current turn
-                    print("Dice has been rolled with spacebar.")
+
                     if self.activegame and self.turn_phase == "ROLL": #26/04/2026 changes made such that roll cannot be done while moving
                         self.moves_left = random.randint(2, 12)
-                        print(f"Rolled: {self.moves_left}")
+                        self.last_roll = self.moves_left
+                        self.roll_display_time = pygame.time.get_ticks()
                         self.turn_phase = "MOVE"
+                        self.roll_source = "spacebar"
 
     ###for turn system below VVV
     def get_active_player(self):
@@ -834,6 +841,20 @@ class Game:
                 self.dice.draw(self.screen, self.mouse)
                 self.cards_btn.draw(self.screen, self.mouse)
 
+                # UI for dice roll
+                if self.last_roll is not None:
+                    font = pygame.font.SysFont(None, 25)
+                    if self.roll_source:
+                        display_text = f"Rolled: {self.last_roll} ({self.roll_source})"
+                    else:
+                        display_text = f"Rolled: {self.last_roll}"
+                    text = font.render(display_text, True, (255, 255, 255))
+                    rect = text.get_rect(topleft=(320, HEADER_HEIGHT - 55))
+                    bg = rect.inflate(20, 15)
+                    pygame.draw.rect(self.screen, (0, 0, 0), bg, border_radius=8)
+                    pygame.draw.rect(self.screen, (255, 255, 255), bg, 2, border_radius=8)
+                    self.screen.blit(text, rect)
+
                 #CardButton Dropdown Menu running
                 if self.show_cards_dropdown and self.currentplayer:
                     cards_in_hand = self.currentplayer.hand
@@ -904,6 +925,7 @@ class Game:
         self.cpu_timer = 0
         self.cpu_moves_left = 0
         self.cpu_rolled = False
+        self.last_roll = None
 
         print(f"Next player: {self.get_active_player().character.name}")
 
