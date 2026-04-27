@@ -35,24 +35,28 @@ class MainMenu2:
         # Load Characters
         self.character_names = [
             "Col Mustard.png",
-            "MissScarlett.svg",
-            "MrsWhite.svg",
+            "MissScarlett.png",
+            "MrsWhite.png",
             "Mrs. Peacock.png",
-            "ProfessorPlum.svg",
+            "ProfessorPlum.png",
             "Rev Green.png"
         ]
 
         #Finds cards folder, loads and resizes it, then stores it as self.loaded_characters
         for i, name in enumerate(self.character_names):
             img_path = os.path.join(script_dir, "Cards", name)
-
             img = pygame.image.load(img_path).convert_alpha()
-            img = pygame.transform.scale(img, (120, 120))
-
+            max_size = 140
+            w, h = img.get_size()
+            scale = min(max_size / w, max_size / h)
+            new_w = int(w * scale)
+            new_h = int(h * scale)
+            img = pygame.transform.smoothscale(img, (new_w, new_h))
             self.loaded_characters.append(img)
 
             #hitbox for mouseHover
-            rect = img.get_rect(topleft=self.positions[i])
+            x, y = self.positions[i]
+            rect = img.get_rect(center=(x + 60, y + 60))
             self.character_rects.append(rect)
 
 
