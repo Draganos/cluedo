@@ -32,7 +32,6 @@ class Player:
             exit_tile = room_exits[self.in_room]
             self.col = exit_tile[0]
             self.row = exit_tile[1]
-            print(f"Player left the {self.in_room}")
             self.in_room = None
             return "LEFT_ROOM"
         # Calculate new position
@@ -42,7 +41,6 @@ class Player:
         # Door Check
         if (new_col, new_row) in doors:
             entered_room = doors[(new_col, new_row)]
-            print(f"Player entered the {entered_room}!")
 
             # Teleport to the first seat, up to 6 seats per room.
             available_seats = room_seats[entered_room]
