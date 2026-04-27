@@ -398,6 +398,49 @@ class Game:
         self.play_finished = False
         self.cooldown = 840  # milliseconds
 
+        # Variables for the suggestion/accusation selection
+        self.pre_selection = False
+        self.selecting = False # the suggestion/accusation menu
+        self.selecting_block = True # to patch an annoying glitch
+        self.select_suspect = False # selecting suspect menu
+        self.select_weapon = False # selecting weapon menu
+        self.select_room = False # selecting room menu
+
+        self.suspect_picked = False
+        self.weapon_picked = False
+        self.room_picked = False
+        self.card_pos = {
+            "char": [
+                (250, 225), (450, 225), (650, 225),
+                (250, 475), (450, 475), (650, 475)
+            ],
+            "weap": [
+                (250, 225), (450, 225), (650, 225),
+                (250, 475), (450, 475), (650, 475)
+            ],
+            "room": [
+                (250, 200), (450, 200), (650, 200),
+                (250, 450), (450, 450), (650, 450),
+                (250, 700), (450, 700), (650, 700)
+            ]
+        }
+        self.selection_card_list = []
+        self.char_card_list = []
+        self.weap_card_list = []
+        self.room_card_list = []
+
+
+    """def play_menu_music(self):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load("Sounds/menumusic.mp3")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+
+    def play_game_music(self):
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load("Sounds/gamemusic.mp3")
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)"""
 
     def load_card_images(self):
         self.card_images = {
@@ -462,8 +505,14 @@ class Game:
                 self.room_picked = True
             self.selection_card_list.append(card)
 
-        self.submit = MenuButton(COLOUR, 640, 600, 140, 40, "Submit")
-
+        self.submit = MenuButton(COLOUR, 640, 600, 140, 40, "Submit", 20)
+            
+    def suggest_button(self): # BOOKMARK
+        overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA).convert_alpha()
+        overlay.fill((35, 45, 60, 128))
+        suggest = MenuButton(COLOUR, 450, 300, 200, 60, "Make suggestion?", 20)
+        refuse = MenuButton(COLOUR, 450, 380, 200, 60, "Continue", 20)
+        return suggest, refuse, overlay
 
     # type is a string: "char", "weap", or "room";
     def make_suspicion_choice(self, type, positions):
@@ -525,15 +574,21 @@ class Game:
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
-
-                elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest:
-                      self.selecting = True
-                      self.select_suspect = False
-                      self.select_weapon = False
-                      self.select_room = False
-                      self.select_suspicions(self.player, "suggestion")
-
-
+                ###SUGGESTIONS
+                elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest and self.pre_selection:
+                    self.pre_selection = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        res1 = self.suggestbtn.suggest_or_pass(self.mouse)
+                        res2 = self.passbtn.suggest_or_pass(self.mouse)
+                        if res1 and res2:
+                            continue
+                        else:
+                            return
+                    self.selecting = True
+                    self.select_suspect = False
+                    self.select_weapon = False
+                    self.select_room = False
+                    self.select_suspicions(self.player, "suggestion")
 
                     ##MOVEMENT FUNCTIONALITY BELOW
                 elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
@@ -546,9 +601,11 @@ class Game:
                         self.moves_left -= 1
 
                     if result == "ENTERED_ROOM":
+                        self.pre_selection = True
                         self.moves_left = 0
                         self.turn_phase = "ACTION"
                         self.readytosuggest = True
+                        self.suggestbtn, self.passbtn, self.suggest_overlay = self.suggest_button()
 
                     elif self.moves_left == 0:
                         self.turn_phase = "END"
@@ -564,9 +621,11 @@ class Game:
                         self.moves_left -= 1
 
                     if result == "ENTERED_ROOM":
+                        self.pre_selection = True
                         self.moves_left = 0
                         self.turn_phase = "ACTION"
                         self.readytosuggest = True
+                        self.suggestbtn, self.passbtn, self.suggest_overlay = self.suggest_button()
 
                     elif self.moves_left == 0:
                         self.turn_phase = "END"
@@ -582,9 +641,12 @@ class Game:
                         self.moves_left -= 1
 
                     if result == "ENTERED_ROOM":
+                        self.pre_selection = True
                         self.moves_left = 0
                         self.turn_phase = "ACTION"
                         self.readytosuggest = True
+                        self.suggestbtn, self.passbtn, self.suggest_overlay = self.suggest_button()
+
 
                     elif self.moves_left == 0:
                         self.turn_phase = "END"
@@ -600,9 +662,11 @@ class Game:
                         self.moves_left -= 1
 
                     if result == "ENTERED_ROOM":
+                        self.pre_selection = True
                         self.moves_left = 0
                         self.turn_phase = "ACTION"
                         self.readytosuggest = True
+                        self.suggestbtn, self.passbtn, self.suggest_overlay = self.suggest_button()
 
                     elif self.moves_left == 0:
                         self.turn_phase = "END"
@@ -691,6 +755,21 @@ class Game:
                  self.turn_phase = "MOVE"
                  self.dice_sound.play()
 
+            if event.type == pygame.MOUSEBUTTONDOWN and self.turn_phase == "ACTION" and self.readytosuggest and self.pre_selection:
+                    self.pre_selection = False
+                    res1 = self.suggestbtn.suggest_or_pass(self.mouse)
+                    res2 = self.passbtn.suggest_or_pass(self.mouse)
+                    if res1 and not res2:
+                        pass
+                    else:
+                        return
+                    self.selecting = True
+                    self.select_suspect = False
+                    self.select_weapon = False
+                    self.select_room = False
+                    self.select_suspicions(self.player, "suggestion")
+
+            # Accuse button logic
             if event.type == pygame.MOUSEBUTTONDOWN:
 
                 #Handle Cards Dropdown
@@ -735,8 +814,7 @@ class Game:
                                 type_selection = "weap"
 
                     # THIS IS WHERE IT CLICKS THE SUBMIT BUTTON
-                    if (mousey >= 600 and mousey <= 640) and (
-                            self.suspect_picked and self.weapon_picked and self.room_picked):
+                    if (mousey >= 600 and mousey <= 640) and (self.suspect_picked and self.weapon_picked and self.room_picked):
                         if (mousex >= 640 and mousex <= 780):
                             self.suggestion_result, self.selecting, self.readytosuggest, self.turn_phase = self.submit.submit_accusation(
                                 self.mouse, self.currentplayer, self.selection_card_list[0].obj,
@@ -942,6 +1020,7 @@ class Game:
                             self.cpu_tiletarget[cpu] = None
                             self.cpu_moves_left = 0
                             ###CPU WILL NEED TO MAKE ACCUSATION IF RELEVANT MAYBE??? CHECK
+                            # BOOKMARK
 
                         self.cpu_timer = 0
 
@@ -1062,6 +1141,13 @@ class Game:
 
                 if hasattr(self, 'accuse_btn'):
                     self.accuse_btn.draw(self.screen, self.mouse)
+                
+                if self.player.in_room is not None and self.pre_selection: # BOOKMARK
+                    self.screen.blit(self.suggest_overlay, (0,0))
+                    self.suggestbtn.draw(self.screen)
+                    self.suggestbtn.mouseHover(self.mouse)
+                    self.passbtn.draw(self.screen)
+                    self.passbtn.mouseHover(self.mouse)
 
             if self.last_roll is not None:
                 font = pygame.font.SysFont(None, 23)
@@ -1108,6 +1194,8 @@ class Game:
                     for card in self.selection_card_list:
                         card.draw(self.screen, self.mouse)
                     self.submit.draw(self.screen)
+                    if self.suspect_picked and self.weapon_picked and self.room_picked:
+                        self.submit.mouseHover(self.mouse)
 
                 if self.select_suspect:
                     for card in self.char_card_list:
@@ -1516,24 +1604,22 @@ class CheckSheetFunction:
             x_rect = self.x_image.get_rect(center=(center_x, center_y))
             surface.blit(self.x_image, x_rect)
 
-
-
-
-class MenuButton:
-    def __init__(self, colour, pos_x, pos_y, width, height, text=''):
+class MenuButton: # BOOKMARK
+    def __init__(self, colour, pos_x, pos_y, width, height, text='', font_size=30):
         self.color = colour
         self.width = width
         self.height = height
         self.text = text
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.size = font_size
 
     def draw(self, surface):
         # draw the button as a rectangle
         pygame.draw.rect(surface, self.color, (self.pos_x, self.pos_y, self.width, self.height), 0)
 
         if self.text != '':  # checks text isn't empty
-            font = pygame.font.SysFont("papyrus", 30)
+            font = pygame.font.SysFont("papyrus", self.size)
             text = font.render(self.text, 1, "#FFFFFF")
             surface.blit(text, (self.pos_x + (self.width // 2 - text.get_width() // 2),
                                 self.pos_y + (self.height // 2 - text.get_height() // 2)))
@@ -1573,6 +1659,15 @@ class MenuButton:
                         all_players
                     )
                     return shown_card, False, False, "END"
+
+    def suggest_or_pass(self, position):
+        if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
+            if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
+                if self.text == "Make suggestion?":
+                    return True
+                else:
+                    return False
+                    
 
 # must pass image file into class, (x,y) are it's coordinates, (width, height) and name are self explanatory
 class SuggestionCards:
