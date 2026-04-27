@@ -1053,10 +1053,8 @@ class Game:
                 # UI for dice roll
                 if self.last_roll is not None:
                     font = pygame.font.SysFont(None, 23)
-                    if self.roll_source:
-                        display_text = f"Rolled: {self.last_roll}"
-                    else:
-                        display_text = f"Rolled: {self.last_roll}"
+                    display_text = f"Rolled: {self.last_roll} ({self.roll_source})" \
+                        if self.roll_source else f"Rolled: {self.last_roll}"
                     text = font.render(display_text, True, (255, 255, 255))
                     rect = text.get_rect(topleft=(10, HEADER_HEIGHT - 20))
                     bg = rect.inflate(20, 15)
