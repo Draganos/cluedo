@@ -5,7 +5,7 @@ import pygame
 
 from main import setup_game, make_suggestion  # for linking gridcontroller
 
-#Constants along with OFFSET X, Y and TILE_SIZE determine the grid layout. Sheet is for the squares inside the sheet.
+# Constants, OFFSET X, Y and TILE_SIZE determine the grid layout. Sheet is for the squares inside the sheet.
 SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
@@ -572,21 +572,21 @@ class Game:
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
-                ###SUGGESTIONS
-                elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest and self.pre_selection:
-                    self.pre_selection = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        res1 = self.suggestbtn.suggest_or_pass(self.mouse)
-                        res2 = self.passbtn.suggest_or_pass(self.mouse)
-                        if res1 and res2:
-                            continue
-                        else:
-                            return
-                    self.selecting = True
-                    self.select_suspect = False
-                    self.select_weapon = False
-                    self.select_room = False
-                    self.select_suspicions(self.player, "suggestion")
+                ###SUGGESTIONS VVV area is now redundant since now UI has visual suggestion, not keyboard based anymore
+                ###elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest and self.pre_selection:
+                ###    self.pre_selection = False
+                ###    if event.type == pygame.MOUSEBUTTONDOWN:
+                ###        res1 = self.suggestbtn.suggest_or_pass(self.mouse)
+                ###        res2 = self.passbtn.suggest_or_pass(self.mouse)
+                ###        if res1 and res2:
+                ###            continue
+                ###        else:
+                ###            return
+                ###    self.selecting = True
+                ###    self.select_suspect = False
+                ###    self.select_weapon = False
+                ###    self.select_room = False
+                ###    self.select_suspicions(self.player, "suggestion")
 
                     ##MOVEMENT FUNCTIONALITY BELOW
                 elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
@@ -756,14 +756,17 @@ class Game:
                 res1 = self.suggestbtn.suggest_or_pass(self.mouse)
                 res2 = self.passbtn.suggest_or_pass(self.mouse)
                 if res1 and not res2:
-                    pass
+                    self.selecting = True
+                    self.select_suspect = False
+                    self.select_weapon = False
+                    self.select_room = False
+                    self.select_suspicions(self.player, "suggestion")
+                elif res2 and not res1:
+                    self.pre_selection = False
+                    self.readytosuggest = False
+                    self.turn_phase = "END"
                 else:
-                    return
-                self.selecting = True
-                self.select_suspect = False
-                self.select_weapon = False
-                self.select_room = False
-                self.select_suspicions(self.player, "suggestion")
+                    continue
 
             # Accuse button logic
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -814,7 +817,7 @@ class Game:
                     if (mousey >= 600 and mousey <= 640) and (
                             self.suspect_picked and self.weapon_picked and self.room_picked):
                         if (mousex >= 640 and mousex <= 780):
-                            self.suggestion_result, self.selecting, self.readytosuggest, self.turn_phase = self.submit.submit_accusation(
+                            self.suggestion_result, self.selecting, self.readytosuggest, self.turn_phase = self.submit.submit_suggestion(
                                 self.mouse, self.currentplayer, self.selection_card_list[0].obj,
                                 self.selection_card_list[1].obj, self.selection_card_list[2].obj, self.all_players)
 
@@ -1668,7 +1671,7 @@ class MenuButton:  # BOOKMARK
                     pygame.quit()
         return None
 
-    def submit_accusation(self, position, player, suspect, weapon, guess_room, all_players):
+    def submit_suggestion(self, position, player, suspect, weapon, guess_room, all_players):
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 if suspect and weapon and guess_room:
