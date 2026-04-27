@@ -1,5 +1,6 @@
 import random
 
+
 class Character:
     def __init__(self, name):
         self.name = name
@@ -7,21 +8,25 @@ class Character:
         self.weapon = None  # applied in randomizer if murderer
         self.position = None  # coordinates or board indexes can be added later with sese coordination
 
+
 class Room:
     def __init__(self, name):
         self.name = name
         self.characters = []
         self.weapons = []
 
+
 class Asset:
     def __init__(self, item_name, item_type):
         self.item_name = item_name
         self.item_type = item_type
 
+
 class Weapon(Asset):
     def __init__(self, name):
         super().__init__(name, "weapon")
         self.room = None
+
 
 class Envelope:
     def __init__(self):
@@ -34,6 +39,7 @@ class Envelope:
         self.weapon = weapon
         self.room = room
 
+
 class Dice(Asset):
     def __init__(self, sides=6):
         super().__init__("Dice", "dice")
@@ -41,6 +47,7 @@ class Dice(Asset):
 
     def roll(self):
         return random.randint(1, self.sides)
+
 
 class Game:
     def __init__(self, board, characters, weapons, envelope, dice):
@@ -50,6 +57,7 @@ class Game:
         self.envelope = envelope
         self.dice = dice
         self.current_turn = 0
+
 
 class Player:
     def __init__(self, isCPU=False, character=None):
@@ -62,8 +70,8 @@ class Player:
         return [c.name if isinstance(c, Character) or isinstance(c, Room)
                 else c.item_name for c in self.hand]
 
-def setup_game(selected_character_name):
 
+def setup_game(selected_character_name):
     print("Setting up game...")
     characters = [Character(n) for n
                   in ["Scarlet",
@@ -77,11 +85,11 @@ def setup_game(selected_character_name):
                  "Hall",
                  "Lounge",
                  "Library",
-                "Billiard Room",
-                "Dining Room",
-                "Conservatory",
-                "Ballroom",
-                "Kitchen"]]
+                 "Billiard Room",
+                 "Dining Room",
+                 "Conservatory",
+                 "Ballroom",
+                 "Kitchen"]]
     weapons = [Weapon(n) for n
                in ["Candlestick",
                    "Dagger",
@@ -109,31 +117,37 @@ def setup_game(selected_character_name):
     remaining_chars = [c for c in characters if c != envelope.character]
     remaining_weapons = [w for w in weapons if w != envelope.weapon]
     remaining_rooms = [r for r in rooms if r != envelope.room]
-
-    deck = remaining_chars + remaining_weapons + remaining_rooms
-    random.shuffle(deck)
     all_players = [player] + cpu_players
-    for i, card in enumerate(deck):
-        all_players[i % len(all_players)].hand.append(card)
+    random.shuffle(remaining_chars)
+    random.shuffle(remaining_weapons)
+    random.shuffle(remaining_rooms)
+    for i, p in enumerate(all_players):
+        if i < len(remaining_chars):
+            p.hand.append(remaining_chars[i])
+        if i < len(remaining_weapons):
+            p.hand.append(remaining_weapons[i])
+        if i < len(remaining_rooms):
+            p.hand.append(remaining_rooms[i])
 
     return player, cpu_players, rooms, weapons, characters, envelope
+
 
 def suggestion(player, room, characters, weapons, all_players):
     print(f"\nYou are {player.character.name} in {room.name}")
 
-    #suspect = random.choice(list(set(characters)-set(eliminated)))
-    suspect = random.choice(characters) #replaced above line with this such that game doesnt crash in gridmovement
+    # suspect = random.choice(list(set(characters)-set(eliminated)))
+    suspect = random.choice(characters)  # replaced above line with this such that game doesnt crash in gridmovement
     weapon = random.choice(weapons)
 
     print(f"Suggestion: {suspect.name} in {room.name} with {weapon.item_name}")
 
-    active_players = list(set(all_players)-set(eliminated))
+    active_players = list(set(all_players) - set(eliminated))
 
     # Move the suggested suspect into the room
     suspect.room = room
     start_index = active_players.index(player)
 
-    for i in range(1, len(all_players)-len(eliminated)):
+    for i in range(1, len(all_players) - len(eliminated)):
         other = active_players[(start_index + i) % len(active_players)]
 
         # Find matching cards
@@ -153,8 +167,9 @@ def suggestion(player, room, characters, weapons, all_players):
     print("No player could show you a card.")
     return None
 
+
 """ - returns boolean (False means game ends) and queue (turn order of all non-eliminated players)"""
-#def round(queue, room, characters, weapons, all_players): #####hashed as not usable in gridmovement architecture, left here for reference
+# def round(queue, room, characters, weapons, all_players): #####hashed as not usable in gridmovement architecture, left here for reference
 #    # this function makes the assumption that it is called repeatedly in the game loop, which is effectively a while True loop
 #    # this while True loop is simulated in main.py. I cannot stress this enough, that is solely for testing purposes and NOT TO BE IMPLEMENTED IN THE FINAL GAME
 #    if len(all_players) > (len(eliminated)-3):
@@ -174,7 +189,8 @@ def suggestion(player, room, characters, weapons, all_players):
     - if turn ends with accusation and accusation FALSE, removes the player from the queue
     - returns array of Player objects, all_players """
 
-#below block is hashed as can cause crashes, new method under
+
+# below block is hashed as can cause crashes, new method under
 #######def turn(player, room, characters, weapons, all_players):
 #######    if player not in eliminated:
 #######        print("You can move up to", roll_dice(player), "spaces.")
@@ -224,18 +240,20 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
     print("the suggestion couldnt be disproved.")
     return None
 
+
 def roll_dice(player):
-    dice_roll = random.randint(2, 12) # randomly generate number between 2-12
+    dice_roll = random.randint(2, 12)  # randomly generate number between 2-12
     return dice_roll
+
 
 def accusation(player, all_players):
     accusations = {"character": None, "weapon": None, "room": None}
 
     char_list = ["scarlet", "plum", "mustard", "white", "peacock", "green"]
     weap_list = ["candlestick", "dagger", "pistol", "rope", "lead pipe", "wrench"]
-    room_list = ["study", "hall", "lounge", "library", "billiard room", 
+    room_list = ["study", "hall", "lounge", "library", "billiard room",
                  "dining room", "conservatory", "ballroom", "kitchen"]
-    
+
     accused = input("Who do you accuse?: ").lower()
     while accused not in char_list:
         print("Suspect must be one of: Scarlet, Plum, Mustard, White, Peacock, Green.")
@@ -250,20 +268,22 @@ def accusation(player, all_players):
 
     location = input("Where was the murder committed?: ").lower()
     while location not in room_list:
-        print("Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
+        print(
+            "Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
         location = input("Where was the murder committed?: ").lower()
     accusations["room"] = location.capitalize()
 
-    #print(f"{player.character.name} has accused {accusations["character"]} of using the {accusations["weapon"]} to murder Black in the {accusations["room"]}.")
+    # print(f"{player.character.name} has accused {accusations["character"]} of using the {accusations["weapon"]} to murder Black in the {accusations["room"]}.")
+
 
 if __name__ == "__main__":
     selected_character = "Scarlet"
     player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_character)
     all_players = [player] + cpu_players
-    queue = all_players 
-    eliminated = [] # keeps track of eliminated player objects
+    queue = all_players
+    eliminated = []  # keeps track of eliminated player objects
     test_room = rooms[0]
-    #suggestion(player, test_room, characters, weapons, all_players)
-    #game = True
-    #while (game): # simulate game loop (REMOVE ONCE MAIN AND GRIDMOVEMENT ARE FULLY LINKED)
+    # suggestion(player, test_room, characters, weapons, all_players)
+    # game = True
+    # while (game): # simulate game loop (REMOVE ONCE MAIN AND GRIDMOVEMENT ARE FULLY LINKED)
     #    game, queue = round(queue, test_room, characters, weapons, all_players)
