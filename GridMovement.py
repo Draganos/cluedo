@@ -209,6 +209,7 @@ class Game:
         self.cpu_moves_left = 0
         self.cpu_rolled = False
         self.cpu_roomtarget = {}
+        self.cpu_tiletarget = {}
         ###storing game state variables for gamecontroller
         self.activegame = False
         self.currentplayer = None
@@ -691,23 +692,29 @@ class Game:
 
                     #Assigning a room for CPU to target
                     if cpu not in self.cpu_roomtarget or self.cpu_roomtarget[cpu] is None:
-                        self.cpu_roomtarget[cpu] = random.choice(list(self.room_exits.keys()))
+                        target_room = random.choice(list(self.room_doors.keys()))
+                        self.cpu_roomtarget[cpu] = target_room
+                        self.cpu_tiletarget[cpu] = random.choice(self.room_doors[target_room])
 
                     target_room = self.cpu_roomtarget[cpu]
-                    target_tile = random.choice(self.room_doors[target_room])
+                    target_tile = self.cpu_tiletarget[cpu]
 
                     #CPU MOVES W DELAY
                     if self.cpu_timer > 50 and self.cpu_moves_left > 0:
                         dx, dy = self.get_cpudirection(visualcpu, target_tile)
-                        result = visualcpu.move(
-                            dx,
-                            dy,
-                            self.forbidden_tiles,
-                            self.doors,
-                            self.room_seats,
-                            self.room_exits
-                        )
-                        #if result is None: #If CPU goes into the wall or something
+                        if (dx, dy) == (0, 0):
+                            self.cpu_moves_left = 0
+                            result = None
+                        else:
+                            result = visualcpu.move(
+                                dx,
+                                dy,
+                                self.forbidden_tiles,
+                                self.doors,
+                                self.room_seats,
+                                self.room_exits
+                            )
+                        #if result is None: #If CPU goes into the wall or something <---- redundant piece of code now
                         #    dx, dy = random.choice([(0, -1), (0, 1), (-1, 0), (1, 0)])
                         #    result = visualcpu.move(
                         #        dx,
@@ -722,6 +729,7 @@ class Game:
                         #behavior for when the cpu reaches that room
                         if result == "ENTERED_ROOM":
                             self.cpu_roomtarget[cpu] = None
+                            self.cpu_tiletarget[cpu] = None
                             self.cpu_moves_left = 0
                             ###CPU WILL NEED TO MAKE ACCUSATION IF RELEVANT MAYBE??? CHECK
 
@@ -862,6 +870,9 @@ class Game:
         self.turn_index = (self.turn_index + 1) % len(self.all_players)
         self.moves_left = 0
         self.turn_phase = "ROLL"
+        self.cpu_timer = 0
+        self.cpu_moves_left = 0
+        self.cpu_rolled = False
 
         print(f"Next player: {self.get_active_player().character.name}")
 
