@@ -743,7 +743,7 @@ class Game:
                         "Dice cannot be rolled with mouse as not players turn")  # added 24/04/2026 for locking movement to current turn
                     return  # added 24/04/2026 for locking movement to current turn
 
-                # print("Dice has been rolled with mouse.")
+                # debug print("Dice has been rolled with mouse.")
                 if self.activegame and self.turn_phase == "ROLL":
 
                  self.moves_left = random.randint(2, 12)
