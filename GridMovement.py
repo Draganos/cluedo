@@ -917,8 +917,6 @@ class Game:
         pygame.quit()
 
     def end_turn(self):
-        print(f"Ending turn: {self.get_active_player().character.name}")
-
         self.turn_index = (self.turn_index + 1) % len(self.all_players)
         self.moves_left = 0
         self.turn_phase = "ROLL"
@@ -926,9 +924,6 @@ class Game:
         self.cpu_moves_left = 0
         self.cpu_rolled = False
         self.last_roll = None
-
-        print(f"Next player: {self.get_active_player().character.name}")
-
 
 class Dice:
     # Should (ideally) have both mouse and keyboard functionality.
