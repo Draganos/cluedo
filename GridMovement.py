@@ -230,7 +230,7 @@ class Game:
 
         self.message = ""
         self.message_timer = 0
-        self.font = pygame.font.SysFont(None, 32)
+        self.font = pygame.font.SysFont(None, 40)
 
         # Door tiles
         self.doors = {
