@@ -1106,6 +1106,20 @@ class Game:
                 self.dice.draw(self.screen, self.mouse)
                 self.cards_btn.draw(self.screen, self.mouse)
 
+                 # UI for dice roll
+                if self.last_roll is not None:
+                    font = pygame.font.SysFont(None, 23)
+                    if self.roll_source:
+                        display_text = f"Rolled: {self.last_roll}"
+                    else:
+                        display_text = f"Rolled: {self.last_roll}"
+                    text = font.render(display_text, True, (255, 255, 255))
+                    rect = text.get_rect(topleft=(10, HEADER_HEIGHT - 20))
+                    bg = rect.inflate(20, 15)
+                    pygame.draw.rect(self.screen, (0, 0, 0), bg, border_radius=8)
+                    pygame.draw.rect(self.screen, (255, 255, 255), bg, 2, border_radius=8)
+                    self.screen.blit(text, rect)
+
                 #CardButton Dropdown Menu running
                 if self.show_cards_dropdown and self.currentplayer:
                     cards_in_hand = self.currentplayer.hand
