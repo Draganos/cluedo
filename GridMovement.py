@@ -631,7 +631,7 @@ class Game:
                         self.turn_phase = "END"
 
                 elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER] and self.turn_phase in ["END", "ACTION"]:
-                    print("TURN ENDED")
+                    # debugging print("TURN ENDED")
                     self.readytosuggest = False
                     self.suggestion_result = None
                     self.end_turn()
@@ -673,7 +673,7 @@ class Game:
                     self.activegame = True
                     self.menu = None
                     #self.play_game_music()
-                    print("the game is fully initialised.")
+                    print("Game initialised.")
 
                     ###CPU GRAPHICS
                     cpu_start_positions = [
@@ -731,8 +731,11 @@ class Game:
                         return  # added 24/04/2026 for locking movement to current turn
 
                     if self.activegame and self.turn_phase == "ROLL": #26/04/2026 changes made such that roll cannot be done while moving
-                        self.moves_left = random.randint(2, 12)
-                        print(f"Rolled: {self.moves_left}")
+                        roll = random.randint(2, 12)
+                        self.moves_left = roll
+                        self.last_roll = roll
+                        self.roll_display_time = pygame.time.get_ticks()
+                        # debugging print(f"Rolled: {self.moves_left}")
                         self.turn_phase = "MOVE"
                         self.roll_source = "spacebar"
             
@@ -1157,7 +1160,7 @@ class Game:
         self.room_picked = False
         self.selection_card_list = []
 
-        print(f"Next player: {self.get_active_player().character.name}")
+        #print(f"Next player: {self.get_active_player().character.name}")
 
 
 class Dice:

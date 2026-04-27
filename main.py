@@ -116,7 +116,6 @@ def setup_game(selected_character_name):
     for i, card in enumerate(deck):
         all_players[i % len(all_players)].hand.append(card)
 
-    print("Game initialised...")
     return player, cpu_players, rooms, weapons, characters, envelope
 
 def suggestion(player, room, characters, weapons, all_players):
