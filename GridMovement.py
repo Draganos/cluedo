@@ -174,7 +174,8 @@ class Game:
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height + HEADER_HEIGHT))
         self.menu = Menu()
-        self.play_menu_music()
+        #uncomment here, (roughly) line 366-376 when music tracks are actually implemented, and (roughly) line 558
+        #self.play_menu_music()
 
         # Header, Dice, Accuse and CardButton
         #self.turn_image = pygame.image.load('Assets/Your turn.png')   ####MADE REDUNDANT BY NEW YOUR TURN IMAGE
@@ -361,7 +362,8 @@ class Game:
         self.play_finished = False
         self.cooldown = 840  # milliseconds
 
-    def play_menu_music(self):
+    # commented out because it's crashing the game
+    """def play_menu_music(self):
         pygame.mixer.music.stop()
         pygame.mixer.music.load("Sounds/menumusic.mp3")
         pygame.mixer.music.set_volume(0.5)
@@ -371,7 +373,7 @@ class Game:
         pygame.mixer.music.stop()
         pygame.mixer.music.load("Sounds/gamemusic.mp3")
         pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(-1)"""
 
     def load_card_images(self):
         self.card_images = {
@@ -553,7 +555,7 @@ class Game:
                     self.player.character = self.currentplayer.character  # this links visual player to logic of the character
                     self.activegame = True
                     self.menu = None
-                    self.play_game_music()
+                    #self.play_game_music()
                     print("the game is fully initialised.")
 
                     ###CPU GRAPHICS
