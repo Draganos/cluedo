@@ -1503,7 +1503,7 @@ class CheckSheetFunction:
                             self.ticks.add(cell_id)  # Add tick if empty
 
                         return True
-          return False
+        return False
 
     def draw(self, surface):
         for (section, row, col) in self.ticks:
