@@ -15,6 +15,8 @@ OFFSET_Y = (18 * SCALE) + HEADER_HEIGHT
 COLOUR = "#462779"
 COLOUR_HOVER = "#9040BA"
 
+# for random events
+CHANCE = 10000
 
 class Player:
     def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None):
@@ -156,8 +158,6 @@ class Sprite_Chars():
         if done:
             return True
         return False
-
-
 ###END SPRITE WORK FROM VICTOR
 
 class Game:
@@ -171,7 +171,6 @@ class Game:
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height + HEADER_HEIGHT))
         self.menu = Menu()
-        #uncomment here, (roughly) line 366-376 when music tracks are actually implemented, and (roughly) line 558
         #self.play_menu_music()
 
         # Header, Dice, Accuse and CardButton
@@ -362,13 +361,43 @@ class Game:
                 self.forbidden_tiles.append((c, r))
 
         # Variables for Sprite animations
-        self.chance = 10000
+        self.chance = CHANCE
         self.last_surprise = pygame.time.get_ticks()
         self.playing = False
         self.play_finished = False
         self.cooldown = 840  # milliseconds
 
-    # commented out because it's crashing the game
+        # Variables for the suggestion/accusation selection
+        self.selecting = False # the suggestion/accusation menu
+        self.selecting_block = True # to patch an annoying glitch
+        self.select_suspect = False # selecting suspect menu
+        self.select_weapon = False # selecting weapon menu
+        self.select_room = False # selecting room menu
+
+        self.suspect_picked = False
+        self.weapon_picked = False
+        self.room_picked = False
+        self.card_pos = {
+            "char": [
+                (250, 225), (450, 225), (650, 225),
+                (250, 475), (450, 475), (650, 475)
+            ],
+            "weap": [
+                (250, 225), (450, 225), (650, 225),
+                (250, 475), (450, 475), (650, 475)
+            ],
+            "room": [
+                (250, 200), (450, 200), (650, 200),
+                (250, 450), (450, 450), (650, 450),
+                (250, 700), (450, 700), (650, 700)
+            ]
+        }
+        self.selection_card_list = []
+        self.char_card_list = []
+        self.weap_card_list = []
+        self.room_card_list = []
+
+
     """def play_menu_music(self):
         pygame.mixer.music.stop()
         pygame.mixer.music.load("Sounds/menumusic.mp3")
@@ -421,6 +450,68 @@ class Game:
                                                      (140, 200)),
             "Kitchen": pygame.transform.smoothscale(pygame.image.load("Cards/Kitchen.png").convert_alpha(), (140, 200)),
         }
+
+    # type is a string: "suggestion" or "accusation"
+    def select_suspicions(self, player, type):
+        self.overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA).convert_alpha()
+        position_x = [300, 450, 600]
+        self.overlay.fill((35, 45, 60, 128))
+        sus_room = {"room": None, "alterable": True}
+        types = ["char", "weap", "room"]
+        if type == "suggestion":
+            for i in self.rooms:
+                if i.name == player.in_room:
+                    sus_room["room"] = i
+            sus_room["alterable"] = False
+        self.blank_surf = pygame.Surface((140, 200))
+        self.blank_surf.fill((35, 45, 60))
+
+        for i in range(3):
+            card = SuggestionCards(self.blank_surf, position_x[i], 350, 140, 200, None, types[i])
+            if i == 2 and type == "suggestion":
+                card = SuggestionCards(self.card_images[sus_room["room"].name], position_x[i], 350, 140, 200, sus_room["room"], types[i], sus_room["alterable"])
+                self.room_picked = True
+            self.selection_card_list.append(card)
+
+        self.submit = MenuButton(COLOUR, 640, 600, 140, 40, "Submit", 20)
+            
+
+    # type is a string: "char", "weap", or "room"; 
+    def make_suspicion_choice(self, type, positions):
+        cards = {
+            "char": {
+                "loop": 6,
+                "names": self.characters
+            },
+            "weap": {
+                "loop": 6,
+                "names": self.weapons
+            },
+            "room": {
+                "loop": 9,
+                "names": self.rooms
+            }
+        }
+
+        for i in range(cards[type]["loop"]):
+            if type == "weap":            
+                card = SuggestionCards(self.card_images[cards[type]["names"][i].item_name], positions[i][0], positions[i][1], 140, 200, cards[type]["names"][i])
+            else:
+                card = SuggestionCards(self.card_images[cards[type]["names"][i].name], positions[i][0], positions[i][1], 140, 200, cards[type]["names"][i])
+
+            match type:
+                case "char":
+                    self.char_card_list.append(card)
+                case "weap":
+                    self.weap_card_list.append(card)
+                case "room":
+                    self.room_card_list.append(card)
+
+            #self.screen.blit(
+            #    self.card_images[cards[type]["names"][i]],
+            #    (positions[i][0], positions[i][1])
+            #)
+
     def handle_events(self):
         # checks for actions by the user.
         for event in pygame.event.get():
@@ -444,20 +535,28 @@ class Game:
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
+                ###SUGGESTIONS
                 elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest:
-                    current_room = self.player.in_room
-                    suspect = random.choice(self.characters)
-                    weapon = random.choice(self.weapons)
-                    shown_card = make_suggestion(
-                        self.currentplayer,
-                        current_room,
-                        suspect,
-                        weapon,
-                        self.all_players
-                    )
-                    self.suggestion_result = shown_card
-                    self.readytosuggest = False
-                    self.turn_phase = "END"
+                    self.selecting = True
+                    self.select_suspect = False
+                    self.select_weapon = False
+                    self.select_room = False
+                    self.select_suspicions(self.player, "suggestion")
+                    #self.make_suspicion_choice("char", card_pos["char"])
+                    #current_room = self.player.in_room
+                    #suspect = random.choice(self.characters)
+                    #suspect = self.make_suspicion_choice(self.positions)
+                    #weapon = random.choice(self.weapons)
+                    #shown_card = make_suggestion(
+                    #    self.currentplayer,
+                    #    current_room,
+                    #    suspect,
+                    #    weapon,
+                    #    self.all_players
+                    #)
+                    #self.suggestion_result = shown_card
+                    #self.readytosuggest = False
+                    #self.turn_phase = "END"
 
                     ##MOVEMENT FUNCTIONALITY BELOW
                 elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
@@ -614,7 +713,6 @@ class Game:
             if event.type == pygame.MOUSEBUTTONDOWN:
                  self.check_sheet.handle_click(self.mouse)
 
-
             # Accuse button logic
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if hasattr(self, 'accuse_btn') and self.accuse_btn.rect.collidepoint(self.mouse):
@@ -634,10 +732,117 @@ class Game:
 
                     if self.activegame and self.turn_phase == "ROLL": #26/04/2026 changes made such that roll cannot be done while moving
                         self.moves_left = random.randint(2, 12)
-                        self.last_roll = self.moves_left
-                        self.roll_display_time = pygame.time.get_ticks()
+                        print(f"Rolled: {self.moves_left}")
                         self.turn_phase = "MOVE"
                         self.roll_source = "spacebar"
+            
+            if self.selecting and event.type == pygame.MOUSEBUTTONDOWN and (not self.select_suspect and not self.select_weapon and not self.select_room):
+                type_selection = None
+
+                for card in self.selection_card_list:
+                    selection = card.handle_click(self.mouse)
+                    if selection:
+                        type_selection = selection
+                        break
+                
+                mousex = self.mouse[0]
+                mousey = self.mouse[1]
+                if not isinstance(type_selection, str):
+                    if (mousey >= 350 and mousey <= 550):
+                        if mousex < 440 and mousex > 300:
+                            type_selection = "char"
+                        elif mousex > 600 and mousex < 740:
+                            type_selection = "room"
+                        elif mousex >= 450 and mousex <= 590:
+                            type_selection = "weap"
+                
+                if (mousey >= 600 and mousey <= 640) and (self.suspect_picked and self.weapon_picked and self.room_picked):
+                    if (mousex >= 640 and mousex <= 780):
+                        self.shown_card, self.selecting, self.readytosuggest, self.turn_phase = self.submit.submit_accusation(self.mouse, self.currentplayer, self.selection_card_list[0].obj, self.selection_card_list[1].obj, self.selection_card_list[2].obj, self.all_players)
+
+                match type_selection:
+                    case "char":
+                        self.select_suspect = True
+                    case "weap":
+                        self.select_weapon = True
+                    case "room":
+                        self.select_room = True
+
+                if type_selection:
+                    self.make_suspicion_choice(type_selection, self.card_pos[type_selection])
+                # commented out for use later
+                """
+                suspect = None
+                for card in self.char_card_list:
+                    selection = card.handle_click(self.mouse)
+                    if selection:
+                        suspect = selection
+                        break
+                
+                if suspect:
+                    current_room = self.player.in_room
+                    #suspect = self.make_suspicion_choice(self.positions)
+                    weapon = random.choice(self.weapons)
+                    shown_card = make_suggestion(
+                        self.currentplayer,
+                        current_room,
+                        suspect,
+                        weapon,
+                        self.all_players
+                    )
+                    self.suggestion_result = shown_card
+                    self.selecting = False
+                    self.readytosuggest = False
+                    self.turn_phase = "END"
+                    """
+            if self.select_suspect and event.type == pygame.MOUSEBUTTONDOWN and self.selecting_block == False:
+                suspect = None
+                for char_card in self.char_card_list:
+                    selection = char_card.handle_click(self.mouse)
+                    if selection is not None:
+                        suspect = selection
+                        break
+                
+                if suspect:
+                    new_card = SuggestionCards(self.card_images[suspect.name], 300, 350, 140, 200, suspect)
+                    self.selection_card_list[0] = new_card
+
+                    self.select_suspect = False
+                    self.selecting_block = True
+                    self.suspect_picked = True
+
+            if self.select_weapon and event.type == pygame.MOUSEBUTTONDOWN and self.selecting_block == False:
+                weapon = None
+                for weap_card in self.weap_card_list:
+                    selection = weap_card.handle_click(self.mouse)
+                    if selection is not None:
+                        weapon = selection
+                        break
+                
+                if weapon:
+                    new_card = SuggestionCards(self.card_images[weapon.item_name], 450, 350, 140, 200, weapon)
+                    self.selection_card_list[1] = new_card
+
+                    self.select_weapon = False
+                    self.selecting_block = True
+                    self.weapon_picked = True
+            
+            if self.select_room and event.type == pygame.MOUSEBUTTONDOWN and self.selecting_block == False:
+                q_room = None
+                for room_card in self.room_card_list:
+                    selection = room_card.handle_click(self.mouse)
+                    if selection is not None:
+                        q_room = selection
+                        break
+                
+                if q_room:
+                    new_card = SuggestionCards(self.card_images[q_room.name], 450, 350, 140, 200, q_room)
+                    self.selection_card_list[2] = new_card
+
+                    self.select_room = False
+                    self.selecting_block = True
+                    self.room_picked = True
+
 
     ###for turn system below VVV
     def get_active_player(self):
@@ -892,6 +1097,32 @@ class Game:
                 if hasattr(self, 'accuse_btn'):
                     self.accuse_btn.draw(self.screen, self.mouse)
 
+                if self.selecting:
+                    self.screen.blit(self.overlay, (0, 0))
+                    if (not self.select_suspect and not self.select_weapon and not self.select_room):
+                        for card in self.selection_card_list:
+                            card.draw(self.screen, self.mouse)
+                        self.submit.draw(self.screen)
+                        if (self.suspect_picked and self.weapon_picked and self.room_picked):
+                            self.submit.mouseHover(self.mouse)
+                    #for card in self.char_card_list:
+                    #    card.draw(self.screen, self.mouse)
+
+                if self.select_suspect:
+                    for card in self.char_card_list:
+                        card.draw(self.screen, self.mouse)
+                    self.selecting_block = False
+
+                if self.select_weapon:
+                    for card in self.weap_card_list:
+                        card.draw(self.screen, self.mouse)
+                    self.selecting_block = False
+
+                if self.select_room:
+                    for card in self.room_card_list:
+                        card.draw(self.screen, self.mouse)
+                    self.selecting_block = False
+
                 if self.playing:
                     finished = self.sprite.draw(self.screen)
 
@@ -921,7 +1152,13 @@ class Game:
         self.cpu_timer = 0
         self.cpu_moves_left = 0
         self.cpu_rolled = False
-        self.last_roll = None
+        self.suspect_picked = False
+        self.weapon_picked = False
+        self.room_picked = False
+        self.selection_card_list = []
+
+        print(f"Next player: {self.get_active_player().character.name}")
+
 
 class Dice:
     # Should (ideally) have both mouse and keyboard functionality.
@@ -952,6 +1189,35 @@ class Dice:
         else:
             # draw the transparent copy
             surface.blit(self.image_copy, (self.x, self.y))
+
+# must pass image file into class, (x,y) are it's coordinates, (width, height) and name are self explanatory
+class SuggestionCards:
+    def __init__(self, image, x, y, width, height, obj, type=None, alterable=True):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.image = image
+        self.obj = obj
+        self.alterable = alterable
+        self.type = type
+        # creates a Rect with the same dimensions as the image
+        self.rect = pygame.Rect(x, y, width, height)
+    
+    def draw(self, surface, mouse):
+        surface.blit(self.image, (self.x, self.y))
+        if self.rect.collidepoint(mouse) and self.alterable:
+            pygame.draw.rect(surface, (0,0,0), self.rect, 3)
+
+    def handle_click(self, mouse):
+        if self.obj:
+            if self.rect.collidepoint(mouse) and self.alterable:
+                return self.obj
+                
+        else:
+            if self.rect.collidepoint(mouse) and self.alterable:
+                return self.type
+            
 
 class CardsButton:
     def __init__(self, x, y):
@@ -1105,24 +1371,22 @@ class CheckSheetFunction:
             x_rect = self.x_image.get_rect(center=(center_x, center_y))
             surface.blit(self.x_image, x_rect)
 
-
-
-
 class MenuButton:
-    def __init__(self, colour, pos_x, pos_y, width, height, text=''):
+    def __init__(self, colour, pos_x, pos_y, width, height, text='', font_size=30):
         self.color = colour
         self.width = width
         self.height = height
         self.text = text
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.size = font_size
 
     def draw(self, surface):
         # draw the button as a rectangle
         pygame.draw.rect(surface, self.color, (self.pos_x, self.pos_y, self.width, self.height), 0)
 
         if self.text != '':  # checks text isn't empty
-            font = pygame.font.SysFont("papyrus", 30)
+            font = pygame.font.SysFont("papyrus", self.size)
             text = font.render(self.text, 1, "#FFFFFF")
             surface.blit(text, (self.pos_x + (self.width // 2 - text.get_width() // 2),
                                 self.pos_y + (self.height // 2 - text.get_height() // 2)))
@@ -1149,6 +1413,20 @@ class MenuButton:
                     # Anyway, importantly, the exit button works (i.e. exits the game)
                     pygame.quit()
         return None
+    
+    def submit_accusation(self, position, player, suspect, weapon, guess_room, all_players): #takes mouse position as parameter
+        if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
+            if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
+                if suspect and weapon and guess_room:
+                    shown_card = make_suggestion(
+                        player,
+                        guess_room.name,
+                        suspect,
+                        weapon,
+                        all_players
+                    )
+                    return shown_card, False, False, "END"
+                    
 
 
 if __name__ == "__main__":

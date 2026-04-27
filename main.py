@@ -265,6 +265,6 @@ if __name__ == "__main__":
     eliminated = [] # keeps track of eliminated player objects
     test_room = rooms[0]
     #suggestion(player, test_room, characters, weapons, all_players)
-    game = True
-    while (game): # simulate game loop (REMOVE ONCE MAIN AND GRIDMOVEMENT ARE FULLY LINKED)
-        game, queue = round(queue, test_room, characters, weapons, all_players)
+    #game = True
+    #while (game): # simulate game loop (REMOVE ONCE MAIN AND GRIDMOVEMENT ARE FULLY LINKED)
+    #    game, queue = round(queue, test_room, characters, weapons, all_players)
