@@ -84,7 +84,7 @@ def setup_game(selected_character_name):
                 "Kitchen"]]
     weapons = [Weapon(n) for n
                in ["Candlestick",
-                   "Knife",
+                   "Dagger",
                    "Revolver",
                    "Rope",
                    "Lead Pipe",
@@ -175,7 +175,7 @@ def suggestion(player, room, characters, weapons, all_players):
     - if turn ends with accusation and accusation FALSE, removes the player from the queue
     - returns array of Player objects, all_players """
 
-#below block is hashed as can cause crashes
+#below block is hashed as can cause crashes, new method under
 #######def turn(player, room, characters, weapons, all_players):
 #######    if player not in eliminated:
 #######        print("You can move up to", roll_dice(player), "spaces.")
@@ -199,6 +199,31 @@ def suggestion(player, room, characters, weapons, all_players):
 #######
 #######    return all_players
 
+def make_suggestion(player, room_name, suspect, weapon, all_players):
+    print(f"{player.character.name} suggests:")
+    print(f"{suspect.name} in the {room_name} with the {weapon.item_name}")
+
+    for other in all_players:
+        if other == player:
+            continue
+
+        matching_cards = []
+
+        for card in other.hand:
+            if isinstance(card, Character) and card.name == suspect.name:
+                matching_cards.append(card)
+            elif isinstance(card, Weapon) and card.item_name == weapon.item_name:
+                matching_cards.append(card)
+            elif isinstance(card, Room) and card.name == room_name:
+                matching_cards.append(card)
+
+        if matching_cards:
+            shown_card = random.choice(matching_cards)
+            print(f"{other.character.name} shows a card.")
+            return shown_card
+
+    print("the suggestion couldnt be disproved.")
+    return None
 
 def roll_dice(player):
     dice_roll = random.randint(2, 12) # randomly generate number between 2-12
@@ -208,7 +233,7 @@ def accusation(player, all_players):
     accusations = {"character": None, "weapon": None, "room": None}
 
     char_list = ["scarlet", "plum", "mustard", "white", "peacock", "green"]
-    weap_list = ["candlestick", "knife", "revolver", "rope", "lead pipe", "wrench"]
+    weap_list = ["candlestick", "dagger", "pistol", "rope", "lead pipe", "wrench"]
     room_list = ["study", "hall", "lounge", "library", "billiard room", 
                  "dining room", "conservatory", "ballroom", "kitchen"]
     
@@ -220,7 +245,7 @@ def accusation(player, all_players):
 
     weapon = input("What did they use to carry out the murder?: ").lower()
     while weapon not in weap_list:
-        print("Weapon must be one of: Candlestick, Knife, Revolver, Rope, Lead Pipe, Wrench.")
+        print("Weapon must be one of: Candlestick, Dagger, Pistol, Rope, Lead Pipe, Wrench.")
         weapon = input("What did they use to carry out the murder?: ").lower()
     accusations["weapon"] = weapon.capitalize()
 
