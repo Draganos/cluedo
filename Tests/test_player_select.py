@@ -1,7 +1,9 @@
 import unittest
+import pygame
 from unittest.mock import patch
 
 from GridMovement import MenuButton
+from PickYourCharacter import MainMenu2
 
 """ IMPORTANT INFORMATION
 
@@ -25,7 +27,7 @@ from GridMovement import MenuButton
     This command assumes that all tests will follow the naming convention "test_<wildcard>.py".
     """
 
-class TestMenuButton(unittest.TestCase):
+class TestPlayerSelectScreen(unittest.TestCase):
     # this simulates the application without actually launching a pygame application because that would be long
 
     @patch("PickYourCharacter.MainMenu2")
@@ -48,6 +50,33 @@ class TestMenuButton(unittest.TestCase):
 
     # There will eventually be more tests but I wanted to push this now because the CLI thing is important-ish
 
+    def setUp(self):
+        pygame.init()
+        pygame.display.set_mode((800, 600))  # required for surfaces
+        self.menu = MainMenu2()
+
+    @patch("pygame.mouse.get_pos")
+    def test_mouse_hover_over_first_character(self, mock_mouse_pos):
+        # Arrange: simulate mouse over first character
+        first_rect = self.menu.character_rects[0]
+        mock_mouse_pos.return_value = first_rect.center
+
+        # Act
+        hovered = self.menu.mouseHover()
+
+        # Assert
+        self.assertEqual(hovered, first_rect)
+
+    @patch("pygame.mouse.get_pos")
+    def test_mouse_hover_outside_characters(self, mock_mouse_pos):
+        # Arrange: simulate mouse far away
+        mock_mouse_pos.return_value = (0, 0)
+
+        # Act
+        hovered = self.menu.mouseHover()
+
+        # Assert
+        self.assertIsNone(hovered)
 
 if __name__ == "__main__":
     unittest.main()
