@@ -681,7 +681,11 @@ class Game:
                 action = self.menu.buttonAction(self.mouse)
                 print("menu action = ", action)  # for debugging in console
                 # If the action is START, get rid of the menu
-                if action is not None:
+                if action is not None and action == "Mute":
+                    pygame.mixer.music.set_volume(0)
+                elif action is not None and action == "Unmute":
+                    pygame.mixer.music.set_volume(0.2)
+                elif action is not None and (action != "Mute" and action != "Unmute"):
                     selected_name = action
                     # Extract proper character name
                     if "Mustard" in selected_name:
@@ -1543,14 +1547,22 @@ class Menu:
         self.logo_rect.centerx = pygame.display.get_surface().get_rect().centerx
         self.logo_rect.y = self.height * 0.1
         # now create the start button - centred horizontally
-        self.start_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 - 30, 140, 60, "Start")
-        self.exit_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 60, 140, 60, "Exit")
+        self.start_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 - 60, 160, 60, "Start")
+        self.mute_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 15, 160, 60, "Mute Music", 22)
+        self.exit_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 90, 160, 60, "Exit")
 
     def buttonAction(self, mouse):
         start_action = self.start_btn.changeGameState(mouse)
+        mute_action = self.mute_btn.changeGameState(mouse)
         exit_action = self.exit_btn.changeGameState(mouse)
         if start_action is not None:  # start button returns character selected
             return start_action
+        elif mute_action is not None:
+            if self.mute_btn.text == "Mute Music":
+                self.mute_btn.text = "Unmute Music"
+            elif self.mute_btn.text == "Unmute Music":
+                self.mute_btn.text = "Mute Music"
+            return mute_action
 
         return None
 
@@ -1562,6 +1574,8 @@ class Menu:
         surface.blit(self.logo, (self.logo_rect))
         self.start_btn.draw(self.disp_surf)
         self.start_btn.mouseHover(self.mouse)
+        self.mute_btn.draw(self.disp_surf)
+        self.mute_btn.mouseHover(self.mouse)
         self.exit_btn.draw(self.disp_surf)
         self.exit_btn.mouseHover(self.mouse)
 
@@ -1678,9 +1692,13 @@ class MenuButton:  # BOOKMARK
                     char_menu = MainMenu2()
                     selectedchar = char_menu.run()
                     return selectedchar
-                else:
+                elif self.text == "Exit":
                     # Anyway, importantly, the exit button works (i.e. exits the game)
                     pygame.quit()
+                elif self.text == "Mute Music":
+                    return "Mute"
+                elif self.text == "Unmute Music":
+                    return "Unmute"
         return None
 
     def submit_suggestion(self, position, player, suspect, weapon, guess_room, all_players):
