@@ -556,11 +556,11 @@ class Game:
                 self.running = False
 
             ####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and not self.pre_selection and not self.selecting: 
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     continue  # added 24/04/2026 for locking movement to current turn
                 ###SECRET PASSAGES
-                elif event.key == pygame.K_s and self.player.in_room in self.secret_passages and not self.pre_selection:
+                elif event.key == pygame.K_RETURN and self.player.in_room in self.secret_passages and not self.pre_selection and self.turn_phase == "ROLL":
                     target_room = self.secret_passages[self.player.in_room]
                     seat = self.room_seats[target_room][0]
                     self.player.col = seat[0]
@@ -591,7 +591,7 @@ class Game:
                 ###    self.select_suspicions(self.player, "suggestion")
 
                     ##MOVEMENT FUNCTIONALITY BELOW
-                elif event.key == pygame.K_UP and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (event.key == pygame.K_UP or event.key == pygame.K_w) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -611,7 +611,7 @@ class Game:
                         self.turn_phase = "END"
 
 
-                elif event.key == pygame.K_DOWN and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -631,7 +631,7 @@ class Game:
                         self.turn_phase = "END"
 
 
-                elif event.key == pygame.K_LEFT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -652,7 +652,7 @@ class Game:
                         self.turn_phase = "END"
 
 
-                elif event.key == pygame.K_RIGHT and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -1101,7 +1101,9 @@ class Game:
                     small_font = pygame.font.SysFont("courier", 17)
                     next_player = self.get_next_player().character.name
 
-                    if self.turn_phase == "ROLL":
+                    if self.turn_phase == "ROLL" and (self.player.in_room in self.secret_passages) and (self.get_active_player() == self.currentplayer):
+                        status = "ROLL or ENTER to use shortcut"
+                    elif self.turn_phase == "ROLL":
                         status = "ROLL"
                     elif self.turn_phase == "MOVE":
                         status = f"Moves left: {self.moves_left}"
