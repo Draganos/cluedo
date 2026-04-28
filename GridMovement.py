@@ -1011,7 +1011,7 @@ class Game:
                     target_tile = self.cpu_tiletarget[cpu]
 
                     # CPU MOVES W DELAY
-                    if self.cpu_timer > 50 and self.cpu_moves_left > 0:
+                    if self.cpu_timer > 25 and self.cpu_moves_left > 0:
                         dx, dy = self.get_cpudirection(visualcpu, target_tile)
                         if (dx, dy) == (0, 0):
                             self.cpu_moves_left = 0
