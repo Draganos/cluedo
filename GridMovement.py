@@ -835,6 +835,24 @@ class Game:
                                 self.selection_card_list[1].obj, self.selection_card_list[2].obj, self.all_players)
                             suggested_character = self.selection_card_list[0].obj
                             target_room = self.player.in_room
+                            taken_seats = []
+
+                            #Keeps track of taken seats in the room for the next part
+                            for p in self.visual_players:
+                                taken_seats.append((p.col,p.row))
+
+
+                            #Teleports other players into your room if you suggest them.
+                            for teleportedPlayer in self.visual_players:
+                                if teleportedPlayer.character == suggested_character:
+                                    teleportedPlayer.in_room = target_room
+
+
+                                    for seat in self.room_seats[target_room]:
+                                        if seat not in taken_seats:
+                                            teleportedPlayer.col,teleportedPlayer.row = seat
+                                            break
+                                            
                             if self.suggestion_result:
                                 card_name = (
                                     self.suggestion_result.item_name
