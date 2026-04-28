@@ -820,6 +820,18 @@ class Game:
                             self.suggestion_result, self.selecting, self.readytosuggest, self.turn_phase = self.submit.submit_suggestion(
                                 self.mouse, self.currentplayer, self.selection_card_list[0].obj,
                                 self.selection_card_list[1].obj, self.selection_card_list[2].obj, self.all_players)
+                            suggested_character = self.selection_card_list[0].obj
+                            target_room = self.player.in_room
+                            if self.suggestion_result:
+                                card_name = (
+                                    self.suggestion_result.item_name
+                                    if hasattr(self.suggestion_result, "item_name")
+                                    else self.suggestion_result.name
+                                )
+                                self.message = f"Card shown: {card_name}"
+                            else:
+                                self.message = "No one could disprove your suggestion."
+                            self.message_timer = pygame.time.get_ticks()
 
                     match type_selection:
                         case "char":
@@ -1683,6 +1695,7 @@ class MenuButton:  # BOOKMARK
                         all_players
                     )
                     return shown_card, False, False, "END"
+
 
     def suggest_or_pass(self, position):
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
