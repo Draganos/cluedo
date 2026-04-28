@@ -6,7 +6,7 @@ class Character:
         self.name = name
         self.room = None  # applied in randomizer if murderer
         self.weapon = None  # applied in randomizer if murderer
-        self.position = None  # coordinates or board indexes can be added later with sese coordination
+        self.position = None  # coordinates added later with sese coordination on gridmovement
 
 
 class Room:
