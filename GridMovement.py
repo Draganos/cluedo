@@ -555,6 +555,13 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
+            if event.type == pygame.KEYDOWN and self.menu is None: # mute button, accessible at any time after menu closes
+                if event.key == pygame.K_m:
+                    if pygame.mixer.music.get_volume() != 0:
+                        pygame.mixer.music.set_volume(0)
+                    else:
+                        pygame.mixer.music.set_volume(0.2)
+
             ####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
             if event.type == pygame.KEYDOWN and not self.pre_selection and not self.selecting: 
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
