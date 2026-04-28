@@ -1076,6 +1076,31 @@ class Game:
                             self.cpu_moves_left = 0
                             ###CPU WILL NEED TO MAKE ACCUSATION IF RELEVANT MAYBE??? CHECK
                             # BOOKMARK
+                        
+                        ###CPU SUGGESTION LOGIC
+                            # random suggestion
+                            target_room = visualcpu.in_room
+                            suggested_char = random.choice(self.characters)
+                            suggested_weap = random.choice(self.weapons)
+
+                            # logic from main.py
+                            shown_card = make_suggestion(cpu, target_room, suggested_char, suggested_weap,
+                                                         self.all_players)
+
+                            # pop up message.
+                            self.message = f"{cpu.character.name} suggests: {suggested_char.name},{target_room} ,{suggested_weap.item_name}. {'EVIDENCE FOUND!.' if shown_card else 'No Evidence!'}"
+                            self.message_timer = pygame.time.get_ticks()
+                        
+                            # Suggested characters are forced into the room for the suggestion
+                            taken_seats = [(p.col, p.row) for p in self.visual_players]
+                            for p in self.visual_players:
+                                if p.character == suggested_char:
+                                    p.in_room = target_room
+                                    # Find an empty seat in the room
+                                    for seat in self.room_seats[target_room]:
+                                        if seat not in taken_seats:
+                                            p.col, p.row = seat
+                                            break
 
                         self.cpu_timer = 0
 
