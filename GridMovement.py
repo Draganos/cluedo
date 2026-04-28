@@ -560,7 +560,7 @@ class Game:
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     continue  # added 24/04/2026 for locking movement to current turn
                 ###SECRET PASSAGES
-                elif event.key == pygame.K_s and self.player.in_room in self.secret_passages:
+                elif event.key == pygame.K_s and self.player.in_room in self.secret_passages and not self.pre_selection:
                     target_room = self.secret_passages[self.player.in_room]
                     seat = self.room_seats[target_room][0]
                     self.player.col = seat[0]
@@ -568,7 +568,9 @@ class Game:
                     self.player.in_room = target_room
                     print(f"Secret passage used: moved to {target_room}")
                     self.moves_left = 0
-                    self.turn_phase = "END"
+                    self.turn_phase = "ACTION"
+                    self.readytosuggest = True
+                    self.pre_selection = True
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
