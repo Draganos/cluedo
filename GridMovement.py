@@ -782,14 +782,6 @@ class Game:
 
                     mousex = self.mouse[0]
                     mousey = self.mouse[1]
-                    if not isinstance(type_selection, str):
-                        if (mousey >= 350 and mousey <= 550):
-                            if mousex < 440 and mousex > 300:
-                                type_selection = "char"
-                            elif mousex > 600 and mousex < 740:
-                                type_selection = "room"
-                            elif mousex >= 450 and mousex <= 590:
-                                type_selection = "weap"
 
                     # Where submit button is clicked
                     if (mousey >= 600 and mousey <= 640) and (
