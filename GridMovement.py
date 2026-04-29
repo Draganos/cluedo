@@ -324,7 +324,7 @@ class Game:
             (15, 0), (8, 0),
 
             # CONSERVATORY
-            (0, 20), (1, 19), (2, 19), (3, 19), (4, 20), (5, 20),
+            (0, 19), (0, 20), (1, 19), (2, 19), (3, 19), (4, 20), (5, 20),
             (0, 21), (1, 23), (2, 23), (3, 23), (4, 23), (5, 21),
             (0, 22), (5, 22),
             (0, 23), (5, 23),
@@ -795,7 +795,7 @@ class Game:
                     if (mousey >= 600 and mousey <= 640) and (
                             self.suspect_picked and self.weapon_picked and self.room_picked):
                         if (mousex >= 640 and mousex <= 780):
-                            self.suggestion_result, self.selecting, self.readytosuggest, self.turn_phase = self.submit.submit_suggestion(
+                            self.suggestion_result, self.selecting, self.readytosuggest, self.turn_phase, displayer = self.submit.submit_suggestion(
                                 self.mouse, self.currentplayer, self.selection_card_list[0].obj,
                                 self.selection_card_list[1].obj, self.selection_card_list[2].obj, self.all_players)
                             suggested_character = self.selection_card_list[0].obj
@@ -826,7 +826,7 @@ class Game:
                                     if hasattr(self.suggestion_result, "item_name")
                                     else self.suggestion_result.name
                                 )
-                                self.message = f"Card shown: {card_name}"
+                                self.message = f"{displayer.character.name} shows you {card_name}."
                             else:
                                 self.message = "No one could disprove your suggestion."
                             self.message_timer = pygame.time.get_ticks()
@@ -1098,11 +1098,11 @@ class Game:
                             suggested_char = random.choice(unknownchars or self.characters)
                             suggested_weap = random.choice(unknownweapons or self.weapons)
 
-                            shown_card = make_suggestion(cpu, target_room, suggested_char, suggested_weap,
+                            shown_card, displayer = make_suggestion(cpu, target_room, suggested_char, suggested_weap,
                                                          self.all_players)
                             if shown_card:
                                 cpu.known_cards.add(shown_card)
-                                self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. EVIDENCE FOUND!"
+                                self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. {displayer.character.name} shows {cpu.character.name} a card!"
                             else:
                                 self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. No Evidence!"
 
@@ -1265,7 +1265,7 @@ class Game:
 
             if self.message:
                 elapsed = pygame.time.get_ticks() - self.message_timer
-                if elapsed < 2000:
+                if elapsed < 5000:
                     text_surface = self.font.render(self.message, True, (255, 255, 255))
                     text_rect = text_surface.get_rect()
 
@@ -1780,14 +1780,14 @@ class MenuButton:
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 if suspect and weapon and guess_room:
-                    shown_card = make_suggestion(
+                    shown_card, displayer = make_suggestion(
                         player,
                         guess_room.name,
                         suspect,
                         weapon,
                         all_players
                     )
-                    return shown_card, False, False, "END"
+                    return shown_card, False, False, "END", displayer
 
     def suggest_or_pass(self, position):
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:

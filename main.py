@@ -182,7 +182,7 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
         if matching_cards:
             shown_card = random.choice(matching_cards)
             #print(f"{other.character.name} shows a card.")
-            return shown_card
+            return shown_card, other
 
     #print("the suggestion couldnt be disproved.")
     return None

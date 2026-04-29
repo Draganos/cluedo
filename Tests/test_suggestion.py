@@ -51,9 +51,10 @@ class TestSuggestions(unittest.TestCase):
     # in this test, the player after Scarlet is Plum: Plum has a matching card (Candlestick - self.weapons[0]) so make_suggestion(...) should return Candlestick
     def test_suggestion_disproven(self):
         # Scarlet makes the suggestion Plum, Study, Candlestick
-        result = make_suggestion(self.all_players[0], self.rooms[0].name, self.all_players[1].character, self.weapons[0], self.all_players)
+        result, displayer = make_suggestion(self.all_players[0], self.rooms[0].name, self.all_players[1].character, self.weapons[0], self.all_players)
         # Expect to see Candlestick (i.e. self.weapons[0] returned, as it is the first matching card)
         self.assertEqual(result, self.weapons[0])
+        self.assertEqual(displayer.character.name, "Plum")
     
     # test to check make_suggestion(...) returns None whem suggestion == envelope
     def test_suggestion_proven(self):
