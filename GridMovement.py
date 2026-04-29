@@ -4,7 +4,8 @@ import pygame
 
 from main import setup_game, make_suggestion  # for linking gridcontroller
 
-# Constants, OFFSET X, Y and TILE_SIZE determine the grid layout. Sheet is for the squares inside the sheet.
+# Constants = OFFSET X, Y and TILE_SIZE determine the grid layout. 
+# Sheet is for the cells inside the checksheet.
 SCALE = 0.6
 TILE_SIZE = 46.5 * SCALE
 OFFSET_X = 37 * SCALE
@@ -38,6 +39,7 @@ class Player:
             print(f"Player left the {self.in_room}")
             self.in_room = None
             return "LEFT_ROOM"
+            
         # Calculate new position
         new_col = self.col + dx
         new_row = self.row + dy
@@ -66,7 +68,8 @@ class Player:
             return "MOVED"
 
     def draw(self, surface):
-        # Convert grid position to pixels and draws the player on the grid.
+        
+        # Converts grid position to pixels and draws the player on the grid.
         pixel_x = OFFSET_X + (self.col * TILE_SIZE) + (TILE_SIZE / 2)
         pixel_y = OFFSET_Y + (self.row * TILE_SIZE) + (TILE_SIZE / 2)
         pygame.draw.circle(surface, self.color, (int(pixel_x), int(pixel_y)), int(TILE_SIZE / 3))
@@ -74,24 +77,26 @@ class Player:
 
 class Board:
     def __init__(self):
-        # Load and scale the board
+        
+        # Loads and scales the board
         self.image = pygame.image.load("Assets/cluedoboard.jpg")
         self.width = int(self.image.get_width() * SCALE)
         self.height = int(self.image.get_height() * SCALE)
         self.image = pygame.transform.smoothscale(self.image, (self.width, self.height))
 
-        # Load and scale the sheet
+        # Loads and scales the sheet
         self.sheet = pygame.image.load("Assets/cluedo-sheet.png")
         self.sheet_width = int(self.sheet.get_width() * 0.5 * SCALE)
         self.sheet_height = self.height - 200
         self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.sheet_height))
 
     def draw(self, surface):
-        # Draw the board and sheet shifted down by HEADER_HEIGHT
+        
+        # Draws the board and sheet shifted down by HEADER_HEIGHT
         surface.blit(self.image, (0, HEADER_HEIGHT))
         surface.blit(self.sheet, (self.width, HEADER_HEIGHT))
 
-        # Fill the empty space under the sheet with green.
+        # Fills the empty space under the checksheet with green.
         pygame.draw.rect(
             surface,
             (140, 185, 130),
@@ -99,7 +104,7 @@ class Board:
         )
 
 
-##SPRITE WORK FROM VICTOR ####
+#Victor's Spritework#
 class Spritesheet():
     def __init__(self, image):
         self.sheet = image
@@ -111,7 +116,7 @@ class Spritesheet():
 
         return frame
 
-
+#Animation
 class Sprite_Chars():
     def __init__(self, width, height):
         self.sprite_sheet_image = pygame.image.load("Assets/143445.png")
@@ -133,7 +138,7 @@ class Sprite_Chars():
                 x += 1
 
     def draw(self, surface):
-        # update animation
+        # Update animation
         done = False
         current_time = pygame.time.get_ticks()
         if current_time - self.last_update >= self.animation_cooldown:
@@ -150,17 +155,16 @@ class Sprite_Chars():
         return False
 
 
-###END SPRITE WORK FROM VICTOR
-
 class Game:
     # Initialisation for the game.
     def __init__(self):
+        
+        #MUSIC INIT
         pygame.init()
         pygame.mixer.init()
         pygame.mixer.music.load('Assets/bgm.mp3')
         pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(0.2)
-
         self.dice_sound = pygame.mixer.Sound("Assets/diceroll.mp3")
         self.card_sound = pygame.mixer.Sound("Assets/cardshuffle.mp3")
         self.click_sound = pygame.mixer.Sound("Assets/click.mp3")
@@ -202,13 +206,14 @@ class Game:
         self.mouse = pygame.mouse.get_pos()
         self.sprite = Sprite_Chars(win_width, self.board.height + HEADER_HEIGHT)
 
-        ###cpu-related #cpu init
+        #CPU init
         self.cpu_timer = 0
         self.cpu_moves_left = 0
         self.cpu_rolled = False
         self.cpu_roomtarget = {}
         self.cpu_tiletarget = {}
-        ###storing game state variables for gamecontroller
+        
+        #storing game state variables for gamecontroller
         self.activegame = False
         self.currentplayer = None
         self.otherplayers = []
@@ -222,7 +227,8 @@ class Game:
         # suggestion tracking variables
         self.suggestion_result = None
         self.readytosuggest = False
-        ###TURN TRACKING VARIABLES
+        
+        #TURN TRACKING VARIABLES
         self.turn_index = 0
         self.all_players = []
         self.turn_phase = "ROLL"  # ROLL/MOVE/ACTION/END
@@ -438,6 +444,7 @@ class Game:
             "Kitchen": pygame.transform.smoothscale(pygame.image.load("Cards/Kitchen.png").convert_alpha(), (140, 200)),
         }
 
+    #Guess logic
     def select_suspicions(self, player, type):
         self.overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()),
                                       pygame.SRCALPHA).convert_alpha()
@@ -470,7 +477,7 @@ class Game:
         refuse = MenuButton(COLOUR, 450, 380, 200, 60, "Continue", 20)
         return suggest, refuse, overlay
 
-    #
+
     def make_suspicion_choice(self, type, positions):
         cards = {
             "char": {
@@ -627,7 +634,7 @@ class Game:
                     self.suggestion_result = None
                     self.end_turn()
 
-            #MENU SELECTION BELOW
+            #Menu Selection
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
                 # Catch the action
                 action = self.menu.buttonAction(self.mouse)
@@ -774,7 +781,7 @@ class Game:
                             elif mousex >= 450 and mousex <= 590:
                                 type_selection = "weap"
 
-                    # THIS IS WHERE IT CLICKS THE SUBMIT BUTTON
+                    # Where submit button is clicked
                     if (mousey >= 600 and mousey <= 640) and (
                             self.suspect_picked and self.weapon_picked and self.room_picked):
                         if (mousex >= 640 and mousex <= 780):
@@ -785,7 +792,7 @@ class Game:
                             target_room = self.player.in_room
                             taken_seats = []
 
-                            #tracking of tiles in the room for the next part
+                            #tracking of tiles
                             for p in self.visual_players:
                                 taken_seats.append((p.col, p.row))
 
@@ -825,7 +832,7 @@ class Game:
                     if type_selection:
                         self.make_suspicion_choice(type_selection, self.card_pos[type_selection])
 
-                    # CHARACTER PICKING
+                    #CHARACTER PICKING
                 if self.select_suspect and event.type == pygame.MOUSEBUTTONDOWN and self.selecting_block == False:
                     suspect = None
                     for char_card in self.char_card_list:
@@ -896,7 +903,7 @@ class Game:
                         self.turn_phase = "MOVE"
                         self.dice_sound.play()
 
-    ###for turn system below VVV
+    #Turn system
     def get_active_player(self):
         return self.all_players[self.turn_index]
 
@@ -904,7 +911,7 @@ class Game:
         next_index = (self.turn_index + 1) % len(self.all_players)
         return self.all_players[next_index]
 
-    ##CPU DEF FUNCTIONS
+    #CPU DEF FUNCTIONS
     def getvisualplayer(self, logic_player):
         for visual_player in self.visual_players:
             if visual_player.character == logic_player.character:
@@ -1030,7 +1037,7 @@ class Game:
 
                         if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                             self.cpu_moves_left -= 1
-                            # Only track the last move if they are actually walking in the hallway
+                            # Only tracks the last move if they are actually walking in the hallway
                             if result == "MOVED":
                                 self.cpulastmove[visualcpu] = (dx, dy)
                         # behavior for when the cpu reaches that room
@@ -1046,7 +1053,7 @@ class Game:
                             unknownweapons = [w for w in self.weapons if w not in cpu.known_cards]
                             unknownrooms = [r for r in self.rooms if r not in cpu.known_cards]
 
-                            # ACCUSATION ATTEMPT
+                            # Accusation Attempt
                             #when the cpu knows 15 or more cards they take a guess at the missing ones
                             if len(cpu.known_cards) >= 15: #they guess the first item in each unknown list
                                 if unknownchars and unknownweapons and unknownrooms:
@@ -1058,7 +1065,7 @@ class Game:
                                     self.end_turn()
                                     continue
 
-                                #check against the envelope we determined at init
+                                #checks against the envelope
                                 if (guesscharacter == self.envelope.character and guessweapon == self.envelope.weapon and guessroom == self.envelope.room):
                                     #CPU guesses, game over
                                     pygame.mixer.music.stop()
@@ -1068,7 +1075,7 @@ class Game:
                                     self.accuse_menu.lose_sfx.play()
                                     continue #ends turn moves on straight away
                                 else:
-                                    #If accusation is incorrect then they ar eeliminated.
+                                    #If accusation is incorrect then they are eliminated.
                                     print(f"!!! {cpu.character.name} FAILED AND IS OUT !!!")
                                     self.message = f"{cpu.character.name} is ELIMINATED!"
                                     self.message_timer = pygame.time.get_ticks()
@@ -1386,7 +1393,7 @@ class AccuseButton:
         self.rect.topleft = (x, y)
 
     def draw(self, surface, mouse_pos):
-        # Check if the mouse is currently inside the button's picture frame
+        # Checks if the mouse is currently inside the button
         if self.rect.collidepoint(mouse_pos):
             # If hovering, draw the normal, solid version
             surface.blit(self.image, self.rect.topleft)
@@ -1667,7 +1674,7 @@ class CheckSheetFunction:
         for section, data in self.sections.items():
             start_y = data["y"]
 
-            # Loop through every possible cell in this section
+            # Loops through every possible cell in this section
             for row in range(data["rows"]):
                 for col in range(data["cols"]):
                     # Calculate the top-left corner of this specific cell
@@ -1677,7 +1684,7 @@ class CheckSheetFunction:
                     # Creates a hitbox for the cell
                     cell_rect = pygame.Rect(cell_x, cell_y, self.cell_w, self.cell_h)
 
-                    # Check if the mouse click happened inside this cell's rectangle
+                    # Check if the mouse click happened inside this cell's rect
                     if cell_rect.collidepoint(mouse_x, mouse_y):
                         cell_id = (section, row, col)
 
