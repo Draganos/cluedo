@@ -1,7 +1,7 @@
 import itertools
 import random
 import pygame
-#from pygame import surface #unused now
+# from pygame import surface #unused now
 
 from main import setup_game, make_suggestion  # for linking gridcontroller
 
@@ -49,7 +49,7 @@ class Player:
             available_seats = room_seats[entered_room]
             self.col = available_seats[0][0]
             self.row = available_seats[0][1]
-            self.in_room = entered_room  # Save this for main.py logic later!
+            self.in_room = entered_room
 
             return "ENTERED_ROOM"
 
@@ -165,30 +165,6 @@ class Game:
         pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(0.2)
 
-        # Variables for the suggestion/accusation selection
-        self.selecting = False
-        self.selecting_block = True
-        self.select_suspect = False
-        self.select_weapon = False
-        self.select_room = False
-
-        self.suspect_picked = False
-        self.weapon_picked = False
-        self.room_picked = False
-
-        # Grid positions for where the cards appear on screen
-        self.card_pos = {
-            "char": [(250, 225), (450, 225), (650, 225), (250, 475), (450, 475), (650, 475)],
-            "weap": [(250, 225), (450, 225), (650, 225), (250, 475), (450, 475), (650, 475)],
-            "room": [(250, 200), (450, 200), (650, 200), (250, 450), (450, 450), (650, 450), (250, 700), (450, 700),
-                     (650, 700)]
-        }
-
-        self.selection_card_list = []
-        self.char_card_list = []
-        self.weap_card_list = []
-        self.room_card_list = []
-
         self.dice_sound = pygame.mixer.Sound("Assets/diceroll.mp3")
         self.card_sound = pygame.mixer.Sound("Assets/cardshuffle.mp3")
         self.click_sound = pygame.mixer.Sound("Assets/click.mp3")
@@ -198,7 +174,6 @@ class Game:
         win_width = self.board.width + self.board.sheet_width
         self.screen = pygame.display.set_mode((win_width, self.board.height + HEADER_HEIGHT))
         self.menu = Menu()
-        # uncomment here, (roughly) line 366-376 when music tracks are actually implemented, and (roughly) line 558
         # self.play_menu_music()
         self.last_roll = None
         self.roll_source = None
@@ -345,7 +320,8 @@ class Game:
             (15, 0), (8, 0),
 
             # Specific Dining Room Coordinates
-            (19, 15), (20, 15), (21, 15), (22, 15), (23, 15), (23, 16), (15,24) #(24, 15), (24, 16),  <----- ive removed these cause the white cpu would always get stuck in boundary, 0<23 are columns valid and 24 is out of board.
+            (19, 15), (20, 15), (21, 15), (22, 15), (23, 15), (23, 16), (15, 24)
+            # (24, 15), (24, 16),  <----- ive removed these cause the white cpu would always get stuck in boundary, 0<23 are columns valid and 24 is out of board.
         ]
 
         # MIDDLE =
@@ -555,7 +531,7 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
-            if event.type == pygame.KEYDOWN and self.menu is None: # mute button, accessible at any time after menu closes
+            if event.type == pygame.KEYDOWN and self.menu is None:  # mute button, accessible at any time after menu closes
                 if event.key == pygame.K_m:
                     if pygame.mixer.music.get_volume() != 0:
                         pygame.mixer.music.set_volume(0)
@@ -563,7 +539,7 @@ class Game:
                         pygame.mixer.music.set_volume(0.2)
 
             ####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
-            if event.type == pygame.KEYDOWN and not self.pre_selection and not self.selecting: 
+            if event.type == pygame.KEYDOWN and not self.pre_selection and not self.selecting:
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     continue  # added 24/04/2026 for locking movement to current turn
                 ###SECRET PASSAGES
@@ -597,8 +573,9 @@ class Game:
                 ###    self.select_room = False
                 ###    self.select_suspicions(self.player, "suggestion")
 
-                    ##MOVEMENT FUNCTIONALITY BELOW
-                elif (event.key == pygame.K_UP or event.key == pygame.K_w) and self.moves_left > 0 and self.turn_phase == "MOVE":
+                ##MOVEMENT FUNCTIONALITY BELOW
+                elif (
+                        event.key == pygame.K_UP or event.key == pygame.K_w) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -618,7 +595,8 @@ class Game:
                         self.turn_phase = "END"
 
 
-                elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (
+                        event.key == pygame.K_DOWN or event.key == pygame.K_s) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, 1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -638,7 +616,8 @@ class Game:
                         self.turn_phase = "END"
 
 
-                elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (
+                        event.key == pygame.K_LEFT or event.key == pygame.K_a) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(-1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -659,7 +638,8 @@ class Game:
                         self.turn_phase = "END"
 
 
-                elif (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and self.moves_left > 0 and self.turn_phase == "MOVE":
+                elif (
+                        event.key == pygame.K_RIGHT or event.key == pygame.K_d) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(1, 0, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
                     if result is None:
                         self.message = "Cannot move in there!"
@@ -757,7 +737,7 @@ class Game:
                 if self.activegame and self.turn_phase == "ROLL":
                     d1 = random.randint(1, 6)
                     d2 = random.randint(1, 6)
-                    self.moves_left = d1+d2
+                    self.moves_left = d1 + d2
                     self.last_roll = self.moves_left
                     self.roll_display_time = pygame.time.get_ticks()
                     self.turn_phase = "MOVE"
@@ -787,28 +767,23 @@ class Game:
             if event.type == pygame.MOUSEBUTTONDOWN:
 
                 # Handle Cards Dropdown
-                if hasattr(self, 'cards_btn') and self.cards_btn.rect.collidepoint(self.mouse):
+                if self.cards_btn.rect.collidepoint(self.mouse):
                     self.show_cards_dropdown = not self.show_cards_dropdown
                     self.card_sound.play()
 
                 # If Accuse Menu is already open, let it handle the clicks.
-                elif hasattr(self, 'accuse_menu') and self.accuse_menu.active:
+                elif self.accuse_menu.active:
                     self.accuse_menu.handle(self.mouse, self.envelope)
                     self.click_sound.play()
 
-                # If menu is closed, checks if we clicked the Accuse button to open it
-                elif hasattr(self, 'accuse_btn') and self.accuse_btn.rect.collidepoint(self.mouse):
-                    if self.activegame and self.get_active_player() == self.currentplayer:
-                        print("Accuse button clicked! Opening Menu.")
-                        self.accuse_menu.active = True
-                        self.click_sound.play()
+                # If menu is closed, checks if we clicked the Accuse button to open it.
+                elif self.accuse_btn.rect.collidepoint(self.mouse):
+                    print("Accuse button clicked! Opening Menu.")
+                    self.accuse_menu.active = True
+                    self.click_sound.play()
 
-
-
-
-
-                elif self.selecting and event.type == pygame.MOUSEBUTTONDOWN and (
-                        not self.select_suspect and not self.select_weapon and not self.select_room):
+                elif self.selecting and (
+                    not self.select_suspect and not self.select_weapon and not self.select_room):
                     type_selection = None
 
                     for card in self.selection_card_list:
@@ -839,22 +814,20 @@ class Game:
                             target_room = self.player.in_room
                             taken_seats = []
 
-                            #Keeps track of taken seats in the room for the next part
+                            # Keeps track of taken seats in the room for the next part
                             for p in self.visual_players:
-                                taken_seats.append((p.col,p.row))
+                                taken_seats.append((p.col, p.row))
 
-
-                            #Teleports other players into your room if you suggest them.
+                            # Teleports other players into your room if you suggest them.
                             for teleportedPlayer in self.visual_players:
                                 if teleportedPlayer.character == suggested_character:
                                     teleportedPlayer.in_room = target_room
 
-
                                     for seat in self.room_seats[target_room]:
                                         if seat not in taken_seats:
-                                            teleportedPlayer.col,teleportedPlayer.row = seat
+                                            teleportedPlayer.col, teleportedPlayer.row = seat
                                             break
-                                            
+
                             if self.suggestion_result:
                                 card_name = (
                                     self.suggestion_result.item_name
@@ -943,7 +916,7 @@ class Game:
                     if self.activegame and self.turn_phase == "ROLL":  # 26/04/2026 changes made such that roll cannot be done while moving
                         d1 = random.randint(1, 6)
                         d2 = random.randint(1, 6)
-                        self.moves_left = d1+d2
+                        self.moves_left = d1 + d2
                         print(f"Rolled: {self.moves_left}")
                         self.turn_phase = "MOVE"
                         self.dice_sound.play()
@@ -966,14 +939,15 @@ class Game:
     def get_cpudirection(self, visual_player, target_tile):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
         valid_directions = []
-        lastmove = self.cpulastmove.get(visual_player) #to avoid the backtracking the cpu was doing going front and back around
+        lastmove = self.cpulastmove.get(
+            visual_player)  # to avoid the backtracking the cpu was doing going front and back around
         opposite = None
         if lastmove:
             opposite = (-lastmove[0], -lastmove[1])
         for dx, dy in directions:  # checkvalid directions
             new_col = visual_player.col + dx
             new_row = visual_player.row + dy
-            if opposite and (dx, dy) == opposite: #remove backtrack
+            if opposite and (dx, dy) == opposite:  # remove backtrack
                 continue
             if (new_col, new_row) in self.doors:
                 valid_directions.append((dx, dy))
@@ -982,7 +956,7 @@ class Game:
                     and 0 <= new_row < 25
                     and (new_col, new_row) not in self.forbidden_tiles):
                 valid_directions.append((dx, dy))
-        if not valid_directions: #lets cpu go backwards if it gets stuck
+        if not valid_directions:  # lets cpu go backwards if it gets stuck
             for dx, dy in directions:
                 new_col = visual_player.col + dx
                 new_row = visual_player.row + dy
@@ -994,7 +968,7 @@ class Game:
                         and (new_col, new_row) not in self.forbidden_tiles):
                     return (dx, dy)
             return (0, 0)
-        #set target door and room to move towards
+        # set target door and room to move towards
         dx_to_target = target_tile[0] - visual_player.col
         dy_to_target = target_tile[1] - visual_player.row
         if abs(dx_to_target) > abs(dy_to_target):
@@ -1016,8 +990,7 @@ class Game:
             self.mouse = pygame.mouse.get_pos()
             current_time = pygame.time.get_ticks()
             # Lose Animation Trigger
-            if hasattr(self, 'accuse_menu'):
-                if self.accuse_menu.is_gameover and not self.accuse_menu.is_gamewon:
+            if self.accuse_menu.is_gameover and not self.accuse_menu.is_gamewon:
                     if not self.playing and not self.play_finished:
                         self.playing = True
                         self.sprite.frame = 0
@@ -1032,7 +1005,7 @@ class Game:
                     if not self.cpu_rolled:
                         d1 = random.randint(1, 6)
                         d2 = random.randint(1, 6)
-                        self.cpu_moves_left = d1+d2
+                        self.cpu_moves_left = d1 + d2
                         self.cpu_rolled = True
                         self.last_roll = self.cpu_moves_left
                         self.roll_display_time = pygame.time.get_ticks()
@@ -1082,8 +1055,8 @@ class Game:
                             self.cpu_moves_left = 0
                             ###CPU WILL NEED TO MAKE ACCUSATION IF RELEVANT MAYBE??? CHECK
                             # BOOKMARK
-                        
-                        ###CPU SUGGESTION LOGIC
+
+                            ###CPU SUGGESTION LOGIC
                             # random suggestion
                             target_room = visualcpu.in_room
                             suggested_char = random.choice(self.characters)
@@ -1096,7 +1069,7 @@ class Game:
                             # pop up message.
                             self.message = f"{cpu.character.name} suggests: {suggested_char.name},{target_room} ,{suggested_weap.item_name}. {'EVIDENCE FOUND!.' if shown_card else 'No Evidence!'}"
                             self.message_timer = pygame.time.get_ticks()
-                        
+
                             # Suggested characters are forced into the room for the suggestion
                             taken_seats = [(p.col, p.row) for p in self.visual_players]
                             for p in self.visual_players:
@@ -1157,7 +1130,8 @@ class Game:
                     small_font = pygame.font.SysFont("courier", 17)
                     next_player = self.get_next_player().character.name
 
-                    if self.turn_phase == "ROLL" and (self.player.in_room in self.secret_passages) and (self.get_active_player() == self.currentplayer):
+                    if self.turn_phase == "ROLL" and (self.player.in_room in self.secret_passages) and (
+                            self.get_active_player() == self.currentplayer):
                         status = "ROLL or ENTER to use shortcut"
                     elif self.turn_phase == "ROLL":
                         status = "ROLL"
@@ -1241,8 +1215,8 @@ class Game:
                                 text_dropdown = self.dropdown_font.render(card_name, True, (255, 255, 255))
                                 self.screen.blit(text_dropdown, (x, y))
 
-                if hasattr(self, 'accuse_btn'):
-                    self.accuse_btn.draw(self.screen, self.mouse)
+
+                self.accuse_btn.draw(self.screen, self.mouse)
 
                 if self.player.in_room is not None and self.pre_selection:  # BOOKMARK
                     self.screen.blit(self.suggest_overlay, (0, 0))
@@ -1278,8 +1252,7 @@ class Game:
                 else:
                     self.message = ""
 
-            if hasattr(self, 'accuse_menu'):
-                self.accuse_menu.draw(self.screen, self.card_images)
+            self.accuse_menu.draw(self.screen, self.card_images)
 
             if self.playing:
                 finished = self.sprite.draw(self.screen)
@@ -1590,7 +1563,6 @@ class AccuseMenu:
 
 class Menu:
     def __init__(self):
-        # Loads and scales the background image used for the menu to cover the whole screen; overflow ignored
         self.image = pygame.image.load('Assets/Tudor-Mansion.png')
         self.disp_surf = pygame.display.get_surface()
         x = self.disp_surf.get_width()
@@ -1598,7 +1570,6 @@ class Menu:
         self.image = pygame.transform.smoothscale(self.image, (x, y))
         self.width = x
         self.height = y
-        # Using the same principles as Board(), load the Clue logo
         self.logo = pygame.image.load('Assets/CLUE_logo.png')
         self.logo_width = int(self.logo.get_width())
         self.logo_height = int(self.logo.get_height())
@@ -1606,7 +1577,6 @@ class Menu:
         self.logo_rect = self.logo.get_rect()
         self.logo_rect.centerx = pygame.display.get_surface().get_rect().centerx
         self.logo_rect.y = self.height * 0.1
-        # now create the start button - centred horizontally
         self.start_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 - 60, 160, 60, "Start")
         self.mute_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 15, 160, 60, "Mute Music", 22)
         self.exit_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 90, 160, 60, "Exit")
@@ -1615,7 +1585,7 @@ class Menu:
         start_action = self.start_btn.changeGameState(mouse)
         mute_action = self.mute_btn.changeGameState(mouse)
         exit_action = self.exit_btn.changeGameState(mouse)
-        if start_action is not None:  # start button returns character selected
+        if start_action is not None:
             return start_action
         elif mute_action is not None:
             if self.mute_btn.text == "Mute Music":
@@ -1627,7 +1597,7 @@ class Menu:
         return None
 
     def draw(self, surface, mouse):
-        # Gets mouse pos (taken as parameter)
+        # Gets mouse position
         self.mouse = mouse
         # Draws background from top-left
         surface.blit(self.image, (0, 0))
@@ -1746,14 +1716,12 @@ class MenuButton:  # BOOKMARK
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 if self.text == "Start":
-                    # This should transition to the character select screen
                     print("Start game!")
                     from PickYourCharacter import MainMenu2
                     char_menu = MainMenu2()
                     selectedchar = char_menu.run()
                     return selectedchar
                 elif self.text == "Exit":
-                    # Anyway, importantly, the exit button works (i.e. exits the game)
                     pygame.quit()
                 elif self.text == "Mute Music":
                     return "Mute"
@@ -1773,7 +1741,6 @@ class MenuButton:  # BOOKMARK
                         all_players
                     )
                     return shown_card, False, False, "END"
-
 
     def suggest_or_pass(self, position):
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
