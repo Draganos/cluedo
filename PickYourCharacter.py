@@ -1,4 +1,4 @@
-import os
+
 import pygame
 from GridMovement import Board
 
@@ -11,6 +11,10 @@ class MainMenu2:
         win_width = self.board.width + self.board.sheet_width
         win_height = self.board.height
         self.screen = pygame.display.get_surface()
+
+        if self.screen is None:
+            self.screen = pygame.display.set_mode((win_width, win_height))
+
         pygame.display.set_caption("Clue!")
         self.title_img = None
         self.title_position = (150, 85)
@@ -25,12 +29,8 @@ class MainMenu2:
         self.load_assets()
 
     def load_assets(self):
-        # Directory Python File
-        script_dir = os.path.dirname(__file__)
-
         #Loads Title
-        title_path = os.path.join(script_dir, "Assets", "PickYourCharacter.png")
-        self.title_img = pygame.image.load(title_path).convert_alpha()
+        self.title_img = pygame.image.load("Assets/PickYourCharacter.png")
 
         # Load Characters
         self.character_names = [
@@ -41,17 +41,10 @@ class MainMenu2:
             "ProfessorPlum.png",
             "Rev Green.png"
         ]
-
         #Finds cards folder, loads and resizes it, then stores it as self.loaded_characters
         for i, name in enumerate(self.character_names):
-            img_path = os.path.join(script_dir, "Cards", name)
-            img = pygame.image.load(img_path).convert_alpha()
-            max_size = 140
-            w, h = img.get_size()
-            scale = min(max_size / w, max_size / h)
-            new_w = int(w * scale)
-            new_h = int(h * scale)
-            img = pygame.transform.smoothscale(img, (new_w, new_h))
+            img = pygame.image.load("Cards/" + name)
+            img = pygame.transform.smoothscale(img, (140, 140))
             self.loaded_characters.append(img)
 
             #hitbox for mouseHover
@@ -116,4 +109,5 @@ class MainMenu2:
 if __name__ == "__main__":
     menu = MainMenu2()
     menu.run()
+
 
