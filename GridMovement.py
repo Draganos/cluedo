@@ -18,6 +18,7 @@ COLOUR_HOVER = "#9040BA"
 
 
 class Player:
+    #Initialisation
     def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None):
         self.col = col
         self.in_room = None
@@ -67,6 +68,7 @@ class Player:
             self.row = new_row
             return "MOVED"
 
+    #Draws player on the grid
     def draw(self, surface):
         
         # Converts grid position to pixels and draws the player on the grid.
@@ -76,6 +78,7 @@ class Player:
 
 
 class Board:
+    #Initilisation for the board
     def __init__(self):
         
         # Loads and scales the board
@@ -90,9 +93,9 @@ class Board:
         self.sheet_height = self.height - 200
         self.sheet = pygame.transform.smoothscale(self.sheet, (self.sheet_width, self.sheet_height))
 
+    #Draws the board shifted down by Header_Height
     def draw(self, surface):
-        
-        # Draws the board and sheet shifted down by HEADER_HEIGHT
+    
         surface.blit(self.image, (0, HEADER_HEIGHT))
         surface.blit(self.sheet, (self.width, HEADER_HEIGHT))
 
@@ -104,11 +107,12 @@ class Board:
         )
 
 
-#Victor's Spritework#
+#Victor's Spritework
 class Spritesheet():
+    #Initilisation for the sprite
     def __init__(self, image):
         self.sheet = image
-
+    
     def get_frame(self, frame_x, frame_y, width, height, scale=1):
         frame = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
         frame.blit(self.sheet, (0, 0), (frame_x * width, frame_y * height, width, height))
@@ -1364,16 +1368,20 @@ class Dice:
 
 
 class CardsButton:
+    #Loads up and scales the card button .png
     def __init__(self, x, y):
         self.image = pygame.image.load('Assets/HandCards.png')
         self.image = pygame.transform.smoothscale(self.image, (150, 80))
+        
         # Transparent Effect
         self.image_hover = self.image.copy()
         self.image_hover.set_alpha(150)
 
+
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
+    #Renders button to screen and draws it.
     def draw(self, surface, mouse_pos):
         if self.rect.collidepoint(mouse_pos):
             surface.blit(self.image, self.rect.topleft)
@@ -1381,10 +1389,13 @@ class CardsButton:
             surface.blit(self.image_hover, self.rect.topleft)
 
 
+
 class AccuseButton:
+    #Initalises and loads up the Accuse.png
     def __init__(self, x, y):
         self.image = pygame.image.load('Assets/Accuse.png')
         self.image = pygame.transform.smoothscale(self.image, (150, 120))
+        
         # Transparent effect
         self.image_hover = self.image.copy()
         self.image_hover.set_alpha(150)
@@ -1392,6 +1403,7 @@ class AccuseButton:
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
+    #Renders and draws the .png to the screen.
     def draw(self, surface, mouse_pos):
         # Checks if the mouse is currently inside the button
         if self.rect.collidepoint(mouse_pos):
@@ -1439,7 +1451,7 @@ class AccuseMenu:
         self.current_weapon = next(self.weapon_cycle)
         self.current_room = next(self.room_cycle)
 
-        # Clickable areas for S,W,R
+        # Clickable areas for Suspect, weapon and room.
         self.suspect_rect = pygame.Rect(self.x + 33, self.y + 80, 200, 40)
         self.weapon_rect = pygame.Rect(self.x + 300, self.y + 80, 200, 40)
         self.room_rect = pygame.Rect(self.x + 566, self.y + 80, 200, 40)
@@ -1448,6 +1460,7 @@ class AccuseMenu:
         self.cancel_rect = pygame.Rect(self.x + 420, self.y + 450, 130, 40)
         self.result_message = ""
 
+    #renders the menu.
     def draw(self, surface, card_images):
         if not self.active:
             return
@@ -1532,19 +1545,18 @@ class AccuseMenu:
             warningRect = warningSurf.get_rect(center=(self.x + self.width // 2, self.y + 400))
             surface.blit(warningSurf, warningRect)
 
+    # Draws the card images in the menu
     def draw_image(self, surface, item_name, card_images, x, y):
-
-        # Draws the card images in the menu
         img = item_name
         if img in card_images:
             surface.blit(card_images[img], (x, y))
 
+    #Event handling on mouse click.
     def handle(self, mouse_pos, envelope):
         # If game is over, all clicks get ignored.
         if not self.active or self.is_gameover:
             return False
 
-        # Event handling if mouse clicks on the buttons to cycle through the list.
         if self.suspect_rect.collidepoint(mouse_pos):
             self.current_suspect = next(self.suspect_cycle)
 
@@ -1562,7 +1574,7 @@ class AccuseMenu:
             self.check_accusation(envelope)
 
         return True
-
+    
     def check_accusation(self, envelope):
         env_suspect = envelope.character.name
         env_weapon = envelope.weapon.item_name
@@ -1570,12 +1582,12 @@ class AccuseMenu:
 
         pygame.mixer.music.stop()
 
-        # Checks envelope
+        # Checks envelope to see if its correct or incorrect
         if self.current_suspect == env_suspect and self.current_weapon == env_weapon and self.current_room == env_room:
             print("YOU WIN!")
             self.is_gamewon = True
             self.win_sfx.play()
-
+        
         else:
             print("YOU LOSE!")
             self.is_gamewon = False
@@ -1585,7 +1597,7 @@ class AccuseMenu:
         self.is_gameover = True
         self.gameover_timer = pygame.time.get_ticks()
 
-
+#Starting Main Menu
 class Menu:
     def __init__(self):
         self.image = pygame.image.load('Assets/Tudor-Mansion.png')
@@ -1606,6 +1618,7 @@ class Menu:
         self.mute_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 15, 160, 60, "Mute Music", 22)
         self.exit_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 90, 160, 60, "Exit")
 
+    #Button actions for the menu.
     def buttonAction(self, mouse):
         start_action = self.start_btn.changeGameState(mouse)
         mute_action = self.mute_btn.changeGameState(mouse)
@@ -1617,10 +1630,12 @@ class Menu:
 
         return None
 
+    
+    # Draws background from top-left
     def draw(self, surface, mouse):
         # Gets mouse position
         self.mouse = mouse
-        # Draws background from top-left
+        
         surface.blit(self.image, (0, 0))
         surface.blit(self.logo, (self.logo_rect))
         self.start_btn.draw(self.disp_surf)
@@ -1629,6 +1644,7 @@ class Menu:
         self.mute_btn.mouseHover(self.mouse)
         self.exit_btn.draw(self.disp_surf)
         self.exit_btn.mouseHover(self.mouse)
+
 
 
 class CheckSheetFunction:
@@ -1692,7 +1708,8 @@ class CheckSheetFunction:
 
                         return True
         return False
-
+        
+    #Draws the X in the middle of cell for checksheet.
     def draw(self, surface):
         for (section, row, col) in self.ticks:
             # Find the center
@@ -1705,6 +1722,7 @@ class CheckSheetFunction:
             surface.blit(self.x_image, x_rect)
 
 
+#Buttons for the menu
 class MenuButton:
     def __init__(self, colour, pos_x, pos_y, width, height, text='', font_size=30):
         self.color = colour
@@ -1773,8 +1791,7 @@ class MenuButton:
                 else:
                     return False
 
-
-# must pass image file into class, (x,y) are it's coordinates, (width, height) and name are self explanatory
+#Clickable cards for suggestion screen.
 class SuggestionCards:
     def __init__(self, image, x, y, width, height, obj, type=None, alterable=True):
         self.x = x
@@ -1801,6 +1818,7 @@ class SuggestionCards:
         else:
             if self.rect.collidepoint(mouse) and self.alterable:
                 return self.type
+
 
 
 if __name__ == "__main__":
