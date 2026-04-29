@@ -129,10 +129,9 @@ def setup_game(selected_character_name):
         if i >= len(all_players):
             i = 0
         
-    
     #debug
-    for i in all_players:
-        print(i.show_hand())
+    #for i in all_players:
+    #    print(i.show_hand())
 
     return player, cpu_players, rooms, weapons, characters, envelope
 

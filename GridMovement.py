@@ -767,7 +767,6 @@ class Game:
                     self.dice_sound.play()
 
             if event.type == pygame.MOUSEBUTTONDOWN and self.turn_phase == "ACTION" and self.readytosuggest and self.pre_selection:
-                self.pre_selection = False
                 res1 = self.suggestbtn.suggest_or_pass(self.mouse)
                 res2 = self.passbtn.suggest_or_pass(self.mouse)
                 if res1 and not res2:
@@ -775,6 +774,7 @@ class Game:
                     self.select_suspect = False
                     self.select_weapon = False
                     self.select_room = False
+                    self.pre_selection = False
                     self.select_suspicions(self.player, "suggestion")
                 elif res2 and not res1:
                     self.pre_selection = False
