@@ -657,8 +657,14 @@ class Game:
                     player, cpu_players, rooms, weapons, characters, envelope = setup_game(selected_name)
                     self.currentplayer = player
                     self.otherplayers = cpu_players
-                    self.all_players = [self.currentplayer] + self.otherplayers  ###for turn system
-                    self.turn_index = 0  ###turn index
+                    self.all_players = [self.currentplayer] + self.otherplayers
+
+                    self.turn_index = 0 
+                    for person in self.all_players:
+                        if "Scarlet" in person.character.name:
+                            self.turn_index = self.all_players.index(person)
+
+                     
                     self.rooms = rooms
                     self.weapons = weapons
                     self.characters = characters
