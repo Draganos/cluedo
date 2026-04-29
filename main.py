@@ -100,7 +100,7 @@ def setup_game(selected_character_name):
                    "Revolver",
                    "Rope",
                    "Lead Pipe",
-                   "Spanner"]]
+                   "Wrench"]]
 
     # Assign human player and CPU players
     user_character = next(c for c in characters if c.name == selected_character_name)
@@ -211,11 +211,10 @@ def suggestion(player, room, characters, weapons, all_players):
 
 def make_suggestion(player, room_name, suspect, weapon, all_players):
     print(f"{player.character.name} suggests:")
-    print(f"{suspect.name} in the {room_name} with the {weapon.item_name}")
-
-    for other in all_players:
-        if other == player:
-            continue
+    print(f"{suspect.name} in the {room_name} with the {weapon.item_name}") 
+    start_index = all_players.index(player) 
+    for i in range(1, len(all_players)): #changes made in this block such that logic matches spec and starts from next player not beginning of list. 
+        other = all_players[(start_index + i) % len(all_players)]
 
         matching_cards = []
 
