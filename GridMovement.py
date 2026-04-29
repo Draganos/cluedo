@@ -474,7 +474,7 @@ class Game:
             card = SuggestionCards(self.blank_surf, position_x[i], 350, 140, 200, None, types[i])
             if i == 2 and type == "suggestion":
                 card = SuggestionCards(self.card_images[sus_room["room"].name], position_x[i], 350, 140, 200,
-                                       sus_room["room"], types[i], sus_room["alterable"])
+                                       sus_room["room"], types[i], False)
                 self.room_picked = True
             self.selection_card_list.append(card)
 
@@ -776,12 +776,20 @@ class Game:
 
                     for card in self.selection_card_list:
                         selection = card.handle_click(self.mouse)
-                        if selection:
+                        if selection is not None:
                             type_selection = selection
                             break
 
                     mousex = self.mouse[0]
                     mousey = self.mouse[1]
+                    if not isinstance(type_selection, str):
+                        if (mousey >= 350 and mousey <= 550):
+                            if mousex < 440 and mousex > 300:
+                                type_selection = "char"
+                            elif mousex > 600 and mousex < 740:
+                                type_selection = None
+                            elif mousex >= 450 and mousex <= 590:
+                                type_selection = "weap"
 
                     # Where submit button is clicked
                     if (mousey >= 600 and mousey <= 640) and (
@@ -1809,11 +1817,14 @@ class SuggestionCards:
             pygame.draw.rect(surface, (0, 0, 0), self.rect, 3)
 
     def handle_click(self, mouse):
-        if self.obj:
+        if self.alterable != True:
+            return None
+
+        if self.obj and self.alterable:
             if self.rect.collidepoint(mouse) and self.alterable:
                 return self.obj
 
-        else:
+        elif not self.obj and self.alterable:
             if self.rect.collidepoint(mouse) and self.alterable:
                 return self.type
 
