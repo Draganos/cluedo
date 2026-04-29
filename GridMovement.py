@@ -1613,10 +1613,6 @@ class Menu:
         if start_action is not None:
             return start_action
         elif mute_action is not None:
-            if self.mute_btn.text == "Mute Music":
-                self.mute_btn.text = "Unmute Music"
-            elif self.mute_btn.text == "Unmute Music":
-                self.mute_btn.text = "Mute Music"
             return mute_action
 
         return None
@@ -1749,8 +1745,10 @@ class MenuButton:
                 elif self.text == "Exit":
                     pygame.quit()
                 elif self.text == "Mute Music":
+                    self.text = "Unmute Music"
                     return "Mute"
                 elif self.text == "Unmute Music":
+                    self.text = "Mute Music"
                     return "Unmute"
         return None
 
