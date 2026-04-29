@@ -117,13 +117,22 @@ def setup_game(selected_character_name):
     random.shuffle(remaining_chars)
     random.shuffle(remaining_weapons)
     random.shuffle(remaining_rooms)
-    for i, p in enumerate(all_players):
-        if i < len(remaining_chars):
-            p.hand.append(remaining_chars[i])
-        if i < len(remaining_weapons):
-            p.hand.append(remaining_weapons[i])
-        if i < len(remaining_rooms):
-            p.hand.append(remaining_rooms[i])
+    remaining_cards = remaining_chars + remaining_weapons + remaining_rooms
+    random.shuffle(remaining_cards)
+    
+    # this code is (hopefully) future-proofed to handle a game with less than 6 players
+    i = 0
+    while len(remaining_cards) > 0:
+        all_players[i].hand.append(remaining_cards[0])
+        remaining_cards.pop(0)
+        i += 1
+        if i >= len(all_players):
+            i = 0
+        
+    
+    #debug
+    for i in all_players:
+        print(i.show_hand())
 
     return player, cpu_players, rooms, weapons, characters, envelope
 
