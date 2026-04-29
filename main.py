@@ -162,53 +162,6 @@ def suggestion(player, room, characters, weapons, all_players):
     print("No player could show you a card.")
     return None
 
-
-""" - returns boolean (False means game ends) and queue (turn order of all non-eliminated players)"""
-# def round(queue, room, characters, weapons, all_players): #####hashed as not usable in gridmovement architecture, left here for reference
-#    # this function makes the assumption that it is called repeatedly in the game loop, which is effectively a while True loop
-#    # this while True loop is simulated in main.py. I cannot stress this enough, that is solely for testing purposes and NOT TO BE IMPLEMENTED IN THE FINAL GAME
-#    if len(all_players) > (len(eliminated)-3):
-#        player_turn = queue[0]
-#        queue = turn(queue[0], room, characters, weapons, all_players)
-#        if player_turn in queue:
-#            popped = queue.pop(0)
-#            queue.append(popped)
-#    else:
-#        print("Winner is", list(set(all_players)-set(eliminated))[0].character.name)
-#        return False, queue
-#    return True, queue
-
-"""This is a player's turn (NOT A ROUND)
-    - variable 'player' should receive whatever correct player is needed for their turn
-    - player turn consists of 1) dice roll, 2) suggestion (already done), 3) end turn OR accusation
-    - if turn ends with accusation and accusation FALSE, removes the player from the queue
-    - returns array of Player objects, all_players """
-
-
-# below block is hashed as can cause crashes, new method under
-#######def turn(player, room, characters, weapons, all_players):
-#######    if player not in eliminated:
-#######        print("You can move up to", roll_dice(player), "spaces.")
-#######        suggestion(player, room, characters, weapons, all_players)
-#######
-#######        # end/accusation
-#######        print("\nDebug notes: Accusation has been partially implemented, but always makes the assumption the accusation was incorrect. This is because no envelope with the correct cards have been determined afaik in main.py.\n")
-#######        receive = input("End turn or make accusation? (Type 'End' to end turn, 'Accuse' to make accusation, case-insensitive).")
-#######        if receive.lower() == "end":
-#######            print("Ended turn.")
-#######        else:
-#######            print("Made an accusation.")
-#######            accusation(player, all_players)
-#######            # currently, the code makes the default assumption that all accusations are incorrect
-#######            eliminated.append(player)
-#######            #debug_elim = []
-#######            #for i in eliminated:
-#######            #debug_elim.append(i.character.name)
-#######            #print(debug_elim)
-#######            all_players.remove(player)
-#######
-#######    return all_players
-
 def make_suggestion(player, room_name, suspect, weapon, all_players):
     print(f"{player.character.name} suggests:")
     print(f"{suspect.name} in the {room_name} with the {weapon.item_name}") 

@@ -29,18 +29,7 @@ from PickYourCharacter import MainMenu2
 
 class TestPlayerSelectScreen(unittest.TestCase):
 
-    # this simulates the application without actually launching a pygame application because that would be long
-    #@patch("PickYourCharacter.MainMenu2")
-    #def test_button_returns_expected_character(self, MockMainMenu2):
-    #    mock_instance = MockMainMenu2.return_value
-    #    mock_instance.run.return_value = "Scarlet"  # expected result
-    #    button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Start") # creates a MenuButton for simulation use
-        # simulate the mouse click at (110, 110)
-    #    mouse_pos = (110, 110)
-    #    result = button.changeGameState(mouse_pos)
-        # Assert
-    #    self.assertEqual(result, "Scarlet")
-    #    mock_instance.run.assert_called_once()
+    # patches are used to simulate the application without actually launching a pygame application because that would be long
 
     def setUp(self):
         pygame.init()
