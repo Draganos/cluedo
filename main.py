@@ -76,7 +76,7 @@ class Player:
 
 
 def setup_game(selected_character_name):
-    print("Initialising game...")
+    #print("Initialising game...")
     characters = [Character(n) for n
                   in ["Scarlet",
                       "Plum",
@@ -163,8 +163,8 @@ def suggestion(player, room, characters, weapons, all_players):
     return None
 
 def make_suggestion(player, room_name, suspect, weapon, all_players):
-    print(f"{player.character.name} suggests:")
-    print(f"{suspect.name} in the {room_name} with the {weapon.item_name}") 
+    #print(f"{player.character.name} suggests:")
+    #print(f"{suspect.name} in the {room_name} with the {weapon.item_name}") 
     start_index = all_players.index(player) 
     for i in range(1, len(all_players)): #changes made in this block such that logic matches spec and starts from next player not beginning of list. 
         other = all_players[(start_index + i) % len(all_players)]
@@ -181,10 +181,10 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
 
         if matching_cards:
             shown_card = random.choice(matching_cards)
-            print(f"{other.character.name} shows a card.")
+            #print(f"{other.character.name} shows a card.")
             return shown_card
 
-    print("the suggestion couldnt be disproved.")
+    #print("the suggestion couldnt be disproved.")
     return None
 
 
@@ -205,20 +205,20 @@ def accusation(player, all_players):
 
     accused = input("Who do you accuse?: ").lower()
     while accused not in char_list:
-        print("Suspect must be one of: Scarlet, Plum, Mustard, White, Peacock, Green.")
+        #print("Suspect must be one of: Scarlet, Plum, Mustard, White, Peacock, Green.")
         accused = input("Who do you accuse?: ").lower()
     accusations["character"] = accused.capitalize()
 
     weapon = input("What did they use to carry out the murder?: ").lower()
     while weapon not in weap_list:
-        print("Weapon must be one of: Candlestick, Dagger, Pistol, Rope, Lead Pipe, Wrench.")
+        #print("Weapon must be one of: Candlestick, Dagger, Pistol, Rope, Lead Pipe, Wrench.")
         weapon = input("What did they use to carry out the murder?: ").lower()
     accusations["weapon"] = weapon.capitalize()
 
     location = input("Where was the murder committed?: ").lower()
     while location not in room_list:
-        print(
-            "Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
+        #print(
+        #    "Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
         location = input("Where was the murder committed?: ").lower()
     accusations["room"] = location.capitalize()
 
