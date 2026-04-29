@@ -323,6 +323,12 @@ class Game:
             (17, 5), (18, 5), (19, 5), (20, 5), (21, 5), (22, 5), (23, 5),
             (15, 0), (8, 0),
 
+            # CONSERVATORY
+            (0, 20), (1, 19), (2, 19), (3, 19), (4, 20), (5, 20),
+            (0, 21), (1, 23), (2, 23), (3, 23), (4, 23), (5, 21),
+            (0, 22), (5, 22),
+            (0, 23), (5, 23),
+
             # Specific Dining Room Coordinates
             (19, 15), (20, 15), (21, 15), (22, 15), (23, 15), (23, 16), (15, 24)
             # (24, 15), (24, 16),  <----- ive removed these cause the white cpu would always get stuck in boundary, 0<23 are columns valid and 24 is out of board.
@@ -344,9 +350,9 @@ class Game:
                 self.forbidden_tiles.append((c, r))
 
         # CONSERVATORY =
-        for r in range(19, 25):
-            for c in range(0, 6):
-                self.forbidden_tiles.append((c, r))
+        #for r in range(19, 25):
+        #    for c in range(0, 6):
+        #        self.forbidden_tiles.append((c, r))
 
         # BALLROOM =
         for r in range(17, 23):
