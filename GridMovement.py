@@ -440,7 +440,7 @@ class Game:
             "Rope": pygame.transform.smoothscale(pygame.image.load("Cards/Rope.svg").convert_alpha(), (140, 200)),
             "Lead Pipe": pygame.transform.smoothscale(pygame.image.load("Cards/LeadPipe.png").convert_alpha(),
                                                       (140, 200)),
-            "Spanner": pygame.transform.smoothscale(pygame.image.load("Cards/spanner.png").convert_alpha(), (140, 200)),
+            "Wrench": pygame.transform.smoothscale(pygame.image.load("Cards/spanner.png").convert_alpha(), (140, 200)),
 
             # rooms
             "Study": pygame.transform.smoothscale(pygame.image.load("Cards/Study.png").convert_alpha(), (140, 200)),
@@ -742,7 +742,7 @@ class Game:
                     self.select_room = False
                     self.pre_selection = False
                     self.select_suspicions(self.player, "suggestion")
-                elif res2 and not res1:
+                elif res2 is False and res1 is not True:
                     self.pre_selection = False
                     self.readytosuggest = False
                     self.turn_phase = "END"
@@ -757,13 +757,13 @@ class Game:
                     self.show_cards_dropdown = not self.show_cards_dropdown
                     self.card_sound.play()
 
-                # If Accuse Menu is already open, let it handle the clicks.
+                #if accuse menu is already open let it handle the clicks.
                 elif self.accuse_menu.active:
                     self.accuse_menu.handle(self.mouse, self.envelope)
                     self.click_sound.play()
 
-                # If menu is closed, checks if we clicked the Accuse button to open it.
-                elif self.accuse_btn.rect.collidepoint(self.mouse):
+                #checks if we clicked the Accuse button to open it if menu is closed
+                elif self.accuse_btn.rect.collidepoint(self.mouse) and self.activegame and self.get_active_player() == self.currentplayer:
                     print("Accuse button clicked! Opening Menu.")
                     self.accuse_menu.active = True
                     self.click_sound.play()
@@ -800,19 +800,23 @@ class Game:
                             target_room = self.player.in_room
                             taken_seats = []
 
-                            # Keeps track of taken seats in the room for the next part
+                            #tracking of tiles in the room for the next part
                             for p in self.visual_players:
                                 taken_seats.append((p.col, p.row))
 
-                            # Teleports other players into your room if you suggest them.
+                            #teleports other players below
                             for teleportedPlayer in self.visual_players:
                                 if teleportedPlayer.character == suggested_character:
                                     teleportedPlayer.in_room = target_room
 
+                                    placedintile = False
                                     for seat in self.room_seats[target_room]:
                                         if seat not in taken_seats:
                                             teleportedPlayer.col, teleportedPlayer.row = seat
+                                            placedintile = True
                                             break
+                                    if not placedintile:
+                                        teleportedPlayer.col, teleportedPlayer.row = self.room_seats[target_room][0]
 
                             if self.suggestion_result:
                                 card_name = (
@@ -1050,35 +1054,36 @@ class Game:
                             self.cpu_tiletarget[cpu] = None
                             self.cpu_moves_left = 0
 
-                            #CPU accustion + suggestion logic
+                            #CPU accusation + suggestion logic
 
-                            # Unknown cards defined
-                            un_chars = [c for c in self.characters if c not in cpu.known_cards]
-                            un_weaps = [w for w in self.weapons if w not in cpu.known_cards]
-                            un_rooms = [r for r in self.rooms if r not in cpu.known_cards]
+                            #unknown cards
+                            unknownchars = [c for c in self.characters if c not in cpu.known_cards]
+                            unknownweapons = [w for w in self.weapons if w not in cpu.known_cards]
+                            unknownrooms = [r for r in self.rooms if r not in cpu.known_cards]
 
                             # ACCUSATION ATTEMPT
-                            # If they know 15+ cards, they take a guess at the missing ones
-                            if len(cpu.known_cards) >= 15:
-                                # They guess the first item in each unknown list
-                                g_char = un_chars[0]
-                                g_weap = un_weaps[0]
-                                g_room = un_rooms[0]
+                            #when the cpu knows 15 or more cards they take a guess at the missing ones
+                            if len(cpu.known_cards) >= 15: #they guess the first item in each unknown list
+                                if unknownchars and unknownweapons and unknownrooms:
+                                    guesscharacter = unknownchars[0]
+                                    guessweapon = unknownweapons[0]
+                                    guessroom = unknownrooms[0]
+                                else:
+                                    self.cpu_moves_left = 0
+                                    self.end_turn()
+                                    continue
 
-                                # Check against the secret envelope
-                                if (g_char == self.envelope.character and
-                                        g_weap == self.envelope.weapon and
-                                        g_room == self.envelope.room):
-
-                                    # CPU succesfully guesses, game over is triggered.
+                                #check against the envelope we determined at init
+                                if (guesscharacter == self.envelope.character and guessweapon == self.envelope.weapon and guessroom == self.envelope.room):
+                                    #CPU guesses, game over
                                     pygame.mixer.music.stop()
                                     self.accuse_menu.active = True
                                     self.accuse_menu.is_gameover = True
                                     self.accuse_menu.cpu_winner_name = cpu.character.name
                                     self.accuse_menu.lose_sfx.play()
-                                    continue  # End turn immediately
+                                    continue #ends turn moves on straight away
                                 else:
-                                    # If the accusation is incorrect then they ar eeliminated.
+                                    #If accusation is incorrect then they ar eeliminated.
                                     print(f"!!! {cpu.character.name} FAILED AND IS OUT !!!")
                                     self.message = f"{cpu.character.name} is ELIMINATED!"
                                     self.message_timer = pygame.time.get_ticks()
@@ -1086,17 +1091,15 @@ class Game:
                                     self.end_turn()
                                     continue
 
-                            #Normal CPU suggestion (if they do not accuse)
+                            #the suggestion cpu does without enough information
                             target_room = visualcpu.in_room
-                            # Pick randomly from unknown cards
-                            suggested_char = random.choice(un_chars or self.characters)
-                            suggested_weap = random.choice(un_weaps or self.weapons)
+                            suggested_char = random.choice(unknownchars or self.characters)
+                            suggested_weap = random.choice(unknownweapons or self.weapons)
 
                             shown_card = make_suggestion(cpu, target_room, suggested_char, suggested_weap,
                                                          self.all_players)
-
                             if shown_card:
-                                cpu.known_cards.add(shown_card)  
+                                cpu.known_cards.add(shown_card)
                                 self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. EVIDENCE FOUND!"
                             else:
                                 self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. No Evidence!"
@@ -1108,11 +1111,15 @@ class Game:
                             for p in self.visual_players:
                                 if p.character == suggested_char:
                                     p.in_room = target_room
-                                    # Find an empty seat in the room
-                                    for seat in self.room_seats[target_room]:
+                                    placedintile = False
+                                    for seat in self.room_seats[target_room]: #finds empty place in that room/seat in that room
                                         if seat not in taken_seats:
                                             p.col, p.row = seat
+                                            placedintile = True
                                             break
+                                    if not placedintile:
+                                        p.col, p.row = self.room_seats[target_room][0]
+                                    break
 
                         self.cpu_timer = 0
 
@@ -1254,15 +1261,15 @@ class Game:
                     self.passbtn.draw(self.screen)
                     self.passbtn.mouseHover(self.mouse)
 
-            if self.last_roll is not None:
-                font = pygame.font.SysFont(None, 23)
-                display_text = f"Rolled: {self.last_roll}"
-                text = font.render(display_text, True, (255, 255, 255))
-                rect = text.get_rect(topleft=(10, HEADER_HEIGHT - 20))
-                bg = rect.inflate(20, 15)
-                pygame.draw.rect(self.screen, (0, 0, 0), bg, border_radius=8)
-                pygame.draw.rect(self.screen, (255, 255, 255), bg, 2, border_radius=8)
-                self.screen.blit(text, rect)
+            #if self.last_roll is not None:
+            #    font = pygame.font.SysFont(None, 23)
+            #    display_text = f"Rolled: {self.last_roll}"
+            #    text = font.render(display_text, True, (255, 255, 255))
+            #    rect = text.get_rect(topleft=(10, HEADER_HEIGHT - 20))
+            #    bg = rect.inflate(20, 15)
+            #    pygame.draw.rect(self.screen, (0, 0, 0), bg, border_radius=8)
+            #    pygame.draw.rect(self.screen, (255, 255, 255), bg, 2, border_radius=8)
+            #    self.screen.blit(text, rect)
 
             if self.message:
                 elapsed = pygame.time.get_ticks() - self.message_timer
@@ -1331,14 +1338,13 @@ class Game:
             self.turn_index += 1
             if self.turn_index >= len(self.all_players):
                 self.turn_index = 0
-
-        self.turn_index = (self.turn_index + 1) % len(self.all_players)
+        #self.turn_index = (self.turn_index + 1) % len(self.all_players) <--- this caused game to skip players, removed.
         self.moves_left = 0
         self.turn_phase = "ROLL"
         self.cpu_timer = 0
         self.cpu_moves_left = 0
         self.cpu_rolled = False
-
+        self.cpulastmove = {}
         self.suspect_picked = False
         self.weapon_picked = False
         self.room_picked = False
