@@ -987,7 +987,7 @@ class Game:
                         self.sprite.frame = 0
 
             # CPU HANDLING FOR NON-USER TURN (CPU's Turn)
-            if self.activegame and self.get_active_player() != self.currentplayer:
+            if self.activegame and self.get_active_player() != self.currentplayer and not self.get_active_player.is_eliminated:
                 self.cpu_timer += 1
                 cpu = self.get_active_player()
                 visualcpu = self.getvisualplayer(cpu)
@@ -1339,7 +1339,7 @@ class Game:
             self.turn_index += 1
             if self.turn_index >= len(self.all_players):
                 self.turn_index = 0
-        #self.turn_index = (self.turn_index + 1) % len(self.all_players) <--- this caused game to skip players, removed.
+                
         self.moves_left = 0
         self.turn_phase = "ROLL"
         self.cpu_timer = 0
