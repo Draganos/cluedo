@@ -26,6 +26,9 @@ class Player:
         self.isCPU = isCPU  # set to none if not user.
         self.character = character
         self.hand = []
+        self.is_eliminated = False
+        self.logic_p = None
+
 
     def move(self, dx, dy, forbidden_zones, doors, room_seats, room_exits):
         # if player is inside room, first move them to the rooms exit
@@ -480,14 +483,14 @@ class Game:
 
         self.submit = MenuButton(COLOUR, 640, 600, 140, 40, "Submit", 20)
 
-    def suggest_button(self):  # BOOKMARK
+    def suggest_button(self):
         overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA).convert_alpha()
         overlay.fill((35, 45, 60, 128))
         suggest = MenuButton(COLOUR, 450, 300, 200, 60, "Make suggestion?", 20)
         refuse = MenuButton(COLOUR, 450, 380, 200, 60, "Continue", 20)
         return suggest, refuse, overlay
 
-    # type is a string: "char", "weap", or "room";
+    #
     def make_suspicion_choice(self, type, positions):
         cards = {
             "char": {
@@ -520,10 +523,6 @@ class Game:
                 case "room":
                     self.room_card_list.append(card)
 
-            # self.screen.blit(
-            #    self.card_images[cards[type]["names"][i]],
-            #    (positions[i][0], positions[i][1])
-            # )
 
     def handle_events(self):
         # checks for actions by the user.
@@ -538,11 +537,11 @@ class Game:
                     else:
                         pygame.mixer.music.set_volume(0.2)
 
-            ####    INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
+            #INPUTTING THE MOVEMENT FUNCTIONALITY BY CURRENT TURN. PHASE LOOP DONE VIA SELF.TURN_PHASE SET AS MOVE.
             if event.type == pygame.KEYDOWN and not self.pre_selection and not self.selecting:
                 if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
                     continue  # added 24/04/2026 for locking movement to current turn
-                ###SECRET PASSAGES
+                #SECRET PASSAGES
                 elif event.key == pygame.K_RETURN and self.player.in_room in self.secret_passages and not self.pre_selection and self.turn_phase == "ROLL":
                     target_room = self.secret_passages[self.player.in_room]
                     seat = self.room_seats[target_room][0]
@@ -557,23 +556,8 @@ class Game:
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
-                ###SUGGESTIONS VVV area is now redundant since now UI has visual suggestion, not keyboard based anymore
-                ###elif event.key == pygame.K_g and self.turn_phase == "ACTION" and self.readytosuggest and self.pre_selection:
-                ###    self.pre_selection = False
-                ###    if event.type == pygame.MOUSEBUTTONDOWN:
-                ###        res1 = self.suggestbtn.suggest_or_pass(self.mouse)
-                ###        res2 = self.passbtn.suggest_or_pass(self.mouse)
-                ###        if res1 and res2:
-                ###            continue
-                ###        else:
-                ###            return
-                ###    self.selecting = True
-                ###    self.select_suspect = False
-                ###    self.select_weapon = False
-                ###    self.select_room = False
-                ###    self.select_suspicions(self.player, "suggestion")
 
-                ##MOVEMENT FUNCTIONALITY BELOW
+                #MOVEMENT FUNCTIONALITY BELOW
                 elif (
                         event.key == pygame.K_UP or event.key == pygame.K_w) and self.moves_left > 0 and self.turn_phase == "MOVE":
                     result = self.player.move(0, -1, self.forbidden_tiles, self.doors, self.room_seats, self.room_exits)
@@ -664,7 +648,7 @@ class Game:
                     self.suggestion_result = None
                     self.end_turn()
 
-            ###        MENU SELECTION BELOW
+            #MENU SELECTION BELOW
             if self.menu != None and event.type == pygame.MOUSEBUTTONDOWN:
                 # Catch the action
                 action = self.menu.buttonAction(self.mouse)
@@ -705,7 +689,7 @@ class Game:
                     self.menu = None
                     print("Game initialised.")
 
-                    ###CPU GRAPHICS
+                    #CPU GRAPHICS
                     cpu_start_positions = [
                         (0, 5),
                         (7, 0),
@@ -721,10 +705,14 @@ class Game:
                         (255, 255, 255)  # White
                     ]
                     self.visual_players = [self.player]
+                    self.player.logic_p = self.currentplayer
+
+                    #Initalises and links visual CPU players to logic data for rendering and elimination
                     for i, cpu in enumerate(self.otherplayers):
                         col, row = cpu_start_positions[i]
                         colour = cpu_colours[i]
                         visual_cpu = Player(col, row, colour, isCPU=True, character=cpu.character)
+                        visual_cpu.logic_p = cpu
                         self.visual_players.append(visual_cpu)
 
             if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
@@ -733,7 +721,6 @@ class Game:
                         "Dice cannot be rolled with mouse as not players turn")  # added 24/04/2026 for locking movement to current turn
                     continue  # added 24/04/2026 for locking movement to current turn
 
-                # debug print("Dice has been rolled with mouse.")
                 if self.activegame and self.turn_phase == "ROLL":
                     d1 = random.randint(1, 6)
                     d2 = random.randint(1, 6)
@@ -741,7 +728,6 @@ class Game:
                     self.last_roll = self.moves_left
                     self.roll_display_time = pygame.time.get_ticks()
                     self.turn_phase = "MOVE"
-                    # print(f"Rolled: {self.moves_left}")
 
                     self.turn_phase = "MOVE"
                     self.dice_sound.play()
@@ -936,50 +922,24 @@ class Game:
                 return visual_player
         return None
 
-    def get_cpudirection(self, visual_player, target_tile):
-        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-        valid_directions = []
-        lastmove = self.cpulastmove.get(
-            visual_player)  # to avoid the backtracking the cpu was doing going front and back around
-        opposite = None
-        if lastmove:
-            opposite = (-lastmove[0], -lastmove[1])
-        for dx, dy in directions:  # checkvalid directions
-            new_col = visual_player.col + dx
-            new_row = visual_player.row + dy
-            if opposite and (dx, dy) == opposite:  # remove backtrack
-                continue
-            if (new_col, new_row) in self.doors:
-                valid_directions.append((dx, dy))
-            elif (
-                    0 <= new_col < 24
-                    and 0 <= new_row < 25
-                    and (new_col, new_row) not in self.forbidden_tiles):
-                valid_directions.append((dx, dy))
-        if not valid_directions:  # lets cpu go backwards if it gets stuck
-            for dx, dy in directions:
-                new_col = visual_player.col + dx
-                new_row = visual_player.row + dy
-                if (new_col, new_row) in self.doors:
-                    return (dx, dy)
-                elif (
-                        0 <= new_col < 24
-                        and 0 <= new_row < 25
-                        and (new_col, new_row) not in self.forbidden_tiles):
-                    return (dx, dy)
-            return (0, 0)
-        # set target door and room to move towards
-        dx_to_target = target_tile[0] - visual_player.col
-        dy_to_target = target_tile[1] - visual_player.row
-        if abs(dx_to_target) > abs(dy_to_target):
-            preferred = (1 if dx_to_target > 0 else -1, 0)
-        elif dy_to_target != 0:
-            preferred = (0, 1 if dy_to_target > 0 else -1)
-        else:
-            preferred = (0, 0)
-        if preferred in valid_directions:  # bias set in direction
-            return preferred
-        return random.choice(valid_directions)  # else do another direction which is valid
+    def get_cpudirection(self, p, target):
+        possible_moves = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        random.shuffle(possible_moves) #Natural movement variation
+
+        # Current distance to the door
+        current_dist = abs(p.col - target[0]) + abs(p.row - target[1])
+
+        for dx, dy in possible_moves:
+            new_col, new_row = p.col + dx, p.row + dy
+            # Check if tile is walkable or a door
+            if (new_col, new_row) in self.doors or (
+                    0 <= new_col < 24 and 0 <= new_row < 25 and (new_col, new_row) not in self.forbidden_tiles):
+                # Check if this step gets us closer than we are now
+                new_dist = abs(new_col - target[0]) + abs(new_row - target[1])
+                if new_dist < current_dist:
+                    return (dx, dy)  # Good step
+
+        return random.choice(possible_moves)
 
     def run(self):
         while self.running:
@@ -1000,6 +960,7 @@ class Game:
                 self.cpu_timer += 1
                 cpu = self.get_active_player()
                 visualcpu = self.getvisualplayer(cpu)
+
                 # CPU step by step actions in CPU Turn
                 if visualcpu is not None:  # rolls dice here for each cpu at their turn
                     if not self.cpu_rolled:
@@ -1009,68 +970,114 @@ class Game:
                         self.cpu_rolled = True
                         self.last_roll = self.cpu_moves_left
                         self.roll_display_time = pygame.time.get_ticks()
-                    # print(f"{cpu.character.name} (CPU) rolled {self.cpu_moves_left}")
 
-                    # Assigning a room for CPU to target
-                    if cpu not in self.cpu_roomtarget or self.cpu_roomtarget[cpu] is None:
-                        target_room = random.choice(list(self.room_doors.keys()))
-                        self.cpu_roomtarget[cpu] = target_room
-                        self.cpu_tiletarget[cpu] = random.choice(self.room_doors[target_room])
+                        # Assigning a room for CPU to target
+                        if cpu not in self.cpu_roomtarget or self.cpu_roomtarget[cpu] is None:
+
+                            #CPU prioritizes rooms it has not seen yet.
+                            unknown_room_names = [r.name for r in self.rooms if r not in cpu.known_cards]
+
+                            if unknown_room_names:
+                                target_room = random.choice(unknown_room_names)
+                            else:
+                                target_room = random.choice(list(self.room_doors.keys()))
+
+                            self.cpu_roomtarget[cpu] = target_room
+                            self.cpu_tiletarget[cpu] = random.choice(self.room_doors[target_room])
 
                     target_room = self.cpu_roomtarget[cpu]
                     target_tile = self.cpu_tiletarget[cpu]
 
-                    # CPU MOVES W DELAY
+                    #CPU MOVES WITH DELAY
                     if self.cpu_timer > 25 and self.cpu_moves_left > 0:
-                        dx, dy = self.get_cpudirection(visualcpu, target_tile)
-                        if (dx, dy) == (0, 0):
-                            self.cpu_moves_left = 0
-                            result = None
+
+                        #If CPU is in a room, bypass pathfinding and just exit the door.
+                        if visualcpu.in_room is not None:
+                            dx, dy = 0, 0
+                            result = visualcpu.move(dx, dy, self.forbidden_tiles, self.doors, self.room_seats,
+                                                    self.room_exits)
+
+                        #Normal pathfinding
                         else:
-                            result = visualcpu.move(
-                                dx,
-                                dy,
-                                self.forbidden_tiles,
-                                self.doors,
-                                self.room_seats,
-                                self.room_exits
-                            )
-                        # if result is None: #If CPU goes into the wall or something <---- redundant piece of code now
-                        #    dx, dy = random.choice([(0, -1), (0, 1), (-1, 0), (1, 0)])
-                        #    result = visualcpu.move(
-                        #        dx,
-                        #        dy,
-                        #        self.forbidden_tiles,
-                        #        self.doors,
-                        #        self.room_seats,
-                        #        self.room_exits
-                        #    )
+                            dx, dy = self.get_cpudirection(visualcpu, target_tile)
+                            if (dx, dy) == (0, 0):
+                                self.cpu_moves_left = 0
+                                result = None
+                            else:
+                                result = visualcpu.move(
+                                    dx,
+                                    dy,
+                                    self.forbidden_tiles,
+                                    self.doors,
+                                    self.room_seats,
+                                    self.room_exits
+                                )
+
                         if result in ["MOVED", "ENTERED_ROOM", "LEFT_ROOM"]:
                             self.cpu_moves_left -= 1
-                            self.cpulastmove[visualcpu] = (dx, dy)
+                            # Only track the last move if they are actually walking in the hallway
+                            if result == "MOVED":
+                                self.cpulastmove[visualcpu] = (dx, dy)
                         # behavior for when the cpu reaches that room
                         if result == "ENTERED_ROOM":
                             self.cpu_roomtarget[cpu] = None
                             self.cpu_tiletarget[cpu] = None
                             self.cpu_moves_left = 0
-                            ###CPU WILL NEED TO MAKE ACCUSATION IF RELEVANT MAYBE??? CHECK
-                            # BOOKMARK
 
-                            ###CPU SUGGESTION LOGIC
-                            # random suggestion
+                            #CPU accustion + suggestion logic
+
+                            # Unknown cards defined
+                            un_chars = [c for c in self.characters if c not in cpu.known_cards]
+                            un_weaps = [w for w in self.weapons if w not in cpu.known_cards]
+                            un_rooms = [r for r in self.rooms if r not in cpu.known_cards]
+
+                            # ACCUSATION ATTEMPT
+                            # If they know 15+ cards, they take a guess at the missing ones
+                            if len(cpu.known_cards) >= 15:
+                                # They guess the first item in each unknown list
+                                g_char = un_chars[0]
+                                g_weap = un_weaps[0]
+                                g_room = un_rooms[0]
+
+                                # Check against the secret envelope
+                                if (g_char == self.envelope.character and
+                                        g_weap == self.envelope.weapon and
+                                        g_room == self.envelope.room):
+
+                                    # CPU succesfully guesses, game over is triggered.
+                                    pygame.mixer.music.stop()
+                                    self.accuse_menu.active = True
+                                    self.accuse_menu.is_gameover = True
+                                    self.accuse_menu.cpu_winner_name = cpu.character.name
+                                    self.accuse_menu.lose_sfx.play()
+                                    continue  # End turn immediately
+                                else:
+                                    # If the accusation is incorrect then they ar eeliminated.
+                                    print(f"!!! {cpu.character.name} FAILED AND IS OUT !!!")
+                                    self.message = f"{cpu.character.name} is ELIMINATED!"
+                                    self.message_timer = pygame.time.get_ticks()
+                                    cpu.is_eliminated = True
+                                    self.end_turn()
+                                    continue
+
+                            #Normal CPU suggestion (if they do not accuse)
                             target_room = visualcpu.in_room
-                            suggested_char = random.choice(self.characters)
-                            suggested_weap = random.choice(self.weapons)
+                            # Pick randomly from unknown cards
+                            suggested_char = random.choice(un_chars or self.characters)
+                            suggested_weap = random.choice(un_weaps or self.weapons)
 
-                            # logic from main.py
                             shown_card = make_suggestion(cpu, target_room, suggested_char, suggested_weap,
                                                          self.all_players)
 
-                            # pop up message.
-                            self.message = f"{cpu.character.name} suggests: {suggested_char.name},{target_room} ,{suggested_weap.item_name}. {'EVIDENCE FOUND!.' if shown_card else 'No Evidence!'}"
+                            if shown_card:
+                                cpu.known_cards.add(shown_card)  
+                                self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. EVIDENCE FOUND!"
+                            else:
+                                self.message = f"{cpu.character.name} suggests: {suggested_char.name}, {target_room}, {suggested_weap.item_name}. No Evidence!"
+
                             self.message_timer = pygame.time.get_ticks()
 
-                            # Suggested characters are forced into the room for the suggestion
+                            #Suggested Characters get teleported into the room.
                             taken_seats = [(p.col, p.row) for p in self.visual_players]
                             for p in self.visual_players:
                                 if p.character == suggested_char:
@@ -1083,12 +1090,13 @@ class Game:
 
                         self.cpu_timer = 0
 
-                    # CPUENDTURN
+                    #CPU END TURN
                     if self.cpu_rolled and self.cpu_moves_left == 0:
                         self.cpu_rolled = False
                         self.end_turn()
 
-            ######### drawing menus
+
+            #drawing menus
             if self.menu is not None:  # checking if we are on menu screen or board screen
                 self.menu.draw(self.screen, self.mouse)
 
@@ -1103,14 +1111,7 @@ class Game:
                 # ticks and debug grid drawn on top of the sheet.
                 self.check_sheet.draw(self.screen)
 
-                # Draw the turn image at the top ###REDUNDANT NOW AS NEW TURN GRAPHIC IS DONE DYNAMICALLY
-                #######if hasattr(self, 'turn_image'):
-                #######    img_x = (self.board.width + self.board.sheet_width) // 2 - (self.turn_image.get_width() // 2)
-                #######    img_y = HEADER_HEIGHT // 2 - (self.turn_image.get_height() // 2)
-                #######    self.screen.blit(self.turn_image, (img_x, img_y))
-
                 # Draw UI and Players
-                ##TURN DISPLAY
                 if self.activegame and self.all_players:
                     font = pygame.font.SysFont("courier", 17)
                     active_player = self.get_active_player()
@@ -1162,9 +1163,11 @@ class Game:
                     self.screen.blit(line1, (box_rect.x + 10, box_rect.y + 5))
                     self.screen.blit(line2, (box_rect.x + 10, box_rect.y + 5 + line1.get_height()))
 
-                # self.player.draw(self.screen) ###HASHING FOR NOW TO FOR LOOP THE CPU WITH PLAYERS
-                for visual_player in self.visual_players:
-                    visual_player.draw(self.screen)
+                for vp in self.visual_players:
+                    #Only draws the circle if their linked logic player isn't eliminated
+                    if not vp.logic_p.is_eliminated:
+                        vp.draw(self.screen)
+
                 self.dice.draw(self.screen, self.mouse)
                 self.cards_btn.draw(self.screen, self.mouse)
 
@@ -1290,7 +1293,18 @@ class Game:
         pygame.quit()
 
     def end_turn(self):
-        # print(f"Ending turn: {self.get_active_player().character.name}")
+        #Move to the next player index
+        self.turn_index += 1
+
+        # Reset to 0 if we go past the last player
+        if self.turn_index >= len(self.all_players):
+            self.turn_index = 0
+
+        # Skip anyone who is eliminated
+        while self.all_players[self.turn_index].is_eliminated:
+            self.turn_index += 1
+            if self.turn_index >= len(self.all_players):
+                self.turn_index = 0
 
         self.turn_index = (self.turn_index + 1) % len(self.all_players)
         self.moves_left = 0
@@ -1304,11 +1318,8 @@ class Game:
         self.room_picked = False
         self.selection_card_list = []
 
-        # print(f"Next player: {self.get_active_player().character.name}")
-
 
 class Dice:
-    # Should (ideally) have both mouse and keyboard functionality.
     def __init__(self, x, y):
         # getting positions for later when drawing
         self.x = x
@@ -1387,10 +1398,11 @@ class AccuseMenu:
         self.win_sfx = pygame.mixer.Sound('Assets/victory.mp3')
         self.lose_sfx = pygame.mixer.Sound('Assets/lose.mp3')
 
-        # TIMERS AND CHECKS
+        # TIMER AND CHECKS
         self.is_gameover = False
         self.gameover_timer = 0
         self.is_gamewon = False
+        self.cpu_winner_name = None
 
         # Checks if menu is currently open or not.
         self.active = False
@@ -1430,7 +1442,6 @@ class AccuseMenu:
         pygame.draw.rect(surface, (40, 40, 40), (self.x, self.y, self.width, self.height))
         pygame.draw.rect(surface, (255, 255, 255), (self.x, self.y, self.width, self.height), 3)
 
-        # Checks if game is over or not.
         if self.is_gameover:
             # Timer Countdown
             seconds_left = 5 - ((pygame.time.get_ticks() - self.gameover_timer) // 1000)
@@ -1441,17 +1452,17 @@ class AccuseMenu:
             # Giant text highlighting whether you have won or lost
             if self.is_gamewon:
                 text = f"YOU WIN! CONGRATULATIONS! Closing in {seconds_left}..."
-                color = (0, 255, 0)  # Green
-                title_surf = self.giant_font.render(text, True, color)
-                title_rect = title_surf.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
-                surface.blit(title_surf, title_rect)
-
+                color = (0, 255, 0)
+            elif self.cpu_winner_name:
+                text = f"{self.cpu_winner_name.upper()} SOLVED IT! YOU LOSE! Closing in {seconds_left}..."
+                color = (255, 0, 0)
             else:
                 text = f"WRONG COMBINATION! YOU LOSE! Closing in {seconds_left}..."
-                color = (255, 0, 0)  # Red
-                title_surf = self.giant_font.render(text, True, color)
-                title_rect = title_surf.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
-                surface.blit(title_surf, title_rect)
+                color = (255, 0, 0)
+
+            title_surf = self.giant_font.render(text, True, color)
+            title_rect = title_surf.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
+            surface.blit(title_surf, title_rect)
 
 
 
