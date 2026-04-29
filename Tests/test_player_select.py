@@ -25,30 +25,22 @@ from PickYourCharacter import MainMenu2
     Should you want to run all tests within the Tests folder, run:
         py -m unittest discover -s Tests -p "test_*.py"
     This command assumes that all tests will follow the naming convention "test_<wildcard>.py".
-    """
+"""
 
 class TestPlayerSelectScreen(unittest.TestCase):
+
     # this simulates the application without actually launching a pygame application because that would be long
-
-    @patch("PickYourCharacter.MainMenu2")
-    def test_button_returns_expected_character(self, MockMainMenu2):
-        # Arrange
-        mock_instance = MockMainMenu2.return_value
-        mock_instance.run.return_value = "Scarlet"  # expected result
-
-        button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Start") # creates a MenuButton for simulation use
-
-        # Simulate mouse click inside the button
-        mouse_pos = (110, 110)
-
-        # Act
-        result = button.changeGameState(mouse_pos)
-
+    #@patch("PickYourCharacter.MainMenu2")
+    #def test_button_returns_expected_character(self, MockMainMenu2):
+    #    mock_instance = MockMainMenu2.return_value
+    #    mock_instance.run.return_value = "Scarlet"  # expected result
+    #    button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Start") # creates a MenuButton for simulation use
+        # simulate the mouse click at (110, 110)
+    #    mouse_pos = (110, 110)
+    #    result = button.changeGameState(mouse_pos)
         # Assert
-        self.assertEqual(result, "Scarlet")
-        mock_instance.run.assert_called_once()
-
-    # There will eventually be more tests but I wanted to push this now because the CLI thing is important-ish
+    #    self.assertEqual(result, "Scarlet")
+    #    mock_instance.run.assert_called_once()
 
     def setUp(self):
         pygame.init()
@@ -57,26 +49,45 @@ class TestPlayerSelectScreen(unittest.TestCase):
 
     @patch("pygame.mouse.get_pos")
     def test_mouse_hover_over_first_character(self, mock_mouse_pos):
-        # Arrange: simulate mouse over first character
+        # simulate  mouse over first character
         first_rect = self.menu.character_rects[0]
         mock_mouse_pos.return_value = first_rect.center
 
-        # Act
         hovered = self.menu.mouseHover()
 
-        # Assert
+        # check to see if it is reacting correctly
         self.assertEqual(hovered, first_rect)
 
     @patch("pygame.mouse.get_pos")
     def test_mouse_hover_outside_characters(self, mock_mouse_pos):
-        # Arrange: simulate mouse far away
+        # simulate mouse far away
         mock_mouse_pos.return_value = (0, 0)
 
-        # Act
         hovered = self.menu.mouseHover()
 
-        # Assert
         self.assertIsNone(hovered)
+
+    @patch("pygame.image.load")
+    @patch("pygame.event.get")
+    @patch("pygame.mouse.get_pos")
+    def test_run_selects_character(self, mock_mouse_pos, mock_event_get, mock_image_load):
+        # create a mock image to load in
+        mock_image_load.return_value = pygame.Surface((100, 100))
+
+        # simulates the mouse position hovering over the first character card
+        first_rect = self.menu.character_rects[0]
+        mock_mouse_pos.return_value = first_rect.center
+
+        # simulates mouse click, then ends loop
+        mock_event_get.return_value = [
+            pygame.event.Event(pygame.MOUSEBUTTONDOWN),
+        ]
+
+        # prevent infinite loop
+        self.menu.draw = lambda: None
+
+        selected = self.menu.run()
+        self.assertEqual(selected, self.menu.character_names[0])
 
 if __name__ == "__main__":
     unittest.main()

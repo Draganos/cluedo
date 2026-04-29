@@ -440,7 +440,7 @@ class Game:
             "Rope": pygame.transform.smoothscale(pygame.image.load("Cards/Rope.svg").convert_alpha(), (140, 200)),
             "Lead Pipe": pygame.transform.smoothscale(pygame.image.load("Cards/LeadPipe.png").convert_alpha(),
                                                       (140, 200)),
-            "Wrench": pygame.transform.smoothscale(pygame.image.load("Cards/spanner.png").convert_alpha(), (140, 200)),
+            "Spanner": pygame.transform.smoothscale(pygame.image.load("Cards/spanner.png").convert_alpha(), (140, 200)),
 
             # rooms
             "Study": pygame.transform.smoothscale(pygame.image.load("Cards/Study.png").convert_alpha(), (140, 200)),

@@ -100,7 +100,7 @@ def setup_game(selected_character_name):
                    "Revolver",
                    "Rope",
                    "Lead Pipe",
-                   "Wrench"]]
+                   "Spanner"]]
 
     # Assign human player and CPU players
     user_character = next(c for c in characters if c.name == selected_character_name)
