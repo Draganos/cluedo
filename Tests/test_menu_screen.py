@@ -26,4 +26,12 @@ class TestMenuScreen(unittest.TestCase):
         # then compares the result to see if it's the correct image
         self.assertEqual(result, "MissScarlett.png")
         mock_menu.run.assert_called_once()
-        
+
+    @patch("pygame.quit")
+    def test_exit_button(self, mock_quit):
+        button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Exit")
+
+        result = button.changeGameState((110, 110))
+
+        mock_quit.assert_called_once()
+        self.assertIsNone(result)

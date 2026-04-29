@@ -1262,16 +1262,6 @@ class Game:
                     self.passbtn.draw(self.screen)
                     self.passbtn.mouseHover(self.mouse)
 
-            #if self.last_roll is not None:
-            #    font = pygame.font.SysFont(None, 23)
-            #    display_text = f"Rolled: {self.last_roll}"
-            #    text = font.render(display_text, True, (255, 255, 255))
-            #    rect = text.get_rect(topleft=(10, HEADER_HEIGHT - 20))
-            #    bg = rect.inflate(20, 15)
-            #    pygame.draw.rect(self.screen, (0, 0, 0), bg, border_radius=8)
-            #    pygame.draw.rect(self.screen, (255, 255, 255), bg, 2, border_radius=8)
-            #    self.screen.blit(text, rect)
-
             if self.message:
                 elapsed = pygame.time.get_ticks() - self.message_timer
                 if elapsed < 2000:
