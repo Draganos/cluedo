@@ -987,7 +987,7 @@ class Game:
                         self.sprite.frame = 0
 
             # CPU HANDLING FOR NON-USER TURN (CPU's Turn)
-            if self.activegame and self.get_active_player() != self.currentplayer and not self.get_active_player.is_eliminated:
+            if self.activegame and self.get_active_player() != self.currentplayer:
                 self.cpu_timer += 1
                 cpu = self.get_active_player()
                 visualcpu = self.getvisualplayer(cpu)
