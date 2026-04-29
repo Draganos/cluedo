@@ -1083,6 +1083,7 @@ class Game:
                                     self.accuse_menu.is_gameover = True
                                     self.accuse_menu.cpu_winner_name = cpu.character.name
                                     self.accuse_menu.lose_sfx.play()
+                                    self.accuse_menu.gameover_timer = pygame.time.get_ticks()
                                     continue #ends turn moves on straight away
                                 else:
                                     #If accusation is incorrect then they are eliminated.
