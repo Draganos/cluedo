@@ -8,7 +8,6 @@ class Character:
         self.weapon = None  # applied in randomizer if murderer
         self.position = None  # coordinates added later with sese coordination on gridmovement
 
-
 class Room:
     def __init__(self, name):
         self.name = name
@@ -64,9 +63,14 @@ class Player:
         self.isCPU = isCPU  # set to none if not user.
         self.character = character
         self.hand = []
+        self.is_eliminated = False #check if CPU has been eliminated from the game.
+
+
+        #Tracks what cards each player has seen.
+        self.known_cards = set()
 
     def show_hand(self):
-        """Show all the character's hand"""
+        #Show all the character's hand
         return [c.name if isinstance(c, Character) or isinstance(c, Room)
                 else c.item_name for c in self.hand]
 
@@ -117,21 +121,16 @@ def setup_game(selected_character_name):
     random.shuffle(remaining_chars)
     random.shuffle(remaining_weapons)
     random.shuffle(remaining_rooms)
-    remaining_cards = remaining_chars + remaining_weapons + remaining_rooms
-    random.shuffle(remaining_cards)
-    
-    # this code is (hopefully) future-proofed to handle a game with less than 6 players
-    i = 0
-    while len(remaining_cards) > 0:
-        all_players[i].hand.append(remaining_cards[0])
-        remaining_cards.pop(0)
-        i += 1
-        if i >= len(all_players):
-            i = 0
-        
-    #debug
-    #for i in all_players:
-    #    print(i.show_hand())
+    for i, p in enumerate(all_players):
+        if i < len(remaining_chars):
+            p.hand.append(remaining_chars[i])
+            p.known_cards.add(remaining_chars[i])
+        if i < len(remaining_weapons):
+            p.hand.append(remaining_weapons[i])
+            p.known_cards.add(remaining_weapons[i])
+        if i < len(remaining_rooms):
+            p.hand.append(remaining_rooms[i])
+            p.known_cards.add(remaining_rooms[i])
 
     return player, cpu_players, rooms, weapons, characters, envelope
 
