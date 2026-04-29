@@ -755,7 +755,9 @@ class Game:
 
                 # debug print("Dice has been rolled with mouse.")
                 if self.activegame and self.turn_phase == "ROLL":
-                    self.moves_left = random.randint(2, 12)
+                    d1 = random.randint(1, 6)
+                    d2 = random.randint(1, 6)
+                    self.moves_left = d1+d2
                     self.last_roll = self.moves_left
                     self.roll_display_time = pygame.time.get_ticks()
                     self.turn_phase = "MOVE"
@@ -939,7 +941,9 @@ class Game:
                     print("Dice has been rolled with spacebar.")
 
                     if self.activegame and self.turn_phase == "ROLL":  # 26/04/2026 changes made such that roll cannot be done while moving
-                        self.moves_left = random.randint(2, 12)
+                        d1 = random.randint(1, 6)
+                        d2 = random.randint(1, 6)
+                        self.moves_left = d1+d2
                         print(f"Rolled: {self.moves_left}")
                         self.turn_phase = "MOVE"
                         self.dice_sound.play()
@@ -1026,7 +1030,9 @@ class Game:
                 # CPU step by step actions in CPU Turn
                 if visualcpu is not None:  # rolls dice here for each cpu at their turn
                     if not self.cpu_rolled:
-                        self.cpu_moves_left = random.randint(2, 12)
+                        d1 = random.randint(1, 6)
+                        d2 = random.randint(1, 6)
+                        self.cpu_moves_left = d1+d2
                         self.cpu_rolled = True
                         self.last_roll = self.cpu_moves_left
                         self.roll_display_time = pygame.time.get_ticks()

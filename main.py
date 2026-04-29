@@ -238,7 +238,9 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
 
 
 def roll_dice(player):
-    dice_roll = random.randint(2, 12)  # randomly generate number between 2-12
+    d1 = random.randint(1, 6)
+    d2 = random.randint(1, 6)
+    dice_roll = d1+d2  # randomly generate number between 2-12
     return dice_roll
 
 
