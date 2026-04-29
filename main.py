@@ -72,7 +72,7 @@ class Player:
 
 
 def setup_game(selected_character_name):
-    print("Setting up game...")
+    print("Initialising game...")
     characters = [Character(n) for n
                   in ["Scarlet",
                       "Plum",
@@ -108,10 +108,6 @@ def setup_game(selected_character_name):
     envelope.set_envelope(random.choice(characters),
                           random.choice(weapons),
                           random.choice(rooms))
-    print("Show envelope solution: ")
-    print(f"Character: {envelope.character.name}, "
-          f"Weapon: {envelope.weapon.item_name}, "
-          f"Room: {envelope.room.name}")
 
     # Shuffle and deal remaining cards
     remaining_chars = [c for c in characters if c != envelope.character]
