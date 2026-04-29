@@ -922,24 +922,50 @@ class Game:
                 return visual_player
         return None
 
-    def get_cpudirection(self, p, target):
-        possible_moves = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-        random.shuffle(possible_moves) #Natural movement variation
-
-        # Current distance to the door
-        current_dist = abs(p.col - target[0]) + abs(p.row - target[1])
-
-        for dx, dy in possible_moves:
-            new_col, new_row = p.col + dx, p.row + dy
-            # Check if tile is walkable or a door
-            if (new_col, new_row) in self.doors or (
-                    0 <= new_col < 24 and 0 <= new_row < 25 and (new_col, new_row) not in self.forbidden_tiles):
-                # Check if this step gets us closer than we are now
-                new_dist = abs(new_col - target[0]) + abs(new_row - target[1])
-                if new_dist < current_dist:
-                    return (dx, dy)  # Good step
-
-        return random.choice(possible_moves)
+    def get_cpudirection(self, visual_player, target_tile):
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        valid_directions = []
+        lastmove = self.cpulastmove.get(
+            visual_player)  # to avoid the backtracking the cpu was doing going front and back around
+        opposite = None
+        if lastmove:
+            opposite = (-lastmove[0], -lastmove[1])
+        for dx, dy in directions:  # checkvalid directions
+            new_col = visual_player.col + dx
+            new_row = visual_player.row + dy
+            if opposite and (dx, dy) == opposite:  # remove backtrack
+                continue
+            if (new_col, new_row) in self.doors:
+                valid_directions.append((dx, dy))
+            elif (
+                    0 <= new_col < 24
+                    and 0 <= new_row < 25
+                    and (new_col, new_row) not in self.forbidden_tiles):
+                valid_directions.append((dx, dy))
+        if not valid_directions:  # lets cpu go backwards if it gets stuck
+            for dx, dy in directions:
+                new_col = visual_player.col + dx
+                new_row = visual_player.row + dy
+                if (new_col, new_row) in self.doors:
+                    return (dx, dy)
+                elif (
+                        0 <= new_col < 24
+                        and 0 <= new_row < 25
+                        and (new_col, new_row) not in self.forbidden_tiles):
+                    return (dx, dy)
+            return (0, 0)
+        # set target door and room to move towards
+        dx_to_target = target_tile[0] - visual_player.col
+        dy_to_target = target_tile[1] - visual_player.row
+        if abs(dx_to_target) > abs(dy_to_target):
+            preferred = (1 if dx_to_target > 0 else -1, 0)
+        elif dy_to_target != 0:
+            preferred = (0, 1 if dy_to_target > 0 else -1)
+        else:
+            preferred = (0, 0)
+        if preferred in valid_directions:  # bias set in direction
+            return preferred
+        return random.choice(valid_directions)  # else do another direction which is valid
 
     def run(self):
         while self.running:
