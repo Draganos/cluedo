@@ -72,7 +72,7 @@ class Player:
 
 
 def setup_game(selected_character_name):
-    print("Setting up game...")
+    print("Initialising game...")
     characters = [Character(n) for n
                   in ["Scarlet",
                       "Plum",
