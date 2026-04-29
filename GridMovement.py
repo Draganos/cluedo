@@ -1,7 +1,6 @@
 import itertools
 import random
 import pygame
-# from pygame import surface #unused now
 
 from main import setup_game, make_suggestion  # for linking gridcontroller
 
@@ -99,12 +98,6 @@ class Board:
             (self.width, self.sheet_height + HEADER_HEIGHT, self.sheet_width, self.height - self.sheet_height)
         )
 
-        # Visual Debug: To see the grid lines.
-        # for r in range(25):
-        # for c in range(24):
-        # rect = (OFFSET_X + c * TILE_SIZE, OFFSET_Y + r * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-        # pygame.draw.rect(surface, (255, 0, 0), rect, 1)
-
 
 ##SPRITE WORK FROM VICTOR ####
 class Spritesheet():
@@ -183,8 +176,6 @@ class Game:
         self.roll_display_time = 0
 
         # Header, Dice, Accuse and CardButton
-        # self.turn_image = pygame.image.load('Assets/Your turn.png')   ####MADE REDUNDANT BY NEW YOUR TURN IMAGE
-        # self.turn_image = pygame.transform.smoothscale(self.turn_image, (400, 60))   ###MADE REDUNDANT BY NEW YOUR TURN GRAPHIC
         item_y = self.board.sheet_height + 50 + HEADER_HEIGHT
         dice_x = self.board.width + 40
         accuse_x = self.board.width + 220
@@ -404,18 +395,6 @@ class Game:
         self.char_card_list = []
         self.weap_card_list = []
         self.room_card_list = []
-
-    """def play_menu_music(self):
-        pygame.mixer.music.stop()
-        pygame.mixer.music.load("Sounds/menumusic.mp3")
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
-
-    def play_game_music(self):
-        pygame.mixer.music.stop()
-        pygame.mixer.music.load("Sounds/gamemusic.mp3")
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)"""
 
     def load_card_images(self):
         self.card_images = {
@@ -644,7 +623,6 @@ class Game:
                         self.turn_phase = "END"
 
                 elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER] and self.turn_phase in ["END", "ACTION"]:
-                    # print("TURN ENDED")
                     self.readytosuggest = False
                     self.suggestion_result = None
                     self.end_turn()
@@ -1718,7 +1696,7 @@ class CheckSheetFunction:
             surface.blit(self.x_image, x_rect)
 
 
-class MenuButton:  # BOOKMARK
+class MenuButton:
     def __init__(self, colour, pos_x, pos_y, width, height, text='', font_size=30):
         self.color = colour
         self.width = width
