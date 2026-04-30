@@ -10,8 +10,10 @@ class TestMenuScreen(unittest.TestCase):
         pygame.init()
         pygame.display.set_mode((800, 600))
 
-    # check if the start button actually goes to the the character select screen
-    # done by checking the return after having run the char select screen (because of how the function changeGameState(...) works)
+    """
+    check if the start button actually goes to the the character select screen
+    done by checking the return after having run the char select screen (because of how the function changeGameState(...) works)
+    """
     @patch("PickYourCharacter.MainMenu2")
     def test_start_triggers_character_screen(self, MockMainMenu2):
         mock_menu = MockMainMenu2.return_value
@@ -31,6 +33,9 @@ class TestMenuScreen(unittest.TestCase):
         self.assertEqual(result, "MissScarlett.png")
         mock_menu.run.assert_called_once()
 
+    """
+    check if the exit button correctly calls pygame.quit without actually exiting
+    """
     @patch("pygame.quit")
     def test_exit_button(self, mock_quit):
         button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Exit")
@@ -40,7 +45,9 @@ class TestMenuScreen(unittest.TestCase):
         mock_quit.assert_called_once()
         self.assertIsNone(result)
     
-    # testing the mute buttons toggle and return as expected
+    """
+    testing the mute buttons toggle and return as expected
+    """
     def test_mute(self):
         # create a simulated "Mute" button
         button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Mute Music")
@@ -67,7 +74,11 @@ class TestMenuScreen(unittest.TestCase):
         self.assertEqual(result, "Unmute")
         self.assertEqual(button.text, "Mute Music")
 
-    # testing mouse hover functionality
+    """
+    testing mouse hover functionality
+    first checking that the button reacts correctly when hovered over
+    and the button does not react when mouse is somewhere else
+    """
     def test_mouse_hover_over_buttons(self):
         # simulate a button
         button = MenuButton((255, 0, 0), 100, 100, 140, 60, "Start")

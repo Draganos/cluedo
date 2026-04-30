@@ -47,8 +47,12 @@ class TestSuggestions(unittest.TestCase):
         self.all_players[4].hand = [self.characters[3], self.weapons[2], self.rooms[6]] # Peacock, Revolver, Conservatory
         self.all_players[5].hand = [self.characters[5], self.weapons[4], self.rooms[1]] # White, Lead Pipe, Hall
 
-    # test to ensure suggestions are disproved when a matching card is found, and that the response is clockwise from the suggester
-    # in this test, the player after Scarlet is Plum: Plum has a matching card (Candlestick - self.weapons[0]) so make_suggestion(...) should return Candlestick
+    """
+    test to ensure suggestions are disproved when a matching card is found, and that the response is clockwise from the suggester
+
+    in this test, the player after Scarlet is Plum: Plum has a matching card (Candlestick - self.weapons[0]) so make_suggestion(...) 
+    should return Candlestick, "Plum"
+    """
     def test_suggestion_disproven(self):
         # Scarlet makes the suggestion Plum, Study, Candlestick
         result, displayer = make_suggestion(self.all_players[0], self.rooms[0].name, self.all_players[1].character, self.weapons[0], self.all_players)
@@ -56,7 +60,9 @@ class TestSuggestions(unittest.TestCase):
         self.assertEqual(result, self.weapons[0])
         self.assertEqual(displayer.character.name, "Plum")
     
-    # test to check make_suggestion(...) returns None whem suggestion == envelope
+    """
+    test to check make_suggestion(...) returns None when suggestion == envelope
+    """
     def test_suggestion_proven(self):
         # Scarlet makes the suggestion Scarlet, Rope, Dining Room
         # parameters passed are Scarlet (Player object), Dining Room (String), Scarlet (Character object), Rope (Weapon object), list of all Player objects
