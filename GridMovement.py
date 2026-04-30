@@ -806,10 +806,10 @@ class Game:
                         self.visual_players.append(visual_cpu)
 
             if self.dice_rect.collidepoint(self.mouse) and event.type == pygame.MOUSEBUTTONDOWN:
-                if not self.activegame or self.get_active_player() != self.currentplayer:  # added 24/04/2026 for locking movement to current turn
+                if not self.activegame or self.get_active_player() != self.currentplayer:
                     print(
-                        "Dice cannot be rolled with mouse as not players turn")  # added 24/04/2026 for locking movement to current turn
-                    continue  # added 24/04/2026 for locking movement to current turn
+                        "Dice cannot be rolled with mouse as not players turn")
+                    continue
 
                 if self.activegame and self.turn_phase == "ROLL":
                     d1 = random.randint(1, 6)
@@ -1450,15 +1450,13 @@ class Dice:
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, surface, mouse):
-        # gets mouse position
+        """Gets the mouse position, renders and draws the dice.png button on screen.
+        A solid version appears if the mouse hovers over the button,
+        otherwise it shows a transparent solid version"""
         self.mouse = mouse
-
-        # uses mouse position to change transparency (on hover or no)
         if self.rect.collidepoint(mouse):
-            # draw the solid original
             surface.blit(self.image, (self.x, self.y))
         else:
-            # draw the transparent copy
             surface.blit(self.image_copy, (self.x, self.y))
 
 
@@ -1472,12 +1470,13 @@ class CardsButton:
         self.image_hover = self.image.copy()
         self.image_hover.set_alpha(150)
 
-
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
-    #Renders button to screen and draws it.
     def draw(self, surface, mouse_pos):
+        """Renders and draws the HandCards.png button on screen.
+        A solid version appears if the mouse hovers over the button,
+        otherwise it shows a transparent solid version"""
         if self.rect.collidepoint(mouse_pos):
             surface.blit(self.image, self.rect.topleft)
         else:
@@ -1498,16 +1497,14 @@ class AccuseButton:
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
-    #Renders and draws the .png to the screen.
     def draw(self, surface, mouse_pos):
-        # Checks if the mouse is currently inside the button
+        """Renders and draws the Accuse.png button on screen.
+        A solid version appears if the mouse hovers over the button,
+        otherwise it shows a transparent solid version"""
         if self.rect.collidepoint(mouse_pos):
-            # If hovering, draw the normal, solid version
             surface.blit(self.image, self.rect.topleft)
         else:
-            # If not hovering, draw the slightly transparent version
             surface.blit(self.image_hover, self.rect.topleft)
-
 
 class AccuseMenu:
     def __init__(self, screen_width, screen_height):
@@ -1557,6 +1554,7 @@ class AccuseMenu:
 
     #renders the menu.
     def draw(self, surface, card_images):
+        """Renders the menu"""
         if not self.active:
             return
 
