@@ -16,10 +16,49 @@ OFFSET_Y = (18 * SCALE) + HEADER_HEIGHT
 COLOUR = "#462779"
 COLOUR_HOVER = "#9040BA"
 
-
 class Player:
+    """
+    Represents a player in the game, handling position, movement, and state. 
+    
+    A Player may be either human-controlled or CPU-controlled. It is responsible for 
+    navigating the board, room interaction, and maintaining gameplay states like the 
+    player's current position on the board, their hand, colour, and elimination status.
+
+    :ivar col: Current column position on the board.
+    :vartype col: int
+    :ivar row: Current row position on the board.
+    :vartype row: int
+    :ivar in_room: Current Room the Player is in
+    :vartype in_room: Room
+    :ivar color: RGB colour used to render the player piece on screen
+    :vartype color: tuple
+    :ivar isCPU: Indicates whether the Player is CPU-controlled or not
+    :vartype isCPU: bool
+    :ivar character: The Character assigned to the Player
+    :vartype character: Character
+    :ivar hand: The cards held by the Player
+    :vartype hand: list
+    :ivar is_eliminated: Indicates whether the Player has been eliminated or not
+    :vartype is_eliminated: bool
+    :ivar logic_p: Links a logical Player object to a visual Player object
+    :vartype logic_p: Player
+    """
     #Initialisation
     def __init__(self, col=0, row=0, color=(255, 255, 255), isCPU=False, character=None):
+        """
+        Constructs an instance of Player.
+
+        :param col: Starting column position, defaults to 0
+        :type col: int, optional
+        :param row: Starting row position, defaults to 0
+        :type row: int, optional
+        :param color: Colour of rendered Player piece on the board, defaults to White
+        :type color: tuple, optional
+        :param isCPU: Determines whether Player is CPU-controlled or not
+        :type isCPU: bool, optional
+        :param character: Assigns a Character to the Player
+        :type character: Character, optional
+        """
         self.col = col
         self.in_room = None
         self.row = row
@@ -32,6 +71,25 @@ class Player:
 
 
     def move(self, dx, dy, forbidden_zones, doors, room_seats, room_exits):
+        """
+        Moves Player on game board, handles room interaction, and prevents player from
+        entering forbidden tiles.
+
+        :param dx: Change in x coordinate
+        :type dx: int
+        :param dy: Change in y coordinate
+        :type dy: int
+        :param forbidden_zones: Coordinates which Player cannot move into
+        :type forbidden_zones: list
+        :param doors: Coordinates which indicate a door
+        :type doors: list
+        :param room_seats: Coordinates which indicate where a Player may go upon entering
+                            a room
+        :type room_seats: list
+        :param room_exits: Coordinates which indicate where a Player may go upon exiting
+                            a room
+        :type room_exits: list
+        """
         # if player is inside room, first move them to the rooms exit
         if self.in_room is not None:
             exit_tile = room_exits[self.in_room]
@@ -70,7 +128,12 @@ class Player:
 
     #Draws player on the grid
     def draw(self, surface):
-        
+        """
+        Draws the player on the board as a circle, using the colour received from the parameters
+
+        :param surface: Surface on which to draw to
+        :type surface: pygame.Surface
+        """
         # Converts grid position to pixels and draws the player on the grid.
         pixel_x = OFFSET_X + (self.col * TILE_SIZE) + (TILE_SIZE / 2)
         pixel_y = OFFSET_Y + (self.row * TILE_SIZE) + (TILE_SIZE / 2)
@@ -78,8 +141,28 @@ class Player:
 
 
 class Board:
+    """
+    Represents the board, handling the rendering of the board, checksheet, and background
+
+    :ivar image: Scaled board image
+    :vartype image: pygame.Surface
+    :ivar width: Width of ``image`` in pixels
+    :vartype width: int
+    :ivar height: Height of ``image`` in pixels
+    :vartype height: int
+
+    :ivar sheet: Scaled checksheet image
+    :vartype sheet: pygame.Surface
+    :ivar sheet_width: Width of ``sheet`` in pixels
+    :vartype sheet_width: int
+    :ivar sheet_height: Height of ``sheet`` in pixels
+    :vartype sheet_height: int
+    """
     #Initilisation for the board
     def __init__(self):
+        """
+        Constructor loads and scales both the board image and sheet image
+        """
         
         # Loads and scales the board
         self.image = pygame.image.load("Assets/cluedoboard.jpg")
@@ -95,7 +178,12 @@ class Board:
 
     #Draws the board shifted down by Header_Height
     def draw(self, surface):
-    
+        """
+        Renders the board image, sheet image, and background colour onto the game screen
+
+        :param surface: Surface on which to render to
+        :type surface: pygame.Surface
+        """
         surface.blit(self.image, (0, HEADER_HEIGHT))
         surface.blit(self.sheet, (self.width, HEADER_HEIGHT))
 
