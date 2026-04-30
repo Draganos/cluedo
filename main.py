@@ -76,7 +76,14 @@ class Player:
 
 
 def setup_game(selected_character_name):
-    #print("Initialising game...")
+    """
+    Initialises game state for GridMovement.py.
+
+    :param selected_character_name: The name of the character chosen by the player
+    :type selected_character_name: str
+    :return: The player, CPU players, rooms, weapons, characters, and envelope
+    :rtype: tuple
+    """
     characters = [Character(n) for n
                   in ["Scarlet",
                       "Plum",
@@ -130,8 +137,7 @@ def setup_game(selected_character_name):
 def suggestion(player, room, characters, weapons, all_players):
     print(f"\nYou are {player.character.name} in {room.name}")
 
-    # suspect = random.choice(list(set(characters)-set(eliminated)))
-    suspect = random.choice(characters)  # replaced above line with this such that game doesnt crash in gridmovement
+    suspect = random.choice(characters)
     weapon = random.choice(weapons)
 
     print(f"Suggestion: {suspect.name} in {room.name} with {weapon.item_name}")
@@ -163,10 +169,26 @@ def suggestion(player, room, characters, weapons, all_players):
     return None
 
 def make_suggestion(player, room_name, suspect, weapon, all_players):
-    #print(f"{player.character.name} suggests:")
-    #print(f"{suspect.name} in the {room_name} with the {weapon.item_name}") 
+    """
+       Processes a player's suggestion and checks if any other player can disprove it.
+
+       :param player: The player making the suggestion
+       :type player: Player
+       :param room_name: The name of the suggested room
+       :type room_name: str
+       :param suspect: The suggested character
+       :type suspect: Character
+       :param weapon: The suggested weapon
+       :type weapon: Weapon
+       :param all_players: List of all players in the game
+       :type all_players: list
+       :return: A tuple containing the shown card and the player who revealed it,
+                if no player can disprove the suggestion
+       :rtype: tuple
+       """
+
     start_index = all_players.index(player) 
-    for i in range(1, len(all_players)): #changes made in this block such that logic matches spec and starts from next player not beginning of list. 
+    for i in range(1, len(all_players)):
         other = all_players[(start_index + i) % len(all_players)]
 
         matching_cards = []

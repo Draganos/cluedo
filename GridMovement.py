@@ -1584,7 +1584,9 @@ class Game:
 
     def end_turn(self):
         """
-        Ends a turn and increases turn index by 1, allowing the next player to take a turn
+        Ends the current player's turn and goes to the next player.
+        Increments the turn index and skips any players who have been eliminated.
+        Also resets all turn specific state variables for the next player's turn.
         """
         #Move to the next player index
         self.turn_index += 1
@@ -1629,9 +1631,16 @@ class Dice:
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, surface, mouse):
-        """Gets the mouse position, renders and draws the dice.png button on screen.
+        """
+        Gets the mouse position, renders and draws the dice.png button on screen.
         A solid version appears if the mouse hovers over the button,
-        otherwise it shows a transparent solid version"""
+        otherwise it shows a transparent solid version
+
+        :param surface: The surface to draw the button on
+        :type surface: pygame.Surface
+        :param mouse: The current mouse position
+        :type mouse: tuple[int, int]
+        """
         self.mouse = mouse
         if self.rect.collidepoint(mouse):
             surface.blit(self.image, (self.x, self.y))
@@ -1653,9 +1662,16 @@ class CardsButton:
         self.rect.topleft = (x, y)
 
     def draw(self, surface, mouse_pos):
-        """Renders and draws the HandCards.png button on screen.
+        """
+        Renders and draws the HandCards.png button on screen.
         A solid version appears if the mouse hovers over the button,
-        otherwise it shows a transparent solid version"""
+        otherwise it shows a transparent solid version
+
+        :param surface: The surface to draw the button on
+        :type surface: pygame.Surface
+        :param mouse_pos: The current mouse position
+        :type mouse_pos: tuple[int, int]
+        """
         if self.rect.collidepoint(mouse_pos):
             surface.blit(self.image, self.rect.topleft)
         else:
@@ -1677,9 +1693,16 @@ class AccuseButton:
         self.rect.topleft = (x, y)
 
     def draw(self, surface, mouse_pos):
-        """Renders and draws the Accuse.png button on screen.
+        """
+        Renders and draws the Accuse.png button on screen.
         A solid version appears if the mouse hovers over the button,
-        otherwise it shows a transparent solid version"""
+        otherwise it shows a transparent solid version
+
+        :param surface: The surface to draw the button on
+        :type surface: pygame.Surface
+        :param mouse_pos: The current mouse position
+        :type mouse_pos: tuple[int, int]
+        """
         if self.rect.collidepoint(mouse_pos):
             surface.blit(self.image, self.rect.topleft)
         else:
@@ -1731,9 +1754,19 @@ class AccuseMenu:
         self.cancel_rect = pygame.Rect(self.x + 420, self.y + 450, 130, 40)
         self.result_message = ""
 
-    #renders the menu.
     def draw(self, surface, card_images):
-        """Renders the menu"""
+        """
+        Renders the accusation menu.
+        It displays selectable options for room, weapon, and suspect and also
+        action buttons. Win or lose is displayed as the outcome and a countdown
+        before the game exits.
+
+        :param surface: The surface to draw the menu on
+        :type surface: pygame.Surface
+        :param card_images: Dictionary or collection of card images used
+        for rendering selections
+        :type card_images: dict
+        """
         if not self.active:
             return
 
@@ -1817,15 +1850,39 @@ class AccuseMenu:
             warningRect = warningSurf.get_rect(center=(self.x + self.width // 2, self.y + 400))
             surface.blit(warningSurf, warningRect)
 
-    # Draws the card images in the menu
     def draw_image(self, surface, item_name, card_images, x, y):
+        """
+           Draws card images onto the surface.
+           It checks whether the item name exists in the card images
+           dictionary and renders the corresponding image at given position.
+
+           :param surface: The surface to draw the image on
+           :type surface: pygame.Surface
+           :param item_name: Name/key of the image to draw
+           :type item_name: str
+           :param card_images: Dictionary of available card images
+           :type card_images: dict
+           :param x: X-coordinate for drawing
+           :type x: int
+           :param y: Y-coordinate for drawing
+           :type y: int
+           """
         img = item_name
         if img in card_images:
             surface.blit(card_images[img], (x, y))
 
-    #Event handling on mouse click.
     def handle(self, mouse_pos, envelope):
-        # If game is over, all clicks get ignored.
+        """
+        Handles mouse clicks for the accusation menu.
+        and also accusation submission.
+
+        :param mouse_pos: The current mouse position
+        :type mouse_pos: tuple[int, int]
+        :param envelope: Game state object used to validate the accusation
+        :type envelope: object
+        :return: True if the click was handled, False otherwise
+        :rtype: bool
+        """
         if not self.active or self.is_gameover:
             return False
 
@@ -1848,6 +1905,14 @@ class AccuseMenu:
         return True
     
     def check_accusation(self, envelope):
+        """
+           Checks whether the player's accusation matches the correct solution.
+           Compares the selected suspect, weapon, and room against the envelope.
+           If all match, the player wins otherwise, the player loses.
+
+           :param envelope: The solution for the correct character, weapon, and room
+           :type envelope: object
+           """
         env_suspect = envelope.character.name
         env_weapon = envelope.weapon.item_name
         env_room = envelope.room.name
@@ -1890,8 +1955,15 @@ class Menu:
         self.mute_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 15, 160, 60, "Mute Music", 22)
         self.exit_btn = MenuButton(COLOUR, self.width // 2 - 70, self.height // 2 + 90, 160, 60, "Exit")
 
-    #Button actions for the menu.
     def buttonAction(self, mouse):
+        """
+        Processes menu button clicks and returns any resulting game state change.
+
+        :param mouse: The current mouse position
+        :type mouse: tuple[int, int]
+        :return: The resulting action from a button click, or None if no action occurred
+        :rtype: any or None
+        """
         start_action = self.start_btn.changeGameState(mouse)
         mute_action = self.mute_btn.changeGameState(mouse)
         exit_action = self.exit_btn.changeGameState(mouse)
@@ -1905,7 +1977,15 @@ class Menu:
     
     # Draws background from top-left
     def draw(self, surface, mouse):
-        # Gets mouse position
+        """
+        Renders the main menu screen.
+        Draws the background cluedoboard.jpg, CLUE_logo.png and menu buttons.
+
+        :param surface: The surface to draw the menu on
+        :type surface: pygame.Surface
+        :param mouse: The current mouse position
+        :type mouse: tuple[int, int]
+        """
         self.mouse = mouse
         
         surface.blit(self.image, (0, 0))
@@ -1953,6 +2033,16 @@ class CheckSheetFunction:
         self.ticks = set()
 
     def handle_click(self, mouse_pos):
+        """
+        Handles mouse clicks on the grid.
+        If a cell is clicked, it is either ticked
+        or not ticked if it was already selected.
+
+        :param mouse_pos: The position of the mouse click
+        :type mouse_pos: tuple[int, int]
+        :return: True if a cell was clicked and toggled, otherwise False
+        :rtype: bool
+        """
         mouse_x, mouse_y = mouse_pos
 
         for section, data in self.sections.items():
@@ -1980,9 +2070,15 @@ class CheckSheetFunction:
 
                         return True
         return False
-        
-    #Draws the X in the middle of cell for checksheet.
+
     def draw(self, surface):
+        """
+           Draws selection markers on the check sheet grid.
+           Renders an 'X' mark centered within each selected grid.
+
+           :param surface: The surface to draw the check sheet on
+           :type surface: pygame.Surface
+           """
         for (section, row, col) in self.ticks:
             # Find the center
             start_y = self.sections[section]["y"]
@@ -2006,6 +2102,14 @@ class MenuButton:
         self.size = font_size
 
     def draw(self, surface):
+        """
+           Renders the button on the given surface.
+           Draws a coloured rectangle and also renders
+           centered text on top of the button if text is provided.
+
+           :param surface: The surface to draw the button on
+           :type surface: pygame.Surface
+           """
         # draw the button as a rectangle
         pygame.draw.rect(surface, self.color, (self.pos_x, self.pos_y, self.width, self.height), 0)
 
@@ -2015,7 +2119,17 @@ class MenuButton:
             surface.blit(text, (self.pos_x + (self.width // 2 - text.get_width() // 2),
                                 self.pos_y + (self.height // 2 - text.get_height() // 2)))
 
-    def mouseHover(self, position):  # changes button colour when mouse is hovering over it
+    def mouseHover(self, position):
+        """
+        Updates the button appearance based on mouse hover state.
+        The button colour changes changes to the hover colour if the mouse hovers
+        over it, otherwise it resets it to the default colour.
+
+        :param position: The current mouse position
+        :type position: tuple[int, int]
+        :return: True if the button is being hovered over, otherwise False
+        :rtype: bool
+        """
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 self.color = COLOUR_HOVER
@@ -2024,6 +2138,15 @@ class MenuButton:
         return False
 
     def changeGameState(self, position):
+        """
+           Handles button clicks and also triggers game actions.
+           If button is clicked it either starts the game,
+           exits or toggles the music state.
+
+           :param position: The current mouse position
+           :type position: tuple[int, int]
+           :return: The result of the button action or None if no action occurred
+           """
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 if self.text == "Start":
@@ -2043,6 +2166,27 @@ class MenuButton:
         return None
 
     def submit_suggestion(self, position, player, suspect, weapon, guess_room, all_players):
+        """
+           Handles suggestions when the button is clicked.
+           The suspect, weapon and rooms are selected and a
+           suggestion is made, returning result.
+
+           :param position: The current mouse position
+           :type position: tuple[int, int]
+           :param player: The player making the suggestion
+           :type player: Player
+           :param suspect: The selected suspect
+           :type suspect: str
+           :param weapon: The selected weapon
+           :type weapon: str
+           :param guess_room: The selected room object
+           :type guess_room: Room
+           :param all_players: List of all players in the game
+           :type all_players: list
+           :return: A tuple containing the shown card, updated flags, turn state,
+                    and the player who revealed the card, or None if no action occurred
+           :rtype: tuple
+           """
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 if suspect and weapon and guess_room:
@@ -2056,6 +2200,17 @@ class MenuButton:
                     return shown_card, False, False, "END", displayer
 
     def suggest_or_pass(self, position):
+        """
+           Determines whether the player chooses to make a suggestion or pass.
+           If button is clicked, returns True meaning a suggestion is made,
+           otherwise False.
+
+           :param position: The current mouse position
+           :type position: tuple[int, int]
+           :return: True if the player chooses to make a suggestion, False if passing,
+                    or None if the button was not clicked
+           :rtype: bool
+           """
         if position[0] > self.pos_x and position[0] < self.pos_x + self.width:
             if position[1] > self.pos_y and position[1] < self.pos_y + self.height:
                 if self.text == "Make suggestion?":
@@ -2078,11 +2233,27 @@ class SuggestionCards:
         self.rect = pygame.Rect(x, y, width, height)
 
     def draw(self, surface, mouse):
+        """
+        Renders the HandCards.png on screen and highlights it when hovered.
+        Draws the card image at its position.
+
+        :param surface: The surface to draw the card on
+        :type surface: pygame.Surface
+        :param mouse: The current mouse position
+        :type mouse: tuple[int, int]
+        """
         surface.blit(self.image, (self.x, self.y))
         if self.rect.collidepoint(mouse) and self.alterable:
             pygame.draw.rect(surface, (0, 0, 0), self.rect, 3)
 
     def handle_click(self, mouse):
+        """
+        Handles mouse click interaction with the cards.
+
+        :param mouse: The current mouse position
+        :type mouse: tuple[int, int]
+        :return: The associated object or type if clicked, otherwise None
+        """
         if self.alterable != True:
             return None
 
