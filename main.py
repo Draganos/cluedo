@@ -1,6 +1,5 @@
 import random
 
-
 class Character:
     def __init__(self, name):
         self.name = name
@@ -14,7 +13,6 @@ class Room:
         self.characters = []
         self.weapons = []
 
-
 class Asset:
     def __init__(self, item_name, item_type):
         self.item_name = item_name
@@ -25,7 +23,6 @@ class Weapon(Asset):
     def __init__(self, name):
         super().__init__(name, "weapon")
         self.room = None
-
 
 class Envelope:
     def __init__(self):
@@ -38,7 +35,6 @@ class Envelope:
         self.weapon = weapon
         self.room = room
 
-
 class Dice(Asset):
     def __init__(self, sides=6):
         super().__init__("Dice", "dice")
@@ -46,7 +42,6 @@ class Dice(Asset):
 
     def roll(self):
         return random.randint(1, self.sides)
-
 
 class Game:
     def __init__(self, board, characters, weapons, envelope, dice):
@@ -56,7 +51,6 @@ class Game:
         self.envelope = envelope
         self.dice = dice
         self.current_turn = 0
-
 
 class Player:
     def __init__(self, isCPU=False, character=None):
@@ -68,12 +62,6 @@ class Player:
 
         #Tracks what cards each player has seen.
         self.known_cards = set()
-
-    def show_hand(self):
-        #Show all the character's hand
-        return [c.name if isinstance(c, Character) or isinstance(c, Room)
-                else c.item_name for c in self.hand]
-
 
 def setup_game(selected_character_name):
     """
@@ -133,41 +121,6 @@ def setup_game(selected_character_name):
         receiver.known_cards.add(card)
     return player, cpu_players, rooms, weapons, characters, envelope
 
-
-def suggestion(player, room, characters, weapons, all_players):
-    print(f"\nYou are {player.character.name} in {room.name}")
-
-    suspect = random.choice(characters)
-    weapon = random.choice(weapons)
-
-    print(f"Suggestion: {suspect.name} in {room.name} with {weapon.item_name}")
-
-    active_players = list(set(all_players) - set(eliminated))
-
-    # Move the suggested suspect into the room
-    suspect.room = room
-    start_index = active_players.index(player)
-
-    for i in range(1, len(all_players) - len(eliminated)):
-        other = active_players[(start_index + i) % len(active_players)]
-
-        # Find matching cards
-        matches = []
-        for card in other.hand:
-            if isinstance(card, Character) and card.name == suspect.name:
-                matches.append(card)
-            elif isinstance(card, Weapon) and card.item_name == weapon.item_name:
-                matches.append(card)
-            elif isinstance(card, Room) and card.name == room.name:
-                matches.append(card)
-        if matches:
-            shown = random.choice(matches)
-            print(f"{other.character.name} shows you a card.")
-
-            return shown
-    print("No player could show you a card.")
-    return None
-
 def make_suggestion(player, room_name, suspect, weapon, all_players):
     """
        Processes a player's suggestion and checks if any other player can disprove it.
@@ -204,16 +157,7 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
         if matching_cards:
             shown_card = random.choice(matching_cards)
             return shown_card, other
-            
     return None, None
-
-
-def roll_dice(player):
-    d1 = random.randint(1, 6)
-    d2 = random.randint(1, 6)
-    dice_roll = d1+d2  # randomly generate number between 2-12
-    return dice_roll
-
 
 def accusation(player, all_players):
     accusations = {"character": None, "weapon": None, "room": None}
