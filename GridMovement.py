@@ -31,13 +31,13 @@ class Player:
     :ivar in_room: Current Room the Player is in
     :vartype in_room: Room
     :ivar color: RGB colour used to render the player piece on screen
-    :vartype color: tuple
+    :vartype color: tuple[int, int]
     :ivar isCPU: Indicates whether the Player is CPU-controlled or not
     :vartype isCPU: bool
     :ivar character: The Character assigned to the Player
     :vartype character: Character
     :ivar hand: The cards held by the Player
-    :vartype hand: list
+    :vartype hand: list[Character | Weapon | Room]
     :ivar is_eliminated: Indicates whether the Player has been eliminated or not
     :vartype is_eliminated: bool
     :ivar logic_p: Links a logical Player object to a visual Player object
@@ -52,11 +52,11 @@ class Player:
         :type col: int, optional
         :param row: Starting row position, defaults to 0
         :type row: int, optional
-        :param color: Colour of rendered Player piece on the board, defaults to White
-        :type color: tuple, optional
-        :param isCPU: Determines whether Player is CPU-controlled or not
+        :param color: Colour of rendered Player piece on the board, defaults to white
+        :type color: tuple[int, int, int], optional
+        :param isCPU: Determines whether Player is CPU-controlled or not, defaults to False
         :type isCPU: bool, optional
-        :param character: Assigns a Character to the Player
+        :param character: Assigns a Character to the Player, defaults to None
         :type character: Character, optional
         """
         self.col = col
@@ -80,15 +80,15 @@ class Player:
         :param dy: Change in y coordinate
         :type dy: int
         :param forbidden_zones: Coordinates which Player cannot move into
-        :type forbidden_zones: list
+        :type forbidden_zones: list[tuple[int, int]]
         :param doors: Coordinates which indicate a door
-        :type doors: list
+        :type doors: list[tuple[int, int]]
         :param room_seats: Coordinates which indicate where a Player may go upon entering
                             a room
-        :type room_seats: list
+        :type room_seats: list[tuple[int, int]]
         :param room_exits: Coordinates which indicate where a Player may go upon exiting
                             a room
-        :type room_exits: list
+        :type room_exits: list[tuple[int, int]]
         """
         # if player is inside room, first move them to the rooms exit
         if self.in_room is not None:
@@ -198,10 +198,39 @@ class Board:
 #Victor's Spritework
 class Spritesheet():
     #Initilisation for the sprite
+    """
+    Renders a frame from a spritesheet (e.g. in PNG format) for use in animation
+
+    :ivar sheet: The spritesheet image
+    :vartype sheet: pygame.Surface
+    """
     def __init__(self, image):
+        """
+        Constructor method
+
+        :param image: The spritesheet to be used
+        :type image: pygame.Surface
+        """
         self.sheet = image
     
-    def get_frame(self, frame_x, frame_y, width, height, scale=1):
+    def get_frame(self, frame_x, frame_y, width, height, scale=1.0):
+        """
+        Extracts a frame from the spritesheet based on position and size, then returns that frame
+
+        :param frame_x: Starting horizontal position
+        :type frame_x: int
+        :param frame_y: Starting vertical position
+        :type frame_y: int
+        :param width: The width of a single frame
+        :type width: int
+        :param height: The height of a single frame
+        :type height: int
+        :param scale: Used to scale the frame, defaults to 1.0
+        :type scale: float, optional
+
+        :return: The extracted and scaled frame
+        :rtype: pygame.Surface
+        """
         frame = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
         frame.blit(self.sheet, (0, 0), (frame_x * width, frame_y * height, width, height))
         frame = pygame.transform.smoothscale_by(frame, scale)
@@ -210,15 +239,40 @@ class Spritesheet():
 
 #Animation
 class Sprite_Chars():
+    """
+    Represents an animated sprite and manages its animation frames
+
+    :ivar sprite_sheet_image: Scaled spritesheet image
+    :vartype sprite_sheet_image: pygame.Surface
+    :ivar sprite_sheet: Spritesheet constructed using ``sprite_sheet_image``
+    :vartype sprite_sheet: Spritesheet
+    :ivar animation_list: All frames of the animation
+    :vartype animation_list: list[pygame.Surface]
+    :ivar last_update: Timestamp of the last animation update in milliseconds
+    :vartype last_update: int
+    :ivar animation_cooldown: Time in milliseconds between frames of animation
+    :vartype animation_cooldown: int
+    :ivar frame: The number of the current frame of animation
+    :vartype frame: int
+    """
     def __init__(self, width, height):
+        """
+        Constructor method, fills ``animation_list`` with each frame for animation
+
+        :param width: The width of a single frame in pixels
+        :type width: int
+        :param height: The height of a single frame in pixels
+        :type height: int
+        """
         self.sprite_sheet_image = pygame.image.load("Assets/143445.png")
         self.sprite_sheet_image = pygame.transform.smoothscale(self.sprite_sheet_image, ((width) * 2, (height) * 7))
         self.sprite_sheet = Spritesheet(self.sprite_sheet_image)
         self.animation_list = []
-        animation_steps = 14
         self.last_update = pygame.time.get_ticks()
         self.animation_cooldown = 60  # milliseconds
         self.frame = 0
+
+        animation_steps = 14
         x = 0
         y = 0
 
@@ -230,6 +284,15 @@ class Sprite_Chars():
                 x += 1
 
     def draw(self, surface):
+        """
+        Renders a frame of the animation onto the screen
+
+        :param surface: Surface on which to render to
+        :type surface: pygame.Surface
+
+        :return: True if animation has completed, otherwise False
+        :rtype: bool
+        """
         # Update animation
         done = False
         current_time = pygame.time.get_ticks()
@@ -248,8 +311,41 @@ class Sprite_Chars():
 
 
 class Game:
+    """
+    Represents the game itself, running the game, drawing visuals, and handling user inputs.
+
+    The class keeps track of the current player, the active players, dice rolls, and turns. It
+    also maintains the phases within a turn, i.e. when the Player can roll the dice, make a suggestion,
+    and end their turn (or make an accusation).
+
+    :ivar board: The game board instance
+    :vartype board: Board
+    :ivar screen: Main display surface
+    :vartype screen: pygame.Surface
+    :ivar player: The human player
+    :vartype player: Player
+    :ivar all_players: List of all players
+    :vartype all_players: list[Player]
+    :ivar currentplayer: The player whose turn it is
+    :vartype currentplayer: Player or None
+    :ivar turn_phase: Current phase of the turn
+    :vartype turn_phase: str
+    :ivar moves_left: Remaining movement after dice roll
+    :vartype moves_left: int
+    :ivar doors: Mapping of tiles to room names
+    :vartype doors: dict[tuple[int, int], str]
+    :ivar room_seats: Positions inside rooms
+    :vartype room_seats: dict[str, list[tuple[int, int]]]
+    :ivar room_exits: Exit tiles for rooms
+    :vartype room_exits: dict[str, tuple[int, int]]
+    :ivar forbidden_tiles: Tiles that cannot be entered
+    :vartype forbidden_tiles: list[tuple[int, int]]
+    """
     # Initialisation for the game.
     def __init__(self):
+        """
+        Constructor method, loads all music/sound assets.
+        """
         
         #MUSIC INIT
         pygame.init()
@@ -490,9 +586,9 @@ class Game:
                 (250, 475), (450, 475), (650, 475)
             ],
             "room": [
-                (250, 200), (450, 200), (650, 200),
-                (250, 450), (450, 450), (650, 450),
-                (250, 700), (450, 700), (650, 700)
+                (250, 140), (450, 140), (650, 140),
+                (250, 350), (450, 350), (650, 350),
+                (250, 560), (450, 560), (650, 560)
             ]
         }
         self.selection_card_list = []
@@ -501,6 +597,13 @@ class Game:
         self.room_card_list = []
 
     def load_card_images(self):
+        """
+        Loads all the card images into a dictionary and transforms them so they are all
+        of equal size.
+
+        :ivar card_images: The card names and their associated (scaled) image
+        :vartype card_images: dict[str, pygame.Surface]
+        """
         self.card_images = {
             # characters
             "Mustard": pygame.transform.smoothscale(pygame.image.load("Cards/Col Mustard.png").convert_alpha(),
@@ -544,6 +647,18 @@ class Game:
 
     #Guess logic
     def select_suspicions(self, player, type):
+        """
+        Renders three cards to allow players to select their suspects and weapons
+
+        :param player: the Player making the suggestion
+        :type player: Player
+        :param type: whether it is a suggestion or accusation
+        :type type: str
+
+        .. note::
+            ``type`` was initially added because this was intended to support accusations as 
+            well, but accusations were implemented differently later, making ``type`` redundant.
+        """
         self.overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()),
                                       pygame.SRCALPHA).convert_alpha()
         position_x = [300, 450, 600]
@@ -569,6 +684,13 @@ class Game:
         self.submit = MenuButton(COLOUR, 640, 600, 140, 40, "Submit", 20)
 
     def suggest_button(self):
+        """
+        Creates two buttons which allow the player to select whether to make a suggestion or 
+        continue without, and an overlay to darken the background.
+
+        :return: A 'make suggestion' button, a 'continue' button, and an overlay surface
+        :rtype: MenuButton, MenuButton, pygame.Surface
+        """
         overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA).convert_alpha()
         overlay.fill((35, 45, 60, 128))
         suggest = MenuButton(COLOUR, 450, 300, 200, 60, "Make suggestion?", 20)
@@ -577,6 +699,14 @@ class Game:
 
 
     def make_suspicion_choice(self, type, positions):
+        """
+        Allows player to select which suspect/weapon/room they'd like to suggest
+
+        :param type: From which deck the player wishes to select from (i.e. Character, Weapons, or Room)
+        :type type: str
+        :param positions: Where on screen each card is to be rendered
+        :type positions: list[tuple[int, int]]
+        """
         cards = {
             "char": {
                 "loop": 6,
@@ -610,6 +740,12 @@ class Game:
 
 
     def handle_events(self):
+        """
+        Handles user input during the game.
+
+        Function deals with both mouse and keyboard inputs in all sections of the game, with the sole
+        exception of the player select screen at the start of the game.
+        """
         # checks for actions by the user.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -871,12 +1007,12 @@ class Game:
 
                     mousex = self.mouse[0]
                     mousey = self.mouse[1]
-                    if not isinstance(type_selection, str):
+                    if not isinstance(type_selection, str) and type_selection is not None:
                         if (mousey >= 350 and mousey <= 550):
                             if mousex < 440 and mousex > 300:
                                 type_selection = "char"
                             elif mousex > 600 and mousex < 740:
-                                type_selection = None
+                                type_selection = "room"
                             elif mousex >= 450 and mousex <= 590:
                                 type_selection = "weap"
 
@@ -1004,20 +1140,53 @@ class Game:
 
     #Turn system
     def get_active_player(self):
+        """
+        Gets the player currently taking their turn.
+
+        :return: The Player taking their turn
+        :rtype: Player
+        """
         return self.all_players[self.turn_index]
 
     def get_next_player(self):
+        """
+        Gets the player whose turn follows the current player's turn.
+        
+        :return: The next Player who will take their turn
+        :rtype: Player
+        """
         next_index = (self.turn_index + 1) % len(self.all_players)
         return self.all_players[next_index]
 
     #CPU DEF FUNCTIONS
     def getvisualplayer(self, logic_player):
+        """
+        Gets the visual (i.e. the board piece) of the parameter ``logic_player``
+
+        :param logic_player: The Player whose visuals are required
+        :type logic_player: Player
+
+        :return: If ``logic_player`` has a linked visual Player, returns that visual Player, otherwise None
+        :rtype: Player
+        """
         for visual_player in self.visual_players:
             if visual_player.character == logic_player.character:
                 return visual_player
         return None
 
     def get_cpudirection(self, visual_player, target_tile):
+        """
+        Pathfinding function for CPU Players.
+
+        :param visual_player: The (visual) Player piece
+        :type visual_player: Player
+        :param target_tile: The position of the tile the CPU aims to head towards
+        :type target_tile: tuple[int, int]
+
+        :return: The direction the CPU will head towards - if a door is adjacent, it will prioritise going
+                    towards the door.
+        :rtype: tuple[int, int]
+        """
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
         valid_directions = []
         lastmove = self.cpulastmove.get(
@@ -1063,6 +1232,12 @@ class Game:
         return random.choice(valid_directions)  # else do another direction which is valid
 
     def run(self):
+        """
+        Runs the game for as long as ``self.running`` is True
+        
+        At the start of each loop, calls ``self.handle_events()`` to handle user input, and renders
+        the game onto the screen Surface.
+        """
         while self.running:
             self.handle_events()
             # Renders the game.
@@ -1408,6 +1583,9 @@ class Game:
         pygame.quit()
 
     def end_turn(self):
+        """
+        Ends a turn and increases turn index by 1, allowing the next player to take a turn
+        """
         #Move to the next player index
         self.turn_index += 1
 
