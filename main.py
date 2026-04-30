@@ -40,9 +40,6 @@ class Dice(Asset):
         super().__init__("Dice", "dice")
         self.sides = sides
 
-    def roll(self):
-        return random.randint(1, self.sides)
-
 class Game:
     def __init__(self, board, characters, weapons, envelope, dice):
         self.board = board
@@ -139,7 +136,6 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
                 if no player can disprove the suggestion
        :rtype: tuple
        """
-
     start_index = all_players.index(player) 
     for i in range(1, len(all_players)):
         other = all_players[(start_index + i) % len(all_players)]
@@ -159,34 +155,32 @@ def make_suggestion(player, room_name, suspect, weapon, all_players):
             return shown_card, other
     return None, None
 
-def accusation(player, all_players):
-    accusations = {"character": None, "weapon": None, "room": None}
-
-    char_list = ["scarlet", "plum", "mustard", "white", "peacock", "green"]
-    weap_list = ["candlestick", "dagger", "pistol", "rope", "lead pipe", "wrench"]
-    room_list = ["study", "hall", "lounge", "library", "billiard room",
-                 "dining room", "conservatory", "ballroom", "kitchen"]
-
-    accused = input("Who do you accuse?: ").lower()
-    while accused not in char_list:
-        #print("Suspect must be one of: Scarlet, Plum, Mustard, White, Peacock, Green.")
-        accused = input("Who do you accuse?: ").lower()
-    accusations["character"] = accused.capitalize()
-
-    weapon = input("What did they use to carry out the murder?: ").lower()
-    while weapon not in weap_list:
-        #print("Weapon must be one of: Candlestick, Dagger, Pistol, Rope, Lead Pipe, Wrench.")
-        weapon = input("What did they use to carry out the murder?: ").lower()
-    accusations["weapon"] = weapon.capitalize()
-
-    location = input("Where was the murder committed?: ").lower()
-    while location not in room_list:
-        #print(
-        #    "Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
-        location = input("Where was the murder committed?: ").lower()
-    accusations["room"] = location.capitalize()
-
-    # print(f"{player.character.name} has accused {accusations["character"]} of using the {accusations["weapon"]} to murder Black in the {accusations["room"]}.")
+# def accusation(player, all_players):
+#     accusations = {"character": None, "weapon": None, "room": None}
+#
+#     char_list = ["scarlet", "plum", "mustard", "white", "peacock", "green"]
+#     weap_list = ["candlestick", "dagger", "pistol", "rope", "lead pipe", "wrench"]
+#     room_list = ["study", "hall", "lounge", "library", "billiard room",
+#                  "dining room", "conservatory", "ballroom", "kitchen"]
+#
+#     accused = input("Who do you accuse?: ").lower()
+#     while accused not in char_list:
+#         #print("Suspect must be one of: Scarlet, Plum, Mustard, White, Peacock, Green.")
+#         accused = input("Who do you accuse?: ").lower()
+#     accusations["character"] = accused.capitalize()
+#
+#     weapon = input("What did they use to carry out the murder?: ").lower()
+#     while weapon not in weap_list:
+#         #print("Weapon must be one of: Candlestick, Dagger, Pistol, Rope, Lead Pipe, Wrench.")
+#         weapon = input("What did they use to carry out the murder?: ").lower()
+#     accusations["weapon"] = weapon.capitalize()
+#
+#     location = input("Where was the murder committed?: ").lower()
+#     while location not in room_list:
+#         #print(
+#         #    "Room must be one of: Study, Hall, Lounge, Library, Billiard Room, Dining Room, Conservatory, Ballroom, Kitchen.")
+#         location = input("Where was the murder committed?: ").lower()
+#     accusations["room"] = location.capitalize()
 
 
 if __name__ == "__main__":
