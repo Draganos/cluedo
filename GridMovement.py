@@ -638,6 +638,7 @@ class Game:
                     self.turn_phase = "ACTION"
                     self.readytosuggest = True
                     self.pre_selection = True
+                    self.suggestbtn, self.passbtn, self.suggest_overlay = self.suggest_button()
                     if self.player.character:
                         self.player.character.position = (self.player.col, self.player.row)
                         self.player.character.room = self.player.in_room
