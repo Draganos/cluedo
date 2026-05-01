@@ -66,6 +66,6 @@ class TestSuggestions(unittest.TestCase):
     def test_suggestion_proven(self):
         # Scarlet makes the suggestion Scarlet, Rope, Dining Room
         # parameters passed are Scarlet (Player object), Dining Room (String), Scarlet (Character object), Rope (Weapon object), list of all Player objects
-        result = make_suggestion(self.all_players[0], self.rooms[5].name, self.all_players[0].character, self.weapons[3], self.all_players)
-        # Expect to see None
-        self.assertEqual(result, None)
+        result, displayer = make_suggestion(self.all_players[0], self.rooms[5].name, self.all_players[0].character, self.weapons[3], self.all_players)
+        self.assertIsNone(result)
+        self.assertIsNone(displayer)
